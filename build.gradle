@@ -1,0 +1,34 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.github.rholder:gradle-one-jar:1.0.3'
+    }
+}
+apply plugin: 'gradle-one-jar'
+// tag::repositories[]
+repositories {
+    mavenCentral()
+}
+// end::repositories[]
+
+// tag::dependencies[]
+dependencies {
+	 compile ("org.apache.kafka:kafka_2.8.0:0.8.1"){
+            exclude group: "com.sun.jdmk", module: "jmxtools"
+            exclude group: "com.sun.jmx", module: "jmxri"
+            exclude group: "javax.mail", module: "mail"
+            exclude group: "javax.jms", module: "jms"
+     }
+     compile "org.scala-lang:scala-library:2.8.0"  
+}
+// end::dependencies[]
+task(runRamdomProducer, dependsOn: 'classes', type: JavaExec) {
+	main = 'com.demandcube.demandspike.kafka.producer.Main'
+	classpath = sourceSets.main.runtimeClasspath
+}
+
+task awesomeFunJar(type: OneJar) {
+    mainClass = 'com.demandcube.demandspike.kafka.producer.Main'
+}
