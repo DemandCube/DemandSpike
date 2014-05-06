@@ -36,14 +36,21 @@ bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 -
 bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic test --from-beginning
 ```
 
+# Build the application
+- Open DemandSpike/src/main/resources/config.yml, to configure the kafka producer, if you had installed kafka with default parameters then you don't have to change the config.yml, You can run the random producer like a single java program without using yarn by excuting gradle runRamdomProducer.
+
+- Execute gradle allInOne, this will generate 2 jar, we will use them later.
+
 # Run the application
-
-- Open DemandSpike/src/main/resources/config.yml, to configure the kafka producer, if you had installed kafka with default parameters then you don't have to change the config.yml
-
-You can run the random producer like a single java program without using yarn by excuting gradle runRamdomProducer.
-
 - Install Hodoop Yarn (details are here https://github.com/DemandCube/yarn-app)
-- execute gradle allInOne
+- Run Hadoop Yarn
+```
+$HADOOP_PREFIX/bin/hdfs namenode -format
+$HADOOP_PREFIX/sbin/hadoop-daemon.sh start namenode
+$HADOOP_PREFIX/sbin/hadoop-daemon.sh start datanode
+$HADOOP_PREFIX/sbin/yarn-daemon.sh start resourcemanager
+$HADOOP_PREFIX/sbin/yarn-daemon.sh start nodemanager
+```
 - Copy both jars from DemandSpike/build/libs to Hadoop root folder
 - Go to $HADOOP_PREFIX and copy jars to hdfs.
 ```
