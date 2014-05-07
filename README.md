@@ -59,7 +59,7 @@ $HADOOP_PREFIX/bin/hdfs dfs -copyFromLocal DemandSpike-standalone.jar /
 ```
 - Start the application on yarn 
 ```
-$HADOOP_PREFIX/bin/hadoop jar DemandSpike.jar com.demandcube.yarn.Client -am_mem 300 -container_mem 300 --container_cnt 4 --hdfsjar /DemandSpike.jar --app_name foobar --command "echo" --am_class_name "com.demandcube.yarn.SampleAM"
+$HADOOP_PREFIX/bin/hadoop jar DemandSpike.jar com.demandcube.demandspike.yarn.Client -am_mem 300 -container_mem 300 --container_cnt 4 --hdfsjar /DemandSpike.jar --app_name foobar --command "echo" --am_class_name "com.demandcube.demandspike.yarn.SampleAM"
 ```
 Take a look at the kafka consumer, you will see coming messages
 
