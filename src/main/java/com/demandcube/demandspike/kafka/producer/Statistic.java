@@ -72,7 +72,7 @@ public class Statistic implements Runnable {
 				}
 				eventsSentPerPeriod = eventsSentTotal - previousEventsSentTotal;
 				bytesSentPerPeriod = bytesSentTotal - previousBytesSentTotal;
-				eventsSentAvg = eventsSentTotal / secondCount;
+				eventsSentAvg = (double) eventsSentTotal / secondCount;
 
 				NumberFormat formatter = new DecimalFormat("#0.00");
 

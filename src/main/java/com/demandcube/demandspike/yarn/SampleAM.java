@@ -1,9 +1,10 @@
-package com.demandcube.yarn;
+package com.demandcube.demandspike.yarn;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.beust.jcommander.JCommander;
+
 
 
 public class SampleAM extends AbstractApplicationMaster {

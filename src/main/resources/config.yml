@@ -1,0 +1,5 @@
+period: 1
+maxSize: 255
+ip: localhost
+port: 9092
+topic_name: test

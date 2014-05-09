@@ -11,6 +11,7 @@ import kafka.producer.ProducerConfig;
  * The Class RandomProducer.
  */
 public class RandomProducer implements Runnable {
+    
 
 	/** The events sent. */
 	private int eventsSent;
@@ -26,6 +27,9 @@ public class RandomProducer implements Runnable {
 
 	/** The max size. */
 	private int maxSize;
+	private String ip;
+	private String port;
+	private String topicName;
 
 	/**
 	 * Instantiates a new random producer.
@@ -34,10 +38,13 @@ public class RandomProducer implements Runnable {
 	 * @param period the period
 	 * @param maxSize the max size
 	 */
-	public RandomProducer(String name, int period, int maxSize) {
+	public RandomProducer(String name, int period, int maxSize,String ip, String port,String topicName) {
 		this.name = name;
 		this.period = period;
 		this.maxSize = maxSize;
+		this.ip  = ip;
+		this.port = port;
+		this.topicName = topicName;
 	}
 
 	/**
@@ -72,7 +79,7 @@ public class RandomProducer implements Runnable {
 	 */
 	public void send() {
 		Properties props = new Properties();
-		props.put("metadata.broker.list", "localhost:9092");
+		props.put("metadata.broker.list", ip+":"+port);
 		props.put("serializer.class", "kafka.serializer.StringEncoder");
 		props.put("request.required.acks", "1");
 		ProducerConfig config = new ProducerConfig(props);
@@ -80,7 +87,7 @@ public class RandomProducer implements Runnable {
 		Random random = new Random();
 		int byteSize = random.nextInt(maxSize);
 		KeyedMessage<String, String> data = new KeyedMessage<String, String>(
-				"test", getRandomByteArray(byteSize));
+			topicName, getRandomByteArray(byteSize));
 		producer.send(data);
 		producer.close();
 		eventsSent++;

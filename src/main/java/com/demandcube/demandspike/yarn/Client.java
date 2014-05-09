@@ -1,4 +1,4 @@
-package com.demandcube.yarn;
+package com.demandcube.demandspike.yarn;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,8 +43,6 @@ public class Client {
 
   @Parameter(names = {"-" + Constants.OPT_APPNAME, "--" + Constants.OPT_APPNAME})
   private String appname;
-  @Parameter(names = {"-" + Constants.OPT_COMMAND, "--" + Constants.OPT_COMMAND})
-  private String command;
   @Parameter(names = {"-" + Constants.OPT_APPLICATION_MASTER_MEM, "--" + Constants.OPT_APPLICATION_MASTER_MEM})
   private int applicationMasterMem;
   @Parameter(names = {"-" + Constants.OPT_CONTAINER_MEM, "--" + Constants.OPT_CONTAINER_MEM})
@@ -52,8 +50,8 @@ public class Client {
   @Parameter(names = {"-" + Constants.OPT_CONTAINER_COUNT, "--" + Constants.OPT_CONTAINER_COUNT})
   private int containerCount;
 
-  @Parameter(names = {"-" + Constants.OPT_HDFSJAR, "--" + Constants.OPT_HDFSJAR})
-  private String hdfsJar;
+
+  
   @Parameter(names = {"-" + Constants.OPT_APPLICATION_MASTER_CLASS_NAME, "--" + Constants.OPT_APPLICATION_MASTER_CLASS_NAME})
   private String applicationMasterClassName;
 
@@ -70,7 +68,6 @@ public class Client {
 
   public void init(String[] args) {
     LOG.setLevel(Level.INFO);
-    LOG.info("command: " + this.command);
   }
 
   public boolean run() throws IOException, YarnException {
@@ -93,9 +90,9 @@ public class Client {
     ContainerLaunchContext amContainer = Records.newRecord(ContainerLaunchContext.class);
 
     LocalResource appMasterJar;
-    appMasterJar = this.setupAppMasterJar(this.hdfsJar);
+    appMasterJar = this.setupAppMasterJar();
     amContainer.setLocalResources(
-        Collections.singletonMap("ae_master.jar", appMasterJar));
+        Collections.singletonMap("lib", appMasterJar));
 
     // Set up CLASSPATH for ApplicationMaster
     Map<String, String> appMasterEnv = new HashMap<String, String>();
@@ -122,12 +119,10 @@ public class Client {
   private String getCommand() {
     StringBuilder sb = new StringBuilder();
     sb.append(Environment.JAVA_HOME.$()).append("/bin/java").append(" ");
-    sb.append("-Xmx").append(this.applicationMasterMem).append("M").append(" ");
+    sb.append("-Xmx").append(this.applicationMasterMem).append("M").append(" -cp './lib/lib/*' ");
     sb.append(this.applicationMasterClassName).append(" ");
     sb.append("--").append(Constants.OPT_CONTAINER_MEM).append(" ").append(this.containerMem).append(" ");
     sb.append("--").append(Constants.OPT_CONTAINER_COUNT).append(" ").append(this.containerCount).append(" ");
-    sb.append("--").append(Constants.OPT_COMMAND).append(" '").append(StringEscapeUtils.escapeJava(this.command)).append("' ");
-
     sb.append("1> ").append(ApplicationConstants.LOG_DIR_EXPANSION_VAR).append("/stdout").append(" ");
     sb.append("2> ").append(ApplicationConstants.LOG_DIR_EXPANSION_VAR).append("/stderr");
     String r = sb.toString();
@@ -197,11 +192,28 @@ public class Client {
   }
 
   // Assume that the hdfsPath already exits in HDFS
-  private LocalResource setupAppMasterJar(String hdfsPath) throws IOException {
-    FileSystem fs = FileSystem.get(this.conf);
-    Path dst = new Path(hdfsPath);
-    dst = fs.makeQualified(dst); // must use fully qualified path name. Otherise, nodemanager gets angry.
-    return this.setupAppMasterJar(fs.getFileStatus(dst), dst);
+  private LocalResource setupAppMasterJar() throws IOException {
+      
+	  Path appMasterJar = new Path(System.getenv("HADOOP_HOME")+"lib.zip");
+	  FileStatus jarStat = null;
+	  try {
+	  FileSystem fs = FileSystem.get(conf);
+	  appMasterJar = fs.makeQualified(appMasterJar);  
+	      jarStat = fs.getFileStatus(appMasterJar);
+
+	  } catch (IOException e) {
+	      // ToDO: Handle Exception
+	  }
+
+	  LocalResource appMasterJarResource = Records.newRecord(LocalResource.class);
+	  appMasterJarResource.setResource(ConverterUtils.getYarnUrlFromPath(appMasterJar));
+	  appMasterJarResource.setSize(jarStat.getLen());
+	  appMasterJarResource.setTimestamp(jarStat.getModificationTime());
+	  appMasterJarResource.setType(LocalResourceType.ARCHIVE);
+	  appMasterJarResource.setVisibility(LocalResourceVisibility.PUBLIC);
+
+	 return appMasterJarResource;
+      
   }
 
   public static void main(String[] args) throws Exception {
