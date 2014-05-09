@@ -37,7 +37,7 @@ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic test --from-beg
 ```
 
 # Build the application
-- Open DemandSpike/src/main/resources/config.yml, to configure the kafka producer, if you had installed kafka with default parameters then you don't have to change the config.yml, You can run the random producer like a single java program without using yarn by excuting gradle runRamdomProducer.
+- Open config.yml, to configure the kafka producer, if you had installed kafka with default parameters then you don't have to change the config.yml, You can run the random producer like a single java program without using yarn by excuting gradle runRamdomProducer.
 
 - Execute gradle allInOne.
 
