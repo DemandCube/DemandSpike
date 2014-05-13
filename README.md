@@ -37,9 +37,9 @@ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic test --from-beg
 ```
 
 # Build the application
-- Open DemandSpike/src/main/resources/config.yml, to configure the kafka producer, if you had installed kafka with default parameters then you don't have to change the config.yml, You can run the random producer like a single java program without using yarn by excuting gradle runRamdomProducer.
+- Open config.yml, to configure the kafka producer, if you had installed kafka with default parameters then you don't have to change the config.yml, You can run the random producer like a single java program without using yarn by excuting gradle runRamdomProducer.
 
-- Execute gradle allInOne, this will generate 2 jar, we will use them later.
+- Execute gradle allInOne.
 
 # Run the application
 - Install Hodoop Yarn (details are here https://github.com/DemandCube/yarn-app)
@@ -51,15 +51,18 @@ $HADOOP_PREFIX/sbin/hadoop-daemon.sh start datanode
 $HADOOP_PREFIX/sbin/yarn-daemon.sh start resourcemanager
 $HADOOP_PREFIX/sbin/yarn-daemon.sh start nodemanager
 ```
-- Copy both jars from DemandSpike/build/libs to Hadoop root folder
-- Go to $HADOOP_PREFIX and copy jars to hdfs.
+- Copy DemandSpike.jar to lib folder and zip the lib folder, then copy it to Hadoop folder
+- Copy DemandSpike.jar  from DemandSpike/build/libs to Hadoop root folder
+- Copy jcommander-1.35.jar to hadoop lib folder
+- Go to $HADOOP_PREFIX and copy files to hdfs.
+
 ```
 $HADOOP_PREFIX/bin/hdfs dfs -copyFromLocal DemandSpike.jar /
-$HADOOP_PREFIX/bin/hdfs dfs -copyFromLocal DemandSpike-standalone.jar /
+$HADOOP_PREFIX/bin/hdfs dfs -copyFromLocal lib.zip /
 ```
 - Start the application on yarn 
 ```
-$HADOOP_PREFIX/bin/hadoop jar DemandSpike.jar com.demandcube.demandspike.yarn.Client -am_mem 300 -container_mem 300 --container_cnt 4 --hdfsjar /DemandSpike.jar --app_name foobar --command "echo" --am_class_name "com.demandcube.demandspike.yarn.SampleAM"
+$HADOOP_PREFIX/bin/hadoop jar DemandSpike.jar com.demandcube.demandspike.yarn.Client -am_mem 300 -container_mem 300 --container_cnt 4 --hdfsjar /DemandSpike.jar --app_name RandomProducer --am_class_name "com.demandcube.demandspike.yarn.SampleAM"
 ```
 Take a look at the kafka consumer, you will see coming messages
 
