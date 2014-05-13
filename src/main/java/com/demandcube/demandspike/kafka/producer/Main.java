@@ -21,15 +21,20 @@ public class Main {
      * @throws FileNotFoundException
      */
     public static void main(String[] args) throws FileNotFoundException {
-	/*InputStream input = new FileInputStream(new File(
-		"config.yml"));
+	Main main = new Main();
+	main.execute(args);
+    }
+    public  void execute(String[] args) throws FileNotFoundException {
+	String path = this.getClass().getResource("config.yml").getFile();
+	InputStream input = new FileInputStream(new File(path));
+	
 	Yaml yaml = new Yaml();
-	Map data = (Map) yaml.load(input);*/
-	int maxSize = 255;//Integer.parseInt(data.get("maxSize").toString());
-	int period =1; //Integer.parseInt(data.get("period").toString());
-	String ip = "localhost";//data.get("ip").toString();
-        String port = "9092";// data.get("port").toString();
-        String topicName = "test";//data.get("topic_name").toString();
+	Map data = (Map) yaml.load(input);
+	int maxSize = Integer.parseInt(data.get("maxSize").toString());
+	int period =1; Integer.parseInt(data.get("period").toString());
+	String ip = data.get("ip").toString();
+        String port = data.get("port").toString();
+        String topicName = data.get("topic_name").toString();
 	RandomProducer rp = new RandomProducer("rp", period, maxSize, ip, port,topicName);
 	Statistic stat = new Statistic(period);
 	stat.monitor(rp);

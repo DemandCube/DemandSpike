@@ -11,6 +11,7 @@ apply plugin: 'gradle-one-jar'
 repositories {
     mavenCentral()
 }
+
 // end::repositories[]
 
 // tag::dependencies[]
@@ -30,11 +31,22 @@ dependencies {
      
 }
 // end::dependencies[]
+
 task(runRamdomProducer, dependsOn: 'classes', type: JavaExec) {
 	main = 'com.demandcube.demandspike.kafka.producer.Main'
 	classpath = sourceSets.main.runtimeClasspath
 }
-
-task allInOne(type: OneJar) {
-    mainClass = 'com.demandcube.demandspike.kafka.producer.Main'
+task lib( type: Copy ) {
+    into "build/libs/lib"
+    from configurations.runtime
 }
+task copyMainJar(type: Copy) {
+    from 'build/libs/DemandSpike.jar'
+    into 'build/libs/lib'
+}
+task zip(type: Zip) {
+    archiveName 'lib.zip'
+    from('build/libs/lib')
+    destinationDir  new File(projectDir, 'build/libs')
+}
+task allInOne(dependsOn: ['build','lib','copyMainJar', 'zip'])

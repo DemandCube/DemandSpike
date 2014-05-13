@@ -1,8 +1,11 @@
 package com.demandcube.demandspike.kafka.producer;
 
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -75,7 +78,9 @@ public class Statistic implements Runnable {
 				eventsSentAvg = (double) eventsSentTotal / secondCount;
 
 				NumberFormat formatter = new DecimalFormat("#0.00");
-
+				DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+				Date date = new Date();
+				System.out.println(dateFormat.format(date));
 				System.out.println("Events Sent Total : " + eventsSentTotal);
 				System.out.println("Events Sent per " + period + " second : "
 						+ eventsSentPerPeriod);
