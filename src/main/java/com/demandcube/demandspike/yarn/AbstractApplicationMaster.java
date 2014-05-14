@@ -184,7 +184,7 @@ public abstract class AbstractApplicationMaster {
 	public void onContainersAllocated(List<Container> containers) {
 	    if (attempt < totalContainerCount) {
 		int containerCnt = containers.size();
-		Path randomProducerJar = new Path(System.getenv("HADOOP_HOME")
+		Path randomProducerJar = new Path(System.getenv("HADOOP_PREFIX")
 			+ "lib.zip");
 		FileStatus jarStat = null;
 		try {

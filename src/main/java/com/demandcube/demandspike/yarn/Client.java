@@ -194,7 +194,7 @@ public class Client {
   // Assume that the hdfsPath already exits in HDFS
   private LocalResource setupAppMasterJar() throws IOException {
       
-	  Path appMasterJar = new Path(System.getenv("HADOOP_HOME")+"lib.zip");
+	  Path appMasterJar = new Path(System.getenv("HADOOP_PREFIX")+"lib.zip");
 	  FileStatus jarStat = null;
 	  try {
 	  FileSystem fs = FileSystem.get(conf);
