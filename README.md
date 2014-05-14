@@ -51,18 +51,12 @@ $HADOOP_PREFIX/sbin/hadoop-daemon.sh start datanode
 $HADOOP_PREFIX/sbin/yarn-daemon.sh start resourcemanager
 $HADOOP_PREFIX/sbin/yarn-daemon.sh start nodemanager
 ```
-- Copy DemandSpike.jar to lib folder and zip the lib folder, then copy it to Hadoop folder
-- Copy DemandSpike.jar  from DemandSpike/build/libs to Hadoop root folder
-- Copy jcommander-1.35.jar to hadoop lib folder
-- Go to $HADOOP_PREFIX and copy files to hdfs.
+- Copy lib.zip and DemandSpike.jar from build/libs folder to hadoop folder
+- Copy jcommander-1.35.jar from build/libs/lib to $HADOOP_PREFIX/share/hadoop/common/ folder
 
-```
-$HADOOP_PREFIX/bin/hdfs dfs -copyFromLocal DemandSpike.jar /
-$HADOOP_PREFIX/bin/hdfs dfs -copyFromLocal lib.zip /
-```
 - Start the application on yarn 
 ```
-$HADOOP_PREFIX/bin/hadoop jar DemandSpike.jar com.demandcube.demandspike.yarn.Client -am_mem 300 -container_mem 300 --container_cnt 4 --hdfsjar /DemandSpike.jar --app_name RandomProducer --am_class_name "com.demandcube.demandspike.yarn.SampleAM"
+$HADOOP_PREFIX/bin/hadoop jar DemandSpike.jar com.demandcube.demandspike.yarn.Client -am_mem 300 -container_mem 300 --container_cnt 4 --app_name RandomProducer --am_class_name "com.demandcube.demandspike.yarn.SampleAM"
 ```
 Take a look at the kafka consumer, you will see coming messages
 
