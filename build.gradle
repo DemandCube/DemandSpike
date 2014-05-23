@@ -28,6 +28,7 @@ dependencies {
      compile "org.apache.hadoop:hadoop-yarn-client:2.3.0"
      compile "com.beust:jcommander:1.35"
      compile 'org.yaml:snakeyaml:1.13'
+     compile 'com.yammer.metric:metrics-core:3.0.0'
      
 }
 // end::dependencies[]
