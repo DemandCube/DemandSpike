@@ -1,0 +1,17 @@
+target: Kafka
+messageSendGap: 0
+messageSize: 1024
+ip: localhost
+port: 9092
+topicName: test
+numMessages: 10000
+requiredAcks: 1
+compressionCodec: 1
+sendBufferBytes: 65536
+producerType: async
+batchNumMessages: 200
+enqueueTimeout: -1
+clientId: producer1
+requestTimeout: 6000
+sendMaxRetries: 3
+retryBackoff: 300

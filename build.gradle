@@ -1,0 +1,57 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.github.rholder:gradle-one-jar:1.0.3'
+    }
+}
+apply plugin: 'gradle-one-jar'
+// tag::repositories[]
+repositories {
+    mavenCentral()
+}
+
+// end::repositories[]
+
+// tag::dependencies[]
+dependencies {
+    compile project(':commons/utils')
+    compile project(':commons/api')
+    compile project(':commons/cluster')
+    compile project(path: ':queuengin')
+	 compile ("org.apache.kafka:kafka_2.8.0:0.8.1"){
+            exclude group: "com.sun.jdmk", module: "jmxtools"
+            exclude group: "com.sun.jmx", module: "jmxri"
+            exclude group: "javax.mail", module: "mail"
+            exclude group: "javax.jms", module: "jms"
+     }
+     compile "org.scala-lang:scala-library:2.8.0"
+     compile "junit:junit:3.8.1"
+     compile "org.apache.hadoop:hadoop-common:2.3.0"
+     compile "org.apache.hadoop:hadoop-yarn-client:2.3.0"
+     compile "com.beust:jcommander:1.35"
+     compile 'org.yaml:snakeyaml:1.13'
+     compile 'com.yammer.metric:metrics-core:3.0.0'
+     
+}
+// end::dependencies[]
+
+task(runRamdomProducer, dependsOn: 'classes', type: JavaExec) {
+	main = 'com.demandcube.demandspike.kafka.producer.Main'
+	classpath = sourceSets.main.runtimeClasspath
+}
+task lib( type: Copy ) {
+    into "build/libs/lib"
+    from configurations.runtime
+}
+task copyMainJar(type: Copy) {
+    from 'build/libs/DemandSpike-1.0.jar'
+    into 'build/libs/lib'
+}
+task zip(type: Zip) {
+    archiveName 'lib.zip'
+    from('build/libs/lib')
+    destinationDir  new File(projectDir, 'build/libs')
+}
+task allInOne(dependsOn: ['build','lib','copyMainJar', 'zip'])
