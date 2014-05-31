@@ -16,6 +16,10 @@ repositories {
 
 // tag::dependencies[]
 dependencies {
+    compile project(':commons/utils')
+    compile project(':commons/api')
+    compile project(':commons/cluster')
+    compile project(path: ':queuengin')
 	 compile ("org.apache.kafka:kafka_2.8.0:0.8.1"){
             exclude group: "com.sun.jdmk", module: "jmxtools"
             exclude group: "com.sun.jmx", module: "jmxri"
@@ -42,7 +46,7 @@ task lib( type: Copy ) {
     from configurations.runtime
 }
 task copyMainJar(type: Copy) {
-    from 'build/libs/DemandSpike.jar'
+    from 'build/libs/DemandSpike-1.0.jar'
     into 'build/libs/lib'
 }
 task zip(type: Zip) {

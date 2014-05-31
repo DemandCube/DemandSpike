@@ -4,6 +4,8 @@ import java.util.Properties;
 import java.util.Random;
 
 import com.demandcube.demandspike.kafka.metrics.MetricsManager;
+import com.demandcube.demandspike.producer.AbstractProducer;
+import com.demandcube.demandspike.producer.AbstractProducerConfig;
 
 import kafka.common.FailedToSendMessageException;
 import kafka.javaapi.producer.Producer;
@@ -13,16 +15,9 @@ import kafka.producer.ProducerConfig;
 /**
  * The Class RandomProducer.
  */
-public class RandomProducer implements Runnable {
+public class KafkaRandomProducer extends AbstractProducer {
 
-    /** The message send gap. */
-    private int messageSendGap;
 
-    /** The message size. */
-    private int messageSize;
-
-    /** The number of messages to send. */
-    private int numMessages;
 
     /** The topic name. */
     private String topicName;
@@ -30,8 +25,6 @@ public class RandomProducer implements Runnable {
     /** The producer. */
     private Producer<String, String> producer;
 
-    /** The metrics manager. */
-    private MetricsManager metricsManager;
 
     /**
      * Instantiates a new random producer.
@@ -41,12 +34,10 @@ public class RandomProducer implements Runnable {
      * @param metricsManager
      *            the metrics manager
      */
-    public RandomProducer(RandomProducerConfig randomProducerConfig,
+    public KafkaRandomProducer(AbstractProducerConfig producerConfig,
 	    MetricsManager metricsManager) {
-	this.metricsManager = metricsManager;
-	messageSendGap = randomProducerConfig.getMessageSendGap();
-	messageSize = randomProducerConfig.getMessageSize();
-	numMessages = randomProducerConfig.getNumMessages();
+	super(producerConfig,metricsManager);
+	KafkaProducerConfig randomProducerConfig = (KafkaProducerConfig)producerConfig;
 	topicName = randomProducerConfig.getTopicName();
 	Properties props = new Properties();
 	props.put("metadata.broker.list", randomProducerConfig.getIp() + ":"
@@ -81,48 +72,13 @@ public class RandomProducer implements Runnable {
      */
     public void send() {
 	KeyedMessage<String, String> data = new KeyedMessage<String, String>(
-		topicName, getRandomByteArray(messageSize));
-	metricsManager.startSendingNewMessage();
+		topicName, getRandomByteArray());
 	producer.send(data);
-	metricsManager.newMessageSent(messageSize);
     }
 
-    /**
-     * Gets the random byte array.
-     *
-     * @param size
-     *            the size
-     * @return the random byte array
-     */
-    public static String getRandomByteArray(int size) {
-	byte[] result = new byte[size];
-	Random random = new Random();
-	random.nextBytes(result);
-	return new String(result);
-    }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Runnable#run()
-     */
-    public void run() {
-	for (int i = 0; i < numMessages; i++) {
-	    try {
-		send();
-	    } catch (FailedToSendMessageException e) {
-		metricsManager.newMessageFailed();
-	    }
-	    if (messageSendGap != 0) {
-		try {
-		    Thread.sleep(messageSendGap);
-		} catch (InterruptedException e) {
-		    e.printStackTrace();
-		}
-	    }
-	}
+    @Override
+    public void producerDestroyed() {
 	producer.close();
-	metricsManager.contextDestroyed();
-
     }
 }

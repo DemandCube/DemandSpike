@@ -214,7 +214,7 @@ public class Client {
     // Assume that the hdfsPath already exits in HDFS
     private LocalResource setupAppMasterJar() throws IOException {
 
-	Path appMasterJar = new Path(System.getenv("HADOOP_PREFIX") + "lib.zip");
+	Path appMasterJar = new Path("/home/nizare/environment/yarn/hadoop-2.2.0/lib.zip");
 	FileStatus jarStat = null;
 	try {
 	    FileSystem fs = FileSystem.get(conf);

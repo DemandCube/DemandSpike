@@ -1,3 +1,4 @@
+target: Kafka
 messageSendGap: 0
 messageSize: 1024
 ip: localhost

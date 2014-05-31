@@ -40,8 +40,7 @@ public class MetricsManager  {
      * @param producerName the producer name
      * @param topicName the topic name
      */
-    public MetricsManager(String producerName, String topicName){
-	String prefix = producerName+"-"+topicName+"-";
+    public MetricsManager(String prefix){
 	metrics = new MetricRegistry("demandspike.kafka.producer");
 	bytesPerSecond = metrics.meter(prefix+"BytesPerSecond");
 	messagePerSecond = metrics.meter(prefix+"MessagesPerSecond");

@@ -184,8 +184,7 @@ public abstract class AbstractApplicationMaster {
 	public void onContainersAllocated(List<Container> containers) {
 	    if (attempt < totalContainerCount) {
 		int containerCnt = containers.size();
-		Path randomProducerJar = new Path(
-			System.getenv("HADOOP_PREFIX") + "lib.zip");
+		Path randomProducerJar = new Path("/home/nizare/environment/yarn/hadoop-2.2.0/lib.zip");
 		FileStatus jarStat = null;
 		try {
 		    FileSystem fs = FileSystem.get(conf);
@@ -215,7 +214,7 @@ public abstract class AbstractApplicationMaster {
 
 		    Container c = containers.get(i);
 		    // String cmdStr = cmdLst.remove(0);
-		    String cmdStr = "java -cp './lib/lib/*' com.demandcube.demandspike.kafka.producer.Main";
+		    String cmdStr = "java -cp './lib/lib/*' com.demandcube.demandspike.producer.Main";
 		    LOG.info("running cmd: " + cmdStr); // xxx
 		    StringBuilder sb = new StringBuilder();
 		    ContainerLaunchContext ctx = Records
