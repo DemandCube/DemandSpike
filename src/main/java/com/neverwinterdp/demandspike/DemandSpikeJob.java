@@ -25,7 +25,7 @@ public class DemandSpikeJob implements Serializable {
   @Parameter(
     names = "--message-size", description = "The size of the message in bytes"
   )
-  int    messageSize ;
+  int    messageSize = 1000 ;
   
   @Parameter(
     names = "--max-duration", description = "Maximum duration time of each task"

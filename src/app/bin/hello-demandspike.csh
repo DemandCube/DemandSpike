@@ -38,6 +38,7 @@ server registration
 :echo "=========================================="
 demandspike submit  \
   --driver kafka --connect-url 127.0.0.1:9092 --topic metrics.consumer \
+  --num-of-task 2  --num-of-thread 2 --message-size 2048 \
   --member-role demandspike --max-duration 60000 --max-num-of-message 500000
 
 :echo "Wait for 60s................."
