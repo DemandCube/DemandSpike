@@ -26,6 +26,8 @@ public class PeriodicTask extends DemandSpikeTask {
       timer.cancel(); 
     } catch (InterruptedException e) {
       e.printStackTrace();
+    } finally {
+      onFinish() ;
     }
   }
   
@@ -42,8 +44,6 @@ public class PeriodicTask extends DemandSpikeTask {
       } catch (Exception e) {
         logger.error("Task Error", e) ;
         this.cancel() ;
-      } finally {
-        onFinish() ;
       }
     }
   }

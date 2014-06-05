@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.beust.jcommander.Parameter;
+import com.neverwinterdp.util.monitor.ApplicationMonitor;
 
 public class MessageDriverFactory implements Serializable {
   @Parameter(
@@ -26,10 +27,10 @@ public class MessageDriverFactory implements Serializable {
   
   public String getDriver() { return this.driver ; }
   
-  public MessageDriver createDriver() {
+  public MessageDriver createDriver(ApplicationMonitor appMonitor) {
     MessageDriver mdriver = null ;
     if("kafka".equals(driver)) {
-      mdriver = new KafkaMessageDriver() ;
+      mdriver = new KafkaMessageDriver(appMonitor) ;
     } else {
       mdriver = new DummyMessageDriver() ;
     }

@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate ;
+import com.neverwinterdp.util.monitor.ApplicationMonitor;
 
 public class DemandSpikeJob implements Serializable {
   @Parameter(
@@ -50,7 +51,7 @@ public class DemandSpikeJob implements Serializable {
   
   public MessageDriverFactory getMessageDriverFactory() { return this.driverFactory ; }
   
-  public DemandSpikeTask[] createTasks() {
+  public DemandSpikeTask[] createTasks(ApplicationMonitor appMonitor) {
     long maxMessagePerTask = Math.round((double)maxNumOfMessage/numOfTask) ;
     DemandSpikeTask[] task = new DemandSpikeTask[numOfTask] ;
     for(int i = 0; i < task.length; i++) {
@@ -60,7 +61,7 @@ public class DemandSpikeJob implements Serializable {
       task[i].setMaxDuration(maxDuration);
       task[i].setMaxNumOfMessage(maxMessagePerTask);
       
-      MessageDriver driver = driverFactory.createDriver() ;
+      MessageDriver driver = driverFactory.createDriver(appMonitor) ;
       task[i].setDriver(driver);
       
       MessageGenerator generator = new MessageGenerator() ;

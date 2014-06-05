@@ -6,12 +6,16 @@ import com.google.inject.Inject;
 import com.neverwinterdp.server.module.ModuleProperties;
 import com.neverwinterdp.server.service.AbstractService;
 import com.neverwinterdp.util.LoggerFactory;
+import com.neverwinterdp.util.monitor.ApplicationMonitor;
 
 public class DemandSpikeClusterService extends AbstractService {
   private Logger logger ;
   
   @Inject
   private ModuleProperties moduleProperties; 
+  
+  @Inject
+  private ApplicationMonitor appMonitor ;
   
   private DemandSpikeJobScheduler jobScheduler ;
   
@@ -26,7 +30,7 @@ public class DemandSpikeClusterService extends AbstractService {
 
   public void start() throws Exception {
     logger.info("Start start()");
-    jobScheduler = new DemandSpikeJobScheduler() ;
+    jobScheduler = new DemandSpikeJobScheduler(appMonitor) ;
     jobScheduler.start();
     logger.info("Finish start()");
   }

@@ -35,6 +35,9 @@ dependencies {
   compile group: 'com.neverwinterdp', name: 'queuengin', version: '1.0-SNAPSHOT'
   compile group: 'com.neverwinterdp', name: 'sparkngin', version: '1.0-SNAPSHOT'
 
+
+  compile group: 'com.yammer.metrics', name: 'metrics-core', version: '2,2.0'
+
   compile group: 'org.apache.hadoop', name: 'hadoop-common', version: '2.4.0'
   compile group: 'org.apache.hadoop', name: 'hadoop-hdfs', version: '2.4.0'
 
@@ -47,8 +50,8 @@ dependencies {
   testCompile 'org.apache.hadoop:hadoop-hdfs:2.4.0:test-sources'
 
   testCompile group: 'org.apache.hadoop', name: 'hadoop-minicluster', version: '2.4.0'
-  testCompile 'org.apache.hadoop:hadoop-minicluster:2.4.0:tests'
-  testCompile 'org.apache.hadoop:hadoop-minicluster:2.4.0:test-sources'
+  //testCompile 'org.apache.hadoop:hadoop-minicluster:2.4.0:tests'
+  //testCompile 'org.apache.hadoop:hadoop-minicluster:2.4.0:test-sources'
 
   //testCompile group: 'org.apache.hadoop', name: 'hadoop-yarn-server-tests', version: '2.4.0'
   //testCompile 'org.apache.hadoop:hadoop-yarn-server-tests:2.4.0:tests'
@@ -83,13 +86,13 @@ def doRelease(String releaseDir) {
   }
 
   def jars = [ 
-    "commons.utils", "commons.api", "commons.cluster",
-    "queuengin", "sparkngin",
-    "jackson-core-asl", "jackson-mapper-asl", 'jcommander',
+    "commons.utils", "commons.api", "commons.cluster", "queuengin", "sparkngin",
+    "jackson-core-2.2.2", "jackson-databind", "jackson-annotations", "jcommander", "reflections", "guava", "javassist",
     'guice', 'javax.inject', 'hazelcast', 'aopalliance',
     "kafka", "scala-library",
+    'zookeeper', 'zkclient',
     "netty-all", 'jzlib',
-    "metrics-core", "metrics-annotation",
+    "metrics-core", "metrics-json", "metrics-annotation",
     "log4j", "slf4j-api", "slf4j-log4j12"
   ] 
 

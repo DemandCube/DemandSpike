@@ -20,7 +20,7 @@ public class DemandSpikeServiceUnitTest {
   
   static protected Server zkServer, kafkaServer, sparknginServer, demandSpikeServer ;
   static protected Shell shell ;
-  static String TOPIC = "DemandSpike" ;
+  static String TOPIC = "metrics.consumer" ;
     
   @BeforeClass
   static public void setup() throws Exception {
@@ -50,9 +50,12 @@ public class DemandSpikeServiceUnitTest {
     shell.execute(
       "demandspike submit " + 
       "  --driver kafka --connect-url 127.0.0.1:9092 --topic " + TOPIC +
-      "  --member-role demandspike --max-duration 1000"
+      "  --member-role demandspike --max-duration 30000 --max-num-of-message 100000" 
     );
-    Thread.sleep(1000);
+    Thread.sleep(30000);
+    shell.execute(
+      "server metric --type timer --filter * " 
+    );
     uninstall(); 
   }
   
@@ -65,7 +68,6 @@ public class DemandSpikeServiceUnitTest {
         "module install " +
         " -Pmodule.data.drop=true" +
         " -Pkafka.zookeeper-urls=127.0.0.1:2181" +
-        " -Pkafka.consumer-report.topics=" + TOPIC +
         "  --member-role kafka --autostart Kafka \n" +
         
         "module install " + 
@@ -83,7 +85,7 @@ public class DemandSpikeServiceUnitTest {
     String uninstallScript = 
         "module uninstall --member-role demandspike --timeout 20000 DemandSpike \n" +
         "module uninstall --member-role sparkngin --timeout 20000 Sparkngin \n" +
-        "module uninstall --member-role kafkar --timeout 20000 Kafka \n" +
+        "module uninstall --member-role kafka --timeout 20000 Kafka \n" +
         "module uninstall --member-role zookeeper --timeout 20000 Zookeeper";
     shell.executeScript(uninstallScript);
   }
