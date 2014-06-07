@@ -11,7 +11,7 @@ server registration
 module install  \
   -Pmodule.data.drop=true \
   -Pzk:clientPort=2181 \
-  --member-role zookeeper --autostart Zookeeper
+  --member-role zookeeper --autostart --module Zookeeper
 
 :sleep 1000
 :echo "Install kafka on the kafka server role"
@@ -20,15 +20,15 @@ module install \
   -Pmodule.data.drop=true \
   -Pkafka:port=9092 -Pkafka:zookeeper.connect=127.0.0.1:2181 \
   -Pkafka.zookeeper-urls=127.0.0.1:2181 \
-  --member-role kafka --autostart Kafka
+  --member-role kafka --autostart --module Kafka
 
 :echo "Install Sparkngin on the sparkngin server role"
 :echo "=============================================="
-module install  --member-role sparkngin --autostart Sparkngin 
+module install  --member-role sparkngin --autostart --module Sparkngin 
 
 :echo "Install DemandSpike on the demandspike server role"
 :echo "=================================================="
-module install  --member-role demandspike --autostart DemandSpike
+module install  --member-role demandspike --autostart --module DemandSpike
 
 :echo "list the server and services registration"
 :echo "=========================================="
@@ -51,19 +51,19 @@ server metric --type timer
 
 :echo "Uninstall DemandSpike server on the demandspike role servers"
 :echo "============================================================"
-module uninstall --member-role demandspike --timeout 20000 DemandSpike 
+module uninstall --member-role demandspike --timeout 20000 --module DemandSpike 
 
 :echo "Uninstall Sparkngin server on the sparkngin role servers"
 :echo "============================================================"
-module uninstall --member-role sparkngin --timeout 20000 Sparkngin 
+module uninstall --member-role sparkngin --timeout 20000 --module Sparkngin 
 
 :echo "Uninstall Kafka server on the kafka role servers"
 :echo "================================================"
-module uninstall --member-role kafka --timeout 20000 Kafka
+module uninstall --member-role kafka --timeout 20000 --module Kafka
 
 :echo "Uninstall Zookeeper server on the zookeeper role servers"
 :echo "========================================================"
-module uninstall --member-role zookeeper --timeout 20000 Zookeeper
+module uninstall --member-role zookeeper --timeout 20000 --module Zookeeper
 
 :echo "list the server and services registration after uninstall kafka and zookeeper service"
 :echo "====================================================================================="

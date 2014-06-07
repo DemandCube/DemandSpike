@@ -63,18 +63,18 @@ public class DemandSpikeServiceUnitTest {
     String installScript =
         "module install " + 
         " -Pmodule.data.drop=true" +
-        " --member-role zookeeper --autostart Zookeeper \n" +
+        " --member-role zookeeper --autostart --module Zookeeper \n" +
         
         "module install " +
         " -Pmodule.data.drop=true" +
         " -Pkafka.zookeeper-urls=127.0.0.1:2181" +
-        "  --member-role kafka --autostart Kafka \n" +
+        "  --member-role kafka --autostart --module Kafka \n" +
         
         "module install " + 
-        "  --member-role sparkngin --autostart Sparkngin \n" +
+        "  --member-role sparkngin --autostart --module Sparkngin \n" +
         
         "module install " +  
-        " --member-role demandspike --autostart DemandSpike \n" +
+        " --member-role demandspike --autostart --module DemandSpike \n" +
         
         "service registration" ;
     shell.executeScript(installScript);
@@ -83,10 +83,10 @@ public class DemandSpikeServiceUnitTest {
   
   void uninstall() {
     String uninstallScript = 
-        "module uninstall --member-role demandspike --timeout 20000 DemandSpike \n" +
-        "module uninstall --member-role sparkngin --timeout 20000 Sparkngin \n" +
-        "module uninstall --member-role kafka --timeout 20000 Kafka \n" +
-        "module uninstall --member-role zookeeper --timeout 20000 Zookeeper";
+        "module uninstall --member-role demandspike --timeout 20000 --module DemandSpike \n" +
+        "module uninstall --member-role sparkngin --timeout 20000 --module Sparkngin \n" +
+        "module uninstall --member-role kafka --timeout 20000 --module Kafka \n" +
+        "module uninstall --member-role zookeeper --timeout 20000 --module Zookeeper";
     shell.executeScript(uninstallScript);
   }
 }

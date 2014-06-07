@@ -4,8 +4,7 @@ import com.beust.jcommander.Parameters;
 import com.beust.jcommander.ParametersDelegate;
 import com.neverwinterdp.demandspike.DemandSpikeClusterService;
 import com.neverwinterdp.demandspike.DemandSpikeJob;
-import com.neverwinterdp.server.cluster.ClusterClient;
-import com.neverwinterdp.server.cluster.ClusterMember;
+import com.neverwinterdp.server.client.MemberSelector;
 import com.neverwinterdp.server.command.ServiceCommand;
 import com.neverwinterdp.server.command.ServiceCommandResult;
 import com.neverwinterdp.server.command.ServiceCommands;
@@ -23,7 +22,7 @@ public class DemandSpikeCommandGroup extends CommandGroup {
     DemandSpikeJob job = new DemandSpikeJob();
     
     @ParametersDelegate
-    MemberSelectorOption memberSelector = new MemberSelectorOption();
+    MemberSelector memberSelector = new MemberSelector();
     
     private long waitTime = 10000;
     
@@ -31,14 +30,8 @@ public class DemandSpikeCommandGroup extends CommandGroup {
       ServiceCommand<Boolean> methodCall = 
           new ServiceCommands.MethodCall<Boolean>("submit", job, waitTime) ;
       methodCall.setTargetService("DemandSpike", DemandSpikeClusterService.class.getSimpleName());
-      ClusterMember[] members = memberSelector.getMembers(ctx) ;
-      ClusterClient client = ctx.getClusterClient() ;
-      ServiceCommandResult<Boolean>[] results = null ;
-      if(members == null) {
-        results = client.execute(methodCall) ; 
-      } else {
-        results = client.execute(methodCall, members) ;
-      }
+      ServiceCommandResult<Boolean>[] results =
+          memberSelector.execute(ctx.getCluster().getClusterClient(), methodCall) ;
       
       ctx.console().header("Submit job");
       TabularPrinter printer = ctx.console().tabularPrinter(30, 10, 10) ;
