@@ -2,8 +2,11 @@ package com.neverwinterdp.demandspike;
 
 import java.io.Serializable;
 
+import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate ;
+import com.neverwinterdp.server.client.CommandParams;
+import com.neverwinterdp.server.client.MemberSelector;
 import com.neverwinterdp.util.monitor.ApplicationMonitor;
 
 public class DemandSpikeJob implements Serializable {
@@ -43,7 +46,19 @@ public class DemandSpikeJob implements Serializable {
   long   sendPeriod = 100 ; // Every 100 ms
   
   @ParametersDelegate
-  MessageDriverFactory driverFactory = new MessageDriverFactory() ;
+  final public MessageDriverFactory driverFactory = new MessageDriverFactory() ;
+  
+  @ParametersDelegate
+  final public MemberSelector memberSelector = new MemberSelector();
+  
+  public DemandSpikeJob() {
+  }
+  
+  public DemandSpikeJob(CommandParams params) {
+    JCommander jcommander = new JCommander(this) ;
+    jcommander.setAcceptUnknownOptions(true);
+    jcommander.parse(params.getArguments());
+  }
   
   public void setJobType(String type) {
     this.type = type ;
