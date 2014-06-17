@@ -26,11 +26,17 @@ repositories {
   mavenCentral()
 }
 
+configurations.all {
+  exclude(group: 'ring', name: 'ring-core', version: '0.3.11')
+}
+
 
 dependencies {
   compile group: 'com.neverwinterdp', name: 'commons.utils', version: '1.0-SNAPSHOT'
   compile group: 'com.neverwinterdp', name: 'commons.api', version: '1.0-SNAPSHOT'
   compile group: 'com.neverwinterdp', name: 'commons.cluster', version: '1.0-SNAPSHOT'
+  compile group: 'com.neverwinterdp', name: 'commons.hadoop-framework', version: '1.0-SNAPSHOT'
+  testCompile group: 'com.neverwinterdp', name: 'commons.hadoop-framework', version: '1.0-SNAPSHOT', classifier: 'tests'
 
   compile group: 'com.neverwinterdp', name: 'queuengin', version: '1.0-SNAPSHOT'
   compile group: 'com.neverwinterdp', name: 'sparkngin', version: '1.0-SNAPSHOT'

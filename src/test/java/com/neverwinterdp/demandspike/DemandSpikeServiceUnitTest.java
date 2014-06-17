@@ -43,7 +43,7 @@ public class DemandSpikeServiceUnitTest {
     kafkaServer.destroy();
     zkServer.destroy() ;
   }
-  
+ 
   @Test
   public void testSendMessage() throws Exception {
     install() ;

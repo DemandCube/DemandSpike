@@ -21,15 +21,11 @@ LOG_OPT="-Dlog4j.configuration=file:$APP_DIR/config/log4j.properties"
 MAIN_CLASS="com.neverwinterdp.server.Server"
 
 function startServer {
-  SERVER_NAME=$1
-  APP_OPT="$APP_OPT -Dserver.name=$SERVER_NAME"
   nohup $JAVACMD -Djava.ext.dirs=$APP_DIR/libs $APP_OPT $LOG_OPT $MAIN_CLASS "$@" <&- &>/dev/null &
   #printf '%d' $! > $SERVER_NAME.pid
 }
 
 function runServer {
-  SERVER_NAME=$1
-  APP_OPT="$APP_OPT -Dserver.name=$SERVER_NAME"
   $JAVACMD -Djava.ext.dirs=$APP_DIR/libs $JAVA_OPTS $APP_OPT $LOG_OPT $MAIN_CLASS "$@"
 }
 

@@ -105,7 +105,7 @@ function submitDemandSpikeJob(profile) {
   var params = {
     "driver": "kafka", "connect-url": "127.0.0.1:9092", "topic": "metrics.consumer", 
     "num-of-task": 2,  "num-of-thread": 2, "message-size": profile.messageSize,
-    "member-role": "demandspike", "max-duration": profile.maxDuration, "max-num-of-message": 500000
+    "member-role": "demandspike", "max-duration": profile.maxDuration, "max-num-of-message": 3000000
   };
 
   cluster.plugin('demandspike','submit', {
@@ -132,6 +132,16 @@ function submitDemandSpikeJob(profile) {
       Assert.assertTrue(resp.success && !resp.isEmpty()) ;
     }
   }) ;
+
+  cluster.server.clearMetric({
+    params: {"expression": "*Kafka*" },
+
+    onResponse: function(resp) {
+      console.h1("Remove *Kafka* metric monitor") ;
+      new ResponsePrinter(console, resp).print() ;
+      Assert.assertTrue(resp.success && !resp.isEmpty()) ;
+    }
+  }) ;
 }
 
 function exit() {
@@ -147,14 +157,8 @@ function exit() {
 }
 
 try {
-  var maxDuration = 180000 ;
+  var maxDuration = 300000 ;
   var profiles = [
-    {
-      demandspike: {
-        messageSize: 1024, 
-        maxDuration: 3000,
-      }
-    },
     {
       demandspike: {
         messageSize: 1024, 
