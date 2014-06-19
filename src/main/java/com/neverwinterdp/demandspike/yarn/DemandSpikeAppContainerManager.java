@@ -9,58 +9,47 @@ import org.apache.hadoop.yarn.client.api.AMRMClient.ContainerRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.neverwinterdp.hadoop.yarn.AppContainerManager;
-import com.neverwinterdp.hadoop.yarn.AppMaster;
-import com.neverwinterdp.hadoop.yarn.AppMonitor;
-import com.neverwinterdp.hadoop.yarn.ContainerInfo;
-import com.neverwinterdp.server.ServerState;
-import com.neverwinterdp.server.client.Cluster;
-import com.neverwinterdp.server.client.MemberSelector;
-import com.neverwinterdp.server.command.ServerCommandResult;
+import com.neverwinterdp.demandspike.DemandSpikeJob;
+import com.neverwinterdp.hadoop.yarn.app.AppContainerConfig;
+import com.neverwinterdp.hadoop.yarn.app.AppMaster;
+import com.neverwinterdp.hadoop.yarn.app.AppMonitor;
+import com.neverwinterdp.hadoop.yarn.app.ContainerInfo;
+import com.neverwinterdp.hadoop.yarn.app.ContainerManager;
+import com.neverwinterdp.hadoop.yarn.app.ContainerState;
+import com.neverwinterdp.util.text.TabularPrinter;
 
-public class DemandSpikeAppContainerManager implements AppContainerManager {
+public class DemandSpikeAppContainerManager implements ContainerManager {
   protected static final Logger LOGGER = LoggerFactory.getLogger(DemandSpikeAppContainerManager.class);
   
-  private  Cluster cluster ;
-  private boolean appStartSuccess = false;
-  
   public void onInit(AppMaster appMaster) {
+    LOGGER.info("Start onInit(AppMaster appMaster)");
     Configuration conf = appMaster.getConfiguration() ;
-    int instanceRequest = conf.getInt("demandspike.instance.request", 1) ;
     int instanceMemory  = conf.getInt("demandspike.instance.memory", 128) ;
-    int instanceCores  = conf.getInt("demandspike.instance.core", 1) ;
-    for (int i = 0; i < instanceRequest; i++) {
+    int instanceCores   = conf.getInt("demandspike.instance.core", 1) ;
+    DemandSpikeJob job = new DemandSpikeJob(appMaster.getConfig().conf) ;
+    for (int i = 0; i < job.numOfTask; i++) {
       ContainerRequest containerReq = 
           appMaster.createContainerRequest(0/*priority*/, instanceCores, instanceMemory);
       appMaster.add(containerReq) ;
     }
-    StringBuilder commandBuilder = new StringBuilder() ;
-    commandBuilder.
-      append("java ").append("com.neverwinterdp.server.Server ").
-      append(" -Pserver.name=demandspike ").
-      append(" -Pserver.roles=demandspike") ;
     try {
-      int allocatedContainers = 0 ;
-      while (allocatedContainers < instanceRequest) {
-        Thread.sleep(300);
-        List<Container> containers = appMaster.getAllocatedContainers();
-        LOGGER.info("Allocate " + containers.size() + " containers");
-        for (Container container : containers) {
-          ++allocatedContainers;
-          appMaster.startContainer(container, commandBuilder.toString());
+      int allocatedContainer = 0 ;
+      while(allocatedContainer < job.numOfTask) {
+        Thread.sleep(1000);
+        List<Container> containers = appMaster.getAllocatedContainers() ;
+        LOGGER.info("Allocated " + containers.size() + " containers");
+        for(Container container : containers) {
+          AppContainerConfig config = new AppContainerConfig(appMaster, container) ;
+          config.setWorker(DemandSpikeWorker.class) ;
+          config.conf.putAll(appMaster.getConfig().conf);
+          appMaster.startContainer(container, config.toCommand()) ;
+          allocatedContainer++ ;
         }
       }
-    } catch(Exception ex) {
-      LOGGER.error("Error on allocate and start container", ex);
+    } catch (Exception e) {
+      LOGGER.error("Start container error", e);
     }
-    
-    System.setProperty("hazelcast.logging.type", "none") ;
-    cluster = new Cluster() ;
-    MemberSelector memberSelector = new MemberSelector().setMemberRole("demandspike") ;
-    appStartSuccess = cluster.waitForRunningMembers(memberSelector, instanceRequest, 60 * 1000) ;
-    if(!appStartSuccess) {
-      LOGGER.error("Failed to launch " + instanceRequest + " instances"); ;
-    }
+    LOGGER.info("Finish onInit(AppMaster appMaster)");
   }
 
   public void onAllocatedContainer(AppMaster master, Container container) {
@@ -76,16 +65,25 @@ public class DemandSpikeAppContainerManager implements AppContainerManager {
 
   public void waitForComplete(AppMaster appMaster) {
     LOGGER.info("Start waitForComplete(AppMaster appMaster)");
-    if(appStartSuccess) {
-      synchronized(this) {
-        try {
-          this.wait();
-        } catch (InterruptedException ex) {
-          LOGGER.error("wait interruption: ", ex);
+    AppMonitor monitor = appMaster.getAppMonitor() ;
+    ContainerInfo[] cinfos = monitor.getContainerInfos() ;
+    
+    try {
+      boolean finished = false ;
+      while(!finished) {
+        synchronized(this) {
+          this.wait(500);
+        } 
+        finished = true; 
+        for(ContainerInfo sel : cinfos) {
+          if(!sel.getProgressStatus().getContainerState().equals(ContainerState.FINISHED)) {
+            finished = false ;
+            break ;
+          }
         }
       }
-    } else {
-      LOGGER.info("App is started with some error, terminate the app!!!");
+    } catch (InterruptedException ex) {
+      LOGGER.error("wait interruption: ", ex);
     }
     LOGGER.info("Finish waitForComplete(AppMaster appMaster)");
   }
@@ -100,21 +98,17 @@ public class DemandSpikeAppContainerManager implements AppContainerManager {
 
   public void onExit(AppMaster appMaster) {
     LOGGER.info("Start onExit(AppMaster appMaster)");
-    ServerCommandResult<ServerState>[] results = 
-        cluster.server.exit(new MemberSelector().setMemberRole("demandspike")) ;
-    System.out.println("Shutdown result");
-    for(ServerCommandResult<ServerState> sel : results) {
-      System.out.println(sel.getFromMember().toString() + ": " + sel.getResult() ) ;
-    }
-    System.out.println("End Shutdown result");
-    cluster.close(); 
-
     AppMonitor appMonitor = appMaster.getAppMonitor() ;
     ContainerInfo[] info = appMonitor.getContainerInfos() ;
+    int[] colWidth = {20, 20, 20, 20} ;
+    TabularPrinter printer = new TabularPrinter(System.out, colWidth) ;
+    printer.header("Id", "Progress", "Error", "State");
     for(ContainerInfo sel : info) {
-      if(!"SUCCESS".equals(sel.getCompleteStatus())) {
-        LOGGER.error("failed on container with command " + sel.getCommands());
-      }
+      printer.row(
+        sel.getContainerId().getId(), 
+        sel.getProgressStatus().getProgress(),
+        sel.getProgressStatus().getError() != null,
+        sel.getProgressStatus().getContainerState());
     }
     LOGGER.info("Finish onExit(AppMaster appMaster)");
   }

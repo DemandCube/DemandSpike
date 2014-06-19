@@ -1,3 +1,6 @@
+zookeeperConnect = "192.168.1.100:2181"
+kafkaConnect = "192.168.1.100:9092"
+
 function install() {
   cluster.module.list({
     params: {"type": "available" },
@@ -31,8 +34,8 @@ function install() {
     { 
       "member-role": "kafka",  "autostart": true, "module": ["Kafka"],
       "-Pmodule.data.drop": "true" ,
-      "-Pkafka:port": "9092", "-Pkafka:zookeeper.connect": "127.0.0.1:2181",
-      "-Pkafka.zookeeper-urls": "127.0.0.1:2181"
+      "-Pkafka:port": "9092", "-Pkafka:zookeeper.connect": zookeeperConnect,
+      "-Pkafka.zookeeper-urls": zookeeperConnect
     },
     { 
       "member-role": "sparkngin",  "autostart": true, "module": ["Sparkngin"],
@@ -103,7 +106,7 @@ function uninstall() {
 
 function submitDemandSpikeJob(profile) {
   var params = {
-    "driver": "kafka", "connect-url": "127.0.0.1:9092", "topic": "metrics.consumer", 
+    "driver": "kafka", "connect-url": kafkaConnect, "topic": "metrics.consumer", 
     "num-of-task": 2,  "num-of-thread": 2, "message-size": profile.messageSize,
     "member-role": "demandspike", "max-duration": profile.maxDuration, "max-num-of-message": 3000000
   };
@@ -157,7 +160,7 @@ function exit() {
 }
 
 try {
-  var maxDuration = 300000 ;
+  var maxDuration = 60000 ;
   var profiles = [
     {
       demandspike: {

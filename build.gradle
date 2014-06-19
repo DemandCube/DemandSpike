@@ -36,7 +36,7 @@ dependencies {
   compile group: 'com.neverwinterdp', name: 'commons.api', version: '1.0-SNAPSHOT'
   compile group: 'com.neverwinterdp', name: 'commons.cluster', version: '1.0-SNAPSHOT'
   compile group: 'com.neverwinterdp', name: 'commons.hadoop-framework', version: '1.0-SNAPSHOT'
-  testCompile group: 'com.neverwinterdp', name: 'commons.hadoop-framework', version: '1.0-SNAPSHOT', classifier: 'tests'
+  compile group: 'com.neverwinterdp', name: 'commons.hadoop-framework', version: '1.0-SNAPSHOT', classifier: 'tests'
 
   compile group: 'com.neverwinterdp', name: 'queuengin', version: '1.0-SNAPSHOT'
   compile group: 'com.neverwinterdp', name: 'sparkngin', version: '1.0-SNAPSHOT'
@@ -95,14 +95,20 @@ def doRelease(String releaseDir) {
   }
 
   def jars = [ 
-    "commons.utils", "commons.api", "commons.cluster", "queuengin", "sparkngin",
+    "commons.utils", "commons.api", "commons.cluster", "commons.hadoop-framework", "queuengin", "sparkngin",
     "jackson-core-2.2.2", "jackson-databind", "jackson-annotations", "jcommander", "reflections", "guava", "javassist",
     'guice', 'javax.inject', 'hazelcast', 'aopalliance',
     "kafka", "scala-library",
     'zookeeper', 'zkclient',
     "netty-all", 'jzlib',
+    
+    "hadoop-common", "hadoop-hdfs", "hadoop-auth", 
+    "hadoop-yarn-api", "hadoop-yarn-common", "hadoop-yarn-client",
+    "protobuf",
+    
     "metrics-core", "metrics-json", "metrics-annotation",
-    "log4j", "slf4j-api", "slf4j-log4j12"
+    "commons-collections", "commons-configuration","commons-lang", "commons-cli",
+    "log4j", "slf4j-api", "slf4j-log4j12", "commons-logging"
   ] 
 
   println "Copy the dependency library"
