@@ -31,14 +31,14 @@ runClient \
    --app-home /tmp/app/DemmandSpike \
    --upload-app $APP_DIR \
    --app-name "NeverwinterDP DemandSpike App" \
-   --container-manager com.neverwinterdp.demandspike.yarn.DemandSpikeAppContainerManager \
+   --container-manager com.neverwinterdp.demandspike.yarn.AsyncDemandSpikeAppContainerManager \
    --conf:fs.default.name=hdfs://hadoop:9000 \
    --conf:dfs.replication=1 \
    --conf:yarn.resourcemanager.scheduler.address=hadoop:8030 \
    --conf:yarn.resourcemanager.address=hadoop:8032 \
    --conf:demandspike.instance.core=1 \
    --conf:demandspike.instance.memory=128 \
-   --conf:demandspike.job.num-of-task=1 \
+   --conf:demandspike.job.num-of-task=10 \
    --conf:demandspike.job.driver=kafka \
    --conf:demandspike.job.topic=metrics.consumer \
    --conf:demandspike.job.connect-url=192.168.1.100:9092 \

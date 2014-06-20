@@ -1,13 +1,12 @@
 package com.neverwinterdp.demandspike.yarn ;
 
-import java.util.List;
+import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.yarn.api.protocolrecords.AllocateResponse;
 import org.apache.hadoop.yarn.api.records.Container;
 import org.apache.hadoop.yarn.api.records.ContainerStatus;
-import org.apache.hadoop.yarn.api.records.Resource;
 import org.apache.hadoop.yarn.client.api.AMRMClient.ContainerRequest;
+import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,49 +19,44 @@ import com.neverwinterdp.hadoop.yarn.app.ContainerManager;
 import com.neverwinterdp.hadoop.yarn.app.ContainerState;
 import com.neverwinterdp.util.text.TabularPrinter;
 
-public class DemandSpikeAppContainerManager implements ContainerManager {
-  protected static final Logger LOGGER = LoggerFactory.getLogger(DemandSpikeAppContainerManager.class);
+public class AsyncDemandSpikeAppContainerManager implements ContainerManager {
+  protected static final Logger LOGGER = LoggerFactory.getLogger(AsyncDemandSpikeAppContainerManager.class);
+  private DemandSpikeJob demandspikeJob ;
   
   public void onInit(AppMaster appMaster) {
     LOGGER.info("Start onInit(AppMaster appMaster)");
     Configuration conf = appMaster.getConfiguration() ;
     int instanceMemory  = conf.getInt("demandspike.instance.memory", 128) ;
     int instanceCores   = conf.getInt("demandspike.instance.core", 1) ;
-    DemandSpikeJob job = new DemandSpikeJob(appMaster.getConfig().conf) ;
-    for (int i = 0; i < job.numOfTask; i++) {
+    demandspikeJob = new DemandSpikeJob(appMaster.getConfig().conf) ;
+    for (int i = 0; i < demandspikeJob.numOfTask; i++) {
       ContainerRequest containerReq = 
           appMaster.createContainerRequest(0/*priority*/, instanceCores, instanceMemory);
       appMaster.add(containerReq) ;
     }
-    try {
-      int allocatedContainer = 0 ;
-      while(allocatedContainer < job.numOfTask) {
-        Thread.sleep(1000);
-        AllocateResponse response = appMaster.getAMRMClient().allocate((float)allocatedContainer/job.numOfTask);
-        Resource resource = response.getAvailableResources() ;
-        LOGGER.info("getAllocatedContainers() Avaiable Cores: " + resource.getVirtualCores());
-        LOGGER.info("getAllocatedContainers() Avaiable Memory: " + resource.getMemory());
-        
-        List<Container> containers = response.getAllocatedContainers() ;
-        LOGGER.info("Allocated " + containers.size() + " containers");
-        for(Container container : containers) {
-          AppContainerConfig config = new AppContainerConfig(appMaster, container) ;
-          config.setWorker(DemandSpikeWorker.class) ;
-          config.conf.putAll(appMaster.getConfig().conf);
-          appMaster.startContainer(container, config.toCommand()) ;
-          allocatedContainer++ ;
-        }
-      }
-    } catch (Exception e) {
-      LOGGER.error("Start container error", e);
-    }
     LOGGER.info("Finish onInit(AppMaster appMaster)");
   }
 
-  public void onAllocatedContainer(AppMaster master, Container container) {
+  public void onAllocatedContainer(AppMaster appMaster, Container container) {
+    try {
+      LOGGER.info("onAllocateContainer(...), container id = " + container.getId());
+      AppContainerConfig config = new AppContainerConfig(appMaster, container) ;
+      config.setWorker(DemandSpikeWorker.class) ;
+      config.conf.putAll(appMaster.getConfig().conf);
+      appMaster.startContainer(container, config.toCommand()) ;
+    } catch(Exception ex) {
+      LOGGER.error("Start container error", ex);
+    }
   }
 
   public void onCompleteContainer(AppMaster master, ContainerStatus status, ContainerInfo containerInfo) {
+    try {
+      AppMonitor monitor = master.getAppMonitor() ;
+      int complete = monitor.getCompletedContainerCount().intValue() ;
+      master.getAMRMClient().allocate(complete/(float)demandspikeJob.numOfTask) ;
+    } catch (Exception e) {
+      LOGGER.error("onCompleteContainer() report error", e);
+    }
     LOGGER.info("on complete container " + status.getContainerId());
   }
 
@@ -72,15 +66,15 @@ public class DemandSpikeAppContainerManager implements ContainerManager {
 
   public void waitForComplete(AppMaster appMaster) {
     LOGGER.info("Start waitForComplete(AppMaster appMaster)");
-    AppMonitor monitor = appMaster.getAppMonitor() ;
-    ContainerInfo[] cinfos = monitor.getContainerInfos() ;
-    
     try {
       boolean finished = false ;
       while(!finished) {
         synchronized(this) {
           this.wait(500);
         } 
+        AppMonitor monitor = appMaster.getAppMonitor() ;
+        ContainerInfo[] cinfos = monitor.getContainerInfos() ;
+        if(cinfos.length < demandspikeJob.numOfTask)  continue ;
         finished = true; 
         for(ContainerInfo sel : cinfos) {
           if(!sel.getProgressStatus().getContainerState().equals(ContainerState.FINISHED)) {

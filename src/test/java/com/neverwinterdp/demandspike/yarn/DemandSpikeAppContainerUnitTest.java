@@ -47,7 +47,7 @@ public class DemandSpikeAppContainerUnitTest extends AbstractMiniClusterUnitTest
       "--conf:yarn.resourcemanager.scheduler.address=0.0.0.0:8030",
       "--conf:demandspike.instance.core=1",
       "--conf:demandspike.instance.memory=128",
-      "--conf:demandspike.job.num-of-task=2",
+      "--conf:demandspike.job.num-of-task=10",
       "--conf:demandspike.job.driver=kafka",
       "--conf:demandspike.job.topic=" + DemandSpikeClusterBuilder.TOPIC ,
       "--conf:demandspike.job.connect-url=127.0.0.1:9092",
