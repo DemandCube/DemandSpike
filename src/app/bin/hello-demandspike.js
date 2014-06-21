@@ -1,5 +1,5 @@
 zookeeperConnect = "192.168.1.100:2181"
-kafkaConnect = "192.168.1.100:9092"
+kafkaConnect = "192.168.1.100:9092,192.168.1.100:9093"
 
 function install() {
   cluster.module.list({
@@ -32,10 +32,24 @@ function install() {
       "-Pzk:clientPort": "2181"
     },
     { 
-      "member-role": "kafka",  "autostart": true, "module": ["Kafka"],
+      "member-name": "kafka1",  "autostart": true, "module": ["Kafka"], "timeout": 30000,
       "-Pmodule.data.drop": "true" ,
-      "-Pkafka:port": "9092", "-Pkafka:zookeeper.connect": zookeeperConnect,
-      "-Pkafka.zookeeper-urls": zookeeperConnect
+      "-Pkafka:broker.id": "1", "-Pkafka:port": "9092", "-Pkafka:zookeeper.connect": zookeeperConnect,
+      "-Pkafka:default.replication.factor": "2",
+      "-Pkafka:controller.socket.timeout.ms": "3000",
+      //"-Pkafka:controlled.shutdown.enable": "true",
+      "-Pcontrolled.shutdown.max.retries": "3",
+      "-Pkafka:controlled.shutdown.retry.backoff.ms": "3000"
+    },
+    { 
+      "member-name": "kafka2",  "autostart": true, "module": ["Kafka"], "timeout": 30000,
+      "-Pmodule.data.drop": "true" ,
+      "-Pkafka:broker.id": "2", "-Pkafka:port": "9093", "-Pkafka:zookeeper.connect": zookeeperConnect,
+      "-Pkafka:default.replication.factor": "2",
+      "-Pkafka:controller.socket.timeout.ms": "3000",
+      //"-Pkafka:controlled.shutdown.enable": "true",
+      "-Pcontrolled.shutdown.max.retries": "3",
+      "-Pkafka:controlled.shutdown.retry.backoff.ms": "3000"
     },
     { 
       "member-role": "sparkngin",  "autostart": true, "module": ["Sparkngin"],
@@ -75,7 +89,7 @@ function uninstall() {
   var uninstallParams = [
     { "member-role": "demandspike",  "module": ["DemandSpike"], "timeout": 20000 },
     { "member-role": "sparkngin",  "module": ["Sparkngin"], "timeout": 20000 },
-    { "member-role": "kafka",      "module": ["Kafka"],     "timeout": 20000 },
+    { "member-role": "kafka",      "module": ["Kafka"],     "timeout": 40000 },
     { "member-role": "zookeeper",  "module": ["Zookeeper"], "timeout": 20000 }
   ];
   for(var i = 0; i < uninstallParams.length; i++) {
@@ -106,7 +120,7 @@ function uninstall() {
 
 function submitDemandSpikeJob(profile) {
   var params = {
-    "driver": "kafka", "connect-url": kafkaConnect, "topic": "metrics.consumer", 
+    "driver": "kafka", "kafka-connect": kafkaConnect, "topic": "metrics.consumer", 
     "num-of-task": 2,  "num-of-thread": 2, "message-size": profile.messageSize,
     "member-role": "demandspike", "max-duration": profile.maxDuration, "max-num-of-message": 3000000
   };
@@ -160,7 +174,7 @@ function exit() {
 }
 
 try {
-  var maxDuration = 60000 ;
+  var maxDuration = 180000 ;
   var profiles = [
     {
       demandspike: {

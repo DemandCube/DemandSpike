@@ -30,9 +30,11 @@ function runServer {
 }
 
 
-#runServer -Pserver.name=zookeeper -Pserver.roles=zookeeper
-
 startServer -Pserver.name=zookeeper -Pserver.roles=zookeeper
-startServer -Pserver.name=kafka -Pserver.roles=kafka
+
+startServer -Pserver.name=kafka1 -Pserver.roles=kafka
+startServer -Pserver.name=kafka2 -Pserver.roles=kafka
+
 startServer -Pserver.name=sparkngin -Pserver.roles=sparkngin
+
 startServer -Pserver.name=demandspike -Pserver.roles=demandspike

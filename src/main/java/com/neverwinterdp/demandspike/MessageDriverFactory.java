@@ -15,7 +15,7 @@ public class MessageDriverFactory implements Serializable {
   String driver = "dummy" ;
   
   @Parameter(
-    names = "--connect-url", variableArity= true, 
+    names = "--kafka-connect", variableArity= true, 
     description = "The connection url list"
   )
   List<String> connect  = new ArrayList<String>() ;

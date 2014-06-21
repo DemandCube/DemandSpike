@@ -31,7 +31,7 @@ public class DemandSpikeServiceUnitTest {
     clusterBuilder.install() ; 
     shell.execute(
       "demandspike submit " + 
-      "  --driver kafka --connect-url 127.0.0.1:9092 --topic " + TOPIC +
+      "  --driver kafka --kafka-connect 127.0.0.1:9092 --topic " + TOPIC +
       "  --member-role demandspike --max-duration 30000 --max-num-of-message 100000" 
     );
     Thread.sleep(30000);
