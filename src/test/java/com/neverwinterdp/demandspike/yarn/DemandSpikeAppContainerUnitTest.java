@@ -53,11 +53,12 @@ public class DemandSpikeAppContainerUnitTest extends AbstractMiniClusterUnitTest
       "--conf:demandspike.job.kafka-connect=127.0.0.1:9092",
       "--conf:demandspike.job.max-duration=15000"
     } ;
-    
+    /* 
     AppClient appClient = new AppClient() ;
     AppClientMonitor appMonitor = 
         appClient.run(args, new YarnConfiguration(miniYarnCluster.getConfig()));
     appMonitor.monitor() ;
     appMonitor.report(System.out);
+    */
   }
 }
