@@ -15,7 +15,7 @@ public class MessageDriverFactory implements Serializable {
   String driver = "dummy" ;
   
   @Parameter(
-    names = "--kafka-connect", variableArity= true, 
+    names = "--broker-connect", variableArity= true, 
     description = "The connection url list"
   )
   List<String> connect  = new ArrayList<String>() ;
@@ -31,6 +31,8 @@ public class MessageDriverFactory implements Serializable {
     MessageDriver mdriver = null ;
     if("kafka".equals(driver)) {
       mdriver = new KafkaMessageDriver(appMonitor) ;
+    } else if("sparkngin".equals(driver)) {
+        mdriver = new HttpSparknginMessageDriver(appMonitor) ;
     } else {
       mdriver = new DummyMessageDriver() ;
     }

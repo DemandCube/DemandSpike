@@ -52,7 +52,10 @@ public class DemandSpikeClusterBuilder {
         "  --member-role kafka --autostart --module Kafka \n" +
         
         "module install " + 
+        "  -Phttp-listen-port=8181 " +
+        "  -Pqueue-buffer=3000 " +
         "  --member-role sparkngin --autostart --module Sparkngin \n" +
+        
         
         "module install " +  
         " --member-role demandspike --autostart --module DemandSpike \n" +

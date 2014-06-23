@@ -27,11 +27,26 @@ public class DemandSpikeServiceUnitTest {
   }
  
   @Test
-  public void testSendMessage() throws Exception {
+  public void testSparkngin() throws Exception {
     clusterBuilder.install() ; 
     shell.execute(
       "demandspike submit " + 
-      "  --driver kafka --kafka-connect 127.0.0.1:9092 --topic " + TOPIC +
+      "  --driver sparkngin --broker-connect 127.0.0.1:8181 --topic " + TOPIC +
+      "  --member-role demandspike --max-duration 30000 --max-num-of-message 100000" 
+    );
+    Thread.sleep(30000);
+    shell.execute(
+      "server metric --type timer --filter * " 
+    );
+    clusterBuilder.uninstall();
+  }
+  
+  @Test
+  public void testKafka() throws Exception {
+    clusterBuilder.install() ; 
+    shell.execute(
+      "demandspike submit " + 
+      "  --driver kafka --broker-connect 127.0.0.1:9092 --topic " + TOPIC +
       "  --member-role demandspike --max-duration 30000 --max-num-of-message 100000" 
     );
     Thread.sleep(30000);
