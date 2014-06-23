@@ -1,0 +1,138 @@
+apply plugin: 'java'
+apply plugin: 'eclipse' 
+apply plugin: 'maven' 
+
+archivesBaseName = 'demandspike'
+
+eclipse {
+  project {
+    name = 'DemandSpike'
+  }
+
+  classpath {
+    downloadSources=true
+  }
+}
+
+eclipse.classpath.defaultOutputDir = file( 'build/classes' )
+
+group = 'com.neverwinterdp'
+sourceCompatibility = 1.7
+version = '1.0-SNAPSHOT'
+configurations.compile.transitive = true
+
+repositories {
+  mavenLocal()
+  mavenCentral()
+}
+
+configurations.all {
+  exclude(group: 'ring', name: 'ring-core', version: '0.3.11')
+}
+
+
+dependencies {
+  compile group: 'com.neverwinterdp', name: 'commons.utils', version: '1.0-SNAPSHOT'
+  compile group: 'com.neverwinterdp', name: 'commons.api', version: '1.0-SNAPSHOT'
+  compile group: 'com.neverwinterdp', name: 'commons.cluster', version: '1.0-SNAPSHOT'
+  compile group: 'com.neverwinterdp', name: 'commons.hadoop-framework', version: '1.0-SNAPSHOT'
+  compile group: 'com.neverwinterdp', name: 'commons.hadoop-framework', version: '1.0-SNAPSHOT', classifier: 'tests'
+
+  compile group: 'com.neverwinterdp', name: 'queuengin', version: '1.0-SNAPSHOT'
+  compile group: 'com.neverwinterdp', name: 'sparkngin', version: '1.0-SNAPSHOT'
+
+
+  compile group: 'com.yammer.metrics', name: 'metrics-core', version: '2,2.0'
+
+  compile group: 'org.apache.hadoop', name: 'hadoop-common', version: '2.4.0'
+  compile group: 'org.apache.hadoop', name: 'hadoop-hdfs', version: '2.4.0'
+
+  compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
+  compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.5'
+
+  compile group: 'org.apache.hadoop', name: 'hadoop-minicluster', version: '2.4.0'
+  compile group: 'org.apache.mrunit', name: 'mrunit', version: '1.0.0', classifier: 'hadoop2'
+
+  testCompile group: 'junit', name: 'junit', version: '4.11'
+
+  //testCompile 'org.apache.hadoop:hadoop-hdfs:2.4.0:tests'
+  //testCompile 'org.apache.hadoop:hadoop-hdfs:2.4.0:test-sources'
+
+  //testCompile group: 'org.apache.hadoop', name: 'hadoop-minicluster', version: '2.4.0'
+  //testCompile 'org.apache.hadoop:hadoop-minicluster:2.4.0:tests'
+  //testCompile 'org.apache.hadoop:hadoop-minicluster:2.4.0:test-sources'
+
+  //testCompile group: 'org.apache.hadoop', name: 'hadoop-yarn-server-tests', version: '2.4.0'
+  //testCompile 'org.apache.hadoop:hadoop-yarn-server-tests:2.4.0:tests'
+  //testCompile 'org.apache.hadoop:hadoop-yarn-server-tests:2.4.0:test-sources'
+}
+
+test {
+  forkEvery = 1
+  ignoreFailures = true
+  testLogging.showStandardStreams = true
+
+  filter {
+    includeTestsMatching "*UnitTest"
+  }
+}
+
+task release (dependsOn: 'build') << {
+  def releaseDir = "${buildDir}/release/DemandSpike"
+  doRelease(releaseDir) ;
+}
+
+def doRelease(String releaseDir) {
+  println "\n\n"
+  println "*************************************************"
+  println "Preparing the release directory ${releaseDir}"
+  println "*************************************************"
+
+  println "Copy the scripts"
+  copy {
+    from "src/app"
+    into "${releaseDir}"
+  }
+
+  def jars = [ 
+    "commons.utils", "commons.api", "commons.cluster", "commons.hadoop-framework", "queuengin", "sparkngin",
+    "jackson-core-2.2.2", "jackson-databind", "jackson-annotations", "jcommander", "reflections", "guava", "javassist",
+    'guice', 'javax.inject', 'hazelcast', 'aopalliance',
+    "kafka", "scala-library",
+    'zookeeper', 'zkclient',
+    "netty-all", 'jzlib',
+    
+    "hadoop-common", "hadoop-hdfs", "hadoop-auth", 
+    "hadoop-yarn-api", "hadoop-yarn-common", "hadoop-yarn-client",
+    "protobuf",
+    
+    "metrics-core", "metrics-json", "metrics-annotation",
+    "commons-collections", "commons-configuration","commons-lang", "commons-cli",
+    "log4j", "slf4j-api", "slf4j-log4j12", "commons-logging"
+  ] 
+
+  println "Copy the dependency library"
+  configurations.compile.each { File file -> 
+    if(isIn(jars, file)) {
+      println "  Copy $file.name to DemandSpike/libs"
+      copy {
+        from file
+        into "${releaseDir}/libs"
+      }
+    } else {
+      //println "Ignore $file.name "
+    }
+  }
+
+  copy {
+    from "${buildDir}/libs"
+    into "${releaseDir}/libs"
+  }
+}
+
+def isIn(set, File file) {
+  for(item in set) {
+    if(file.name.startsWith(item)) return true ;
+  }
+  return false ;
+}
