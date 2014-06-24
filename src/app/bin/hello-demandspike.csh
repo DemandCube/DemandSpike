@@ -37,7 +37,7 @@ server registration
 :echo "Submit a demandspike job"
 :echo "=========================================="
 demandspike submit  \
-  --driver kafka --kafka-connect 127.0.0.1:9092 --topic metrics.consumer \
+  --driver kafka --broker-connect 127.0.0.1:9092 --topic metrics.consumer \
   --num-of-task 2  --num-of-thread 2 --message-size 2048 \
   --member-role demandspike --max-duration 60000 --max-num-of-message 500000
 

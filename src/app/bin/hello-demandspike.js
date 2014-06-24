@@ -120,7 +120,7 @@ function uninstall() {
 
 function submitDemandSpikeJob(profile) {
   var params = {
-    "driver": "kafka", "kafka-connect": kafkaConnect, "topic": "metrics.consumer", 
+    "driver": "kafka", "broker-connect": kafkaConnect, "topic": "metrics.consumer", 
     "num-of-task": 2,  "num-of-thread": 2, "message-size": profile.messageSize,
     "member-role": "demandspike", "max-duration": profile.maxDuration, "max-num-of-message": 3000000
   };
