@@ -1,5 +1,5 @@
-zookeeperConnect = "192.168.1.100:2181"
-kafkaConnect = "192.168.1.100:9092,192.168.1.100:9093"
+zookeeperConnect = "127.0.0.1:2181"
+kafkaConnect = "127.0.0.1:9092,127.0.0.1:9093"
 
 function install() {
   cluster.module.list({
@@ -174,7 +174,7 @@ function exit() {
 }
 
 try {
-  var maxDuration = 180000 ;
+  var maxDuration = 15000 ;
   var profiles = [
     {
       demandspike: {
