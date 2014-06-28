@@ -13,7 +13,7 @@ public class DemandSpikeServiceUnitTest {
   static DemandSpikeClusterBuilder clusterBuilder ;
   static protected Shell shell ;
   static String TOPIC = DemandSpikeClusterBuilder.TOPIC ;
-    
+  
   @BeforeClass
   static public void setup() throws Exception {
     clusterBuilder = new DemandSpikeClusterBuilder() ;
