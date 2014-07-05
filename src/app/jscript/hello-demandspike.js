@@ -1,3 +1,7 @@
+ScriptRunner.require("classpath:util/io.js");
+ScriptRunner.require("classpath:util/assert.js");
+ScriptRunner.require("classpath:cluster/cluster.js");
+
 zookeeperConnect = "127.0.0.1:2181"
 kafkaConnect = "127.0.0.1:9092,127.0.0.1:9093"
 
@@ -53,7 +57,9 @@ function install() {
     },
     { 
       "member-role": "sparkngin",  "autostart": true, "module": ["Sparkngin"],
-      "-Pmodule.data.drop": "true" 
+      "-Pmodule.data.drop": "true",
+      "-Phttp-listen-port": "8080",
+      "-Pforwarder-class": "com.neverwinterdp.sparkngin.http.NullDevMessageForwarder"
     },
     { 
       "member-role": "demandspike",  "autostart": true, "module": ["DemandSpike"],

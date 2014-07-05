@@ -15,7 +15,7 @@ public class DemandSpikeWorker implements AppWorker {
   public void run(AppContainer appContainer) throws Exception {
     ApplicationMonitor appMonitor = new ApplicationMonitor() ;
     DemandSpikeJob job = new DemandSpikeJob(appContainer.getConfig().conf) ;
-    DemandSpikeTask task = job.createTask(appMonitor, "DemandSpikeTask") ;
+    DemandSpikeTask task = job.taskConfig.createTask(appMonitor, "DemandSpikeTask") ;
     task.setLogger(LOGGER);
     task.run() ; 
     System.out.println(appMonitor.toJSON());

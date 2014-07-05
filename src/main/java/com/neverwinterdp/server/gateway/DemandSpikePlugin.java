@@ -1,28 +1,18 @@
-package com.neverwinterdp.server.client;
+package com.neverwinterdp.server.gateway;
 
 import com.neverwinterdp.demandspike.DemandSpikeClusterService;
 import com.neverwinterdp.demandspike.DemandSpikeJob;
 import com.neverwinterdp.server.command.ServiceCommand;
 import com.neverwinterdp.server.command.ServiceCommandResult;
 import com.neverwinterdp.server.command.ServiceCommands;
-import com.neverwinterdp.util.JSONSerializer;
 
 @PluginConfig(name = "demandspike")
 public class DemandSpikePlugin extends Plugin {
-  public String call(String json) {
-    try {
-      CommandParams params = JSONSerializer.INSTANCE.fromString(json, CommandParams.class) ;
-      String commandName = params.getString("_commandName") ;
-      ServiceCommandResult<?>[] results = null ;
-      if("submit".equals(commandName)) results = submit(params) ;
-      if(results != null) {
-        return JSONSerializer.INSTANCE.toString(results) ;
-      }
-      return "{ 'success': false, 'message': 'unknown command'}" ;
-    } catch(Throwable t) {
-      t.printStackTrace(); 
-      throw t ;
-    }
+  public Object doCall(String commandName, CommandParams params) {
+    ServiceCommandResult<?>[] results = null ;
+    if("submit".equals(commandName)) results = submit(params) ;
+    if(results != null) return results ;
+    return null ;
   }
 
   public ServiceCommandResult<Boolean>[] submit(CommandParams params) {

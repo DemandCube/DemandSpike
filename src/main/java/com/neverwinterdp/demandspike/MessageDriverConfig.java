@@ -7,7 +7,7 @@ import java.util.List;
 import com.beust.jcommander.Parameter;
 import com.neverwinterdp.util.monitor.ApplicationMonitor;
 
-public class MessageDriverFactory implements Serializable {
+public class MessageDriverConfig implements Serializable {
   @Parameter(
     names = "--driver", 
     description = "The message driver to send the message. Either dummy, kafka or sparkngin"

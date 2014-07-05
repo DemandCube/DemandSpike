@@ -5,6 +5,7 @@ import java.io.Serializable;
 import org.slf4j.Logger;
 
 abstract public class DemandSpikeTask implements Runnable, Serializable {
+  
   Logger logger ;
   String taskId;
   long   maxDuration ;

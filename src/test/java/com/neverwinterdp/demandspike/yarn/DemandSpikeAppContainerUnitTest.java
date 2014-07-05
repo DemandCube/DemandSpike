@@ -50,7 +50,7 @@ public class DemandSpikeAppContainerUnitTest extends AbstractMiniClusterUnitTest
       "--conf:demandspike.job.num-of-task=3",
       "--conf:demandspike.job.driver=kafka",
       "--conf:demandspike.job.topic=" + DemandSpikeClusterBuilder.TOPIC ,
-      "--conf:demandspike.job.broker-connect=127.0.0.1:9092",
+      "--conf:demandspike.job.broker-connect=" + clusterBuilder.getKafkaConnect(),
       "--conf:demandspike.job.max-duration=15000"
     } ;
     

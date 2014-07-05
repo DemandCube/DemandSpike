@@ -32,11 +32,11 @@ public class DemandSpikeServiceUnitTest {
     shell.execute(
       "demandspike submit " + 
       "  --driver sparkngin --broker-connect 127.0.0.1:8181 --topic " + TOPIC +
-      "  --member-role demandspike --max-duration 30000 --max-num-of-message 100000" 
+      "  --member-role demandspike --max-duration 5000 --max-num-of-message 100000" 
     );
-    Thread.sleep(30000);
+    Thread.sleep(10000);
     shell.execute(
-      "server metric --type timer --filter * " 
+      "server metric --filter * " 
     );
     clusterBuilder.uninstall();
   }
@@ -44,14 +44,38 @@ public class DemandSpikeServiceUnitTest {
   @Test
   public void testKafka() throws Exception {
     clusterBuilder.install() ; 
+    Thread.sleep(3000);
     shell.execute(
       "demandspike submit " + 
-      "  --driver kafka --broker-connect 127.0.0.1:9092 --topic " + TOPIC +
-      "  --member-role demandspike --max-duration 30000 --max-num-of-message 100000" 
+          "  --driver kafka --broker-connect " +  clusterBuilder.getKafkaConnect() + " --topic " + TOPIC +
+      "  --member-role demandspike --max-duration 5000 --max-num-of-message 100000"
+    );
+    Thread.sleep(10000);
+    shell.execute(
+      "server metric --filter * " 
+    );
+    clusterBuilder.uninstall();
+  }
+  
+  //@Test
+  public void testKafkaRandomFailure() throws Exception {
+    clusterBuilder.install() ; 
+    Thread.sleep(3000);
+    shell.execute(
+      "demandspike submit " + 
+      "  --driver kafka --broker-connect " +  clusterBuilder.getKafkaConnect() + " --topic " + TOPIC +
+      "  --member-role demandspike --max-duration 60000 --max-num-of-message 100000" +
+      //"  -Problem:kafka.description=\"kafka service randomly on/off\"" +
+      "  -Problem:kafka.problem=service-failure" +
+      "  -Problem:kafka.member-role=kafka" +
+      "  -Problem:kafka.module=Kafka" +
+      "  -Problem:kafka.service-id=KafkaClusterService" +
+      "  -Problem:kafka.period=10000" +
+      "  -Problem:kafka.failure-time=1000"
     );
     Thread.sleep(30000);
     shell.execute(
-      "server metric --type timer --filter * " 
+      "server metric --filter * " 
     );
     clusterBuilder.uninstall();
   }

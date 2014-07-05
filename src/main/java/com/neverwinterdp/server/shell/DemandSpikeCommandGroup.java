@@ -3,8 +3,8 @@ package com.neverwinterdp.server.shell;
 import com.beust.jcommander.Parameters;
 import com.beust.jcommander.ParametersDelegate;
 import com.neverwinterdp.demandspike.DemandSpikeJob;
-import com.neverwinterdp.server.client.DemandSpikePlugin;
 import com.neverwinterdp.server.command.ServiceCommandResult;
+import com.neverwinterdp.server.gateway.DemandSpikePlugin;
 import com.neverwinterdp.util.text.TabularPrinter;
 
 @CommandGroupConfig(name = "demandspike")
@@ -19,7 +19,7 @@ public class DemandSpikeCommandGroup extends CommandGroup {
     DemandSpikeJob job = new DemandSpikeJob();
     
     public void execute(ShellContext ctx) {
-      DemandSpikePlugin plugin = ctx.getCluster().plugin("demandspike") ;
+      DemandSpikePlugin plugin = ctx.getClusterGateway().plugin("demandspike") ;
       ServiceCommandResult<Boolean>[] results = plugin.submit(job, job.memberSelector.timeout) ;
       
       ctx.console().header("Submit job");
