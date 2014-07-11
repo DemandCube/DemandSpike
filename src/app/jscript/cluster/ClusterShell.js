@@ -10,6 +10,9 @@ var ClusterShell = {
         params: params,
 
         onResponse: function(resp) {
+          if(!resp.success) { 
+            console.printJSON(resp);
+          }
           for(var i = 0; i < resp.results.length; i++) {
             var result = resp.results[i];
             var printer = new cluster.ModuleRegistrationPrinter(console, result.fromMember, result.result);

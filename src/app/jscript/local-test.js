@@ -1,7 +1,18 @@
+ScriptRunner.require("cluster/HttpCluster.js");
 ScriptRunner.require("cluster/ZookeeperCluster.js");
 ScriptRunner.require("cluster/KafkaCluster.js");
 ScriptRunner.require("cluster/SparknginCluster.js");
 ScriptRunner.require("cluster/DemandSpikeCluster.js");
+
+var appDir = java.lang.System.getProperty("app.dir") ;
+
+this.HTTP_CONFIG = {
+  listenPort: 8080, 
+  webappDir: appDir + "/webapp",
+  serverRole: "generic", 
+  servers: ["generic"]
+};
+
 
 this.KAFKA_CONFIG = {
   port: 9092, 
@@ -14,18 +25,20 @@ this.KAFKA_CONFIG = {
 this.SPARKNGIN_CONFIG = {
   serverRole: "sparkngin", 
   servers: ["sparkngin1"],
-  httpListenPort: 8080,
+  httpListenPort: 7080,
   forwarderClass: "com.neverwinterdp.sparkngin.http.NullDevMessageForwarder",
-  sparknginConnect: "127.0.0.1:8080"
+  sparknginConnect: "127.0.0.1:7070"
 };
 
 var ClusterEnv = {
+  httpCluster: new HttpCluster(HTTP_CONFIG) ,
   zkCluster: new ZookeeperCluster() ,
   kafkaCluster: new KafkaCluster(KAFKA_CONFIG),
   sparknginCluster: new SparknginCluster(SPARKNGIN_CONFIG),
   demandspikeCluster: new DemandSpikeCluster(),
 
   install: function() {
+    this.httpCluster.installByServer() ;
     this.zkCluster.installByServer() ;
     this.kafkaCluster.installByServer() ;
     this.sparknginCluster.installByServer() ;
@@ -38,6 +51,7 @@ var ClusterEnv = {
     this.sparknginCluster.uninstall() ;
     this.kafkaCluster.uninstall() ;
     this.zkCluster.uninstall() ;
+    //this.httpCluster.uninstall() ;
   }
 }
 

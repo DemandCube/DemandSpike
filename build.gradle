@@ -33,12 +33,12 @@ configurations.all {
   exclude(group: 'ring', name: 'ring-core', version: '0.3.11')
 }
 
-
 dependencies {
   compile group: 'com.neverwinterdp', name: 'commons.utils', version: '1.0-SNAPSHOT'
   compile group: 'com.neverwinterdp', name: 'commons.api', version: '1.0-SNAPSHOT'
   compile group: 'com.neverwinterdp', name: 'commons.cluster', version: '1.0-SNAPSHOT'
   compile group: 'com.neverwinterdp', name: 'commons.cluster', version: '1.0-SNAPSHOT', classifier: 'js'
+  compile group: 'com.neverwinterdp', name: 'commons.cluster', version: '1.0-SNAPSHOT', classifier: 'webapp'
   compile group: 'com.neverwinterdp', name: 'commons.hadoop-framework', version: '1.0-SNAPSHOT'
   testCompile group: 'com.neverwinterdp', name: 'commons.hadoop-framework', version: '1.0-SNAPSHOT', classifier: 'tests'
 
@@ -58,17 +58,6 @@ dependencies {
   compile group: 'org.apache.mrunit', name: 'mrunit', version: '1.0.0', classifier: 'hadoop2'
 
   testCompile group: 'junit', name: 'junit', version: '4.11'
-
-  //testCompile 'org.apache.hadoop:hadoop-hdfs:2.4.0:tests'
-  //testCompile 'org.apache.hadoop:hadoop-hdfs:2.4.0:test-sources'
-
-  //testCompile group: 'org.apache.hadoop', name: 'hadoop-minicluster', version: '2.4.0'
-  //testCompile 'org.apache.hadoop:hadoop-minicluster:2.4.0:tests'
-  //testCompile 'org.apache.hadoop:hadoop-minicluster:2.4.0:test-sources'
-
-  //testCompile group: 'org.apache.hadoop', name: 'hadoop-yarn-server-tests', version: '2.4.0'
-  //testCompile 'org.apache.hadoop:hadoop-yarn-server-tests:2.4.0:tests'
-  //testCompile 'org.apache.hadoop:hadoop-yarn-server-tests:2.4.0:test-sources'
 }
 
 test {
@@ -92,13 +81,8 @@ def doRelease(String releaseDir) {
   println "Preparing the release directory ${releaseDir}"
   println "*************************************************"
 
-  println "Copy the scripts"
-  copy {
-    from "src/app"
-    into "${releaseDir}"
-  }
 
-  def jars = [ 
+  def dependencyJars = [ 
     "commons.utils", "commons.api", "commons.cluster","commons.netty", "commons.hadoop-framework", "queuengin", "sparkngin",
     "jackson-core-2.2.2", "jackson-databind", "jackson-annotations", "jcommander", "reflections", "guava", "javassist",
     'guice', 'javax.inject', 'hazelcast', 'aopalliance',
@@ -113,15 +97,23 @@ def doRelease(String releaseDir) {
     "metrics-core", "metrics-json", "metrics-annotation",
     "commons-collections", "commons-configuration","commons-lang", "commons-cli",
     "log4j", "slf4j-api", "slf4j-log4j12", "commons-logging"
-  ] 
+  ] ;
 
   println "Copy the dependency library"
   configurations.compile.each { File file -> 
-    if(isIn(jars, file)) {
-      println "  Copy $file.name to DemandSpike/libs"
-      copy {
-        from file
-        into "${releaseDir}/libs"
+    if(isIn(dependencyJars, file)) {
+      if(file.name.indexOf("webapp") > 0) { 
+        println "  Extract $file.name to DemandSpike/webapp"
+        copy {
+          from zipTree(file)
+          into "${releaseDir}/webapp"
+        }
+      } else {
+        println "  Copy $file.name to DemandSpike/libs"
+        copy {
+          from file
+          into "${releaseDir}/libs"
+        }
       }
     } else {
       //println "Ignore $file.name "
@@ -131,6 +123,12 @@ def doRelease(String releaseDir) {
   copy {
     from "${buildDir}/libs"
     into "${releaseDir}/libs"
+  }
+
+  println "Copy and override app"
+  copy {
+    from "src/app"
+    into "${releaseDir}"
   }
 }
 
