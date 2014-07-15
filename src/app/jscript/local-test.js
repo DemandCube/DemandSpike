@@ -90,7 +90,9 @@ function runAll() {
 function runSingle() {
   var jobParams = {
     //test kafka with 1k message size
-    "driver": "kafka", "broker-connect": KAFKA_CONFIG.kafkaConnect, "topic": "metrics.consumer", 
+    "driver": "kafka", "driver:request.required.acks": "1",
+    "broker-connect": KAFKA_CONFIG.kafkaConnect, "topic": "metrics.consumer", 
+    "broker-connect": KAFKA_CONFIG.kafkaConnect, "topic": "metrics.consumer", 
     "num-of-task": 2,  "num-of-thread": 2, "message-size": 1024,
     "member-role": "demandspike", "max-duration": 60000, "max-num-of-message": 3000000
   }
