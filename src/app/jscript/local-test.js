@@ -105,16 +105,17 @@ function runSingle() {
 function runKafkaRandomFailure() {
   var jobParams = {
     //test kafka with 1k message size
-    "driver": "kafka", "broker-connect": KAFKA_CONFIG.kafkaConnect, "topic": "metrics.consumer", 
-    "num-of-task": 2,  "num-of-thread": 2, "message-size": 1024,
+    "driver": "kafka", "driver:request.required.acks": "1",
+    "broker-connect": KAFKA_CONFIG.kafkaConnect, "topic": "metrics.consumer", 
+    "num-of-task": 2, "num-of-thread": 2, "message-size": 1024,
     "member-role": "demandspike", "max-duration": 60000, "max-num-of-message": 3000000,
 
-    "-Problem:kafka.problem": "service-failure",
-    "-Problem:kafka.member-role": "kafka",
-    "-Problem:kafka.module": "Kafka",
-    "-Problem:kafka.service-id": "KafkaClusterService",
-    "-Problem:kafka.period": "15000",
-    "-Problem:kafka.failure-time": "1000"
+    "problem:kafka.problem": "service-failure",
+    "problem:kafka.member-role": "kafka",
+    "problem:kafka.module": "Kafka",
+    "problem:kafka.service-id": "KafkaClusterService",
+    "problem:kafka.period": "15000",
+    "problem:kafka.failure-time": "1000"
   }
 
   ClusterEnv.install() ;

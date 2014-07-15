@@ -1,6 +1,7 @@
 package com.neverwinterdp.demandspike;
 
 import java.util.List;
+import java.util.Map;
 
 import com.codahale.metrics.Timer;
 import com.neverwinterdp.message.Message;
@@ -19,7 +20,7 @@ public class HttpSparknginMessageDriver implements MessageDriver {
     driverMonitor   = appMonitor.createComponentMonitor(HttpSparknginMessageDriver.class) ;
   }
   
-  public void init(List<String> connect, String topic) {
+  public void init(Map<String, String> props, List<String> connect, String topic) {
     this.topic = topic ;
     try {
       for(String selConnect : connect) {

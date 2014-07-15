@@ -47,7 +47,8 @@ public class DemandSpikeServiceUnitTest {
     Thread.sleep(3000);
     shell.execute(
       "demandspike submit " + 
-          "  --driver kafka --broker-connect " +  clusterBuilder.getKafkaConnect() + " --topic " + TOPIC +
+      "  --driver kafka --driver:request.required.acks=1" + 
+      "  --broker-connect " +  clusterBuilder.getKafkaConnect() + " --topic " + TOPIC +
       "  --member-role demandspike --max-duration 5000 --max-num-of-message 100000"
     );
     Thread.sleep(10000);

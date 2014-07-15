@@ -1,6 +1,7 @@
 package com.neverwinterdp.demandspike;
 
 import java.util.List;
+import java.util.Map;
 
 import com.neverwinterdp.message.Message;
 import com.neverwinterdp.queuengin.kafka.KafkaMessageProducer;
@@ -17,11 +18,11 @@ public class KafkaMessageDriver implements MessageDriver {
     this.appMonitor = appMonitor ;
   }
   
-  public void init(List<String> connect, String topic) {
+  public void init(Map<String, String> props, List<String> connect, String topic) {
     this.topic = topic ;
     String connectUrls = StringUtil.join(connect, ",") ;
     ComponentMonitor monitor = appMonitor.createComponentMonitor(KafkaMessageProducer.class) ;
-    producer = new KafkaMessageProducer(monitor, connectUrls) ;
+    producer = new KafkaMessageProducer(props, monitor, connectUrls) ;
   }
   
   public void send(Message message) throws Exception {

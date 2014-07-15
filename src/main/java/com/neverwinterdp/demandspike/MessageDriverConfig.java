@@ -2,8 +2,11 @@ package com.neverwinterdp.demandspike;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.beust.jcommander.DynamicParameter;
 import com.beust.jcommander.Parameter;
 import com.neverwinterdp.util.monitor.ApplicationMonitor;
 
@@ -13,6 +16,12 @@ public class MessageDriverConfig implements Serializable {
     description = "The message driver to send the message. Either dummy, kafka or sparkngin"
   )
   String driver = "dummy" ;
+  
+  @DynamicParameter(
+      names = "--driver:", 
+      description = "The message driver to send the message. Either dummy, kafka or sparkngin"
+   )
+   Map<String, String> driverProperties = new HashMap<String, String>() ;
   
   @Parameter(
     names = "--broker-connect", variableArity= true, 
@@ -36,7 +45,7 @@ public class MessageDriverConfig implements Serializable {
     } else {
       mdriver = new DummyMessageDriver() ;
     }
-    mdriver.init(connect, topic);
+    mdriver.init(driverProperties, connect, topic);
     return mdriver ;
   }
 }

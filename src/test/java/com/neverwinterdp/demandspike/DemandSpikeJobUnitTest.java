@@ -7,6 +7,7 @@ import java.util.Map;
 import org.junit.Test;
 
 import com.beust.jcommander.JCommander;
+import com.neverwinterdp.queuengin.kafka.SimplePartitioner;
 import com.neverwinterdp.util.monitor.ApplicationMonitor;
 
 public class DemandSpikeJobUnitTest {
@@ -15,15 +16,19 @@ public class DemandSpikeJobUnitTest {
     ApplicationMonitor appMonitor = new ApplicationMonitor() ;
     String[] args = {
       "--type", "normal",
+      "--driver", "dummy",
+      "--driver:serializer.class=kafka.serializer.StringEncoder",
+      "--driver:partitioner.class=" + SimplePartitioner.class.getName(),
+      "--driver:request.required.acks=1",
       "--max-duration", "500", "--num-of-task", "3", "--max-num-of-message", "3",
 
-      "-Problem:kafka.description=kafka server randomly on/off",
-      "-Problem:kafka.problem=service-failure",
-      "-Problem:kafka.member-role=kafka",
-      "-Problem:kafka.module=kafka",
-      "-Problem:kafka.service-id=KafkaClusterService",
-      "-Problem:kafka.period=3000",
-      "-Problem:kafka.failure-time=1000",
+      "--problem:kafka.description=kafka server randomly on/off",
+      "--problem:kafka.problem=service-failure",
+      "--problem:kafka.member-role=kafka",
+      "--problem:kafka.module=kafka",
+      "--problem:kafka.service-id=KafkaClusterService",
+      "--problem:kafka.period=3000",
+      "--problem:kafka.failure-time=1000",
     };
     DemandSpikeJob job = new DemandSpikeJob() ;
     new JCommander(job, args) ;

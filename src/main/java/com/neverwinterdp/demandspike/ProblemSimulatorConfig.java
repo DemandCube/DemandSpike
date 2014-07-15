@@ -10,7 +10,7 @@ import com.beust.jcommander.JCommander;
 import com.neverwinterdp.server.gateway.CommandParams;
 
 public class ProblemSimulatorConfig implements Serializable {
-  @DynamicParameter(names = "-Problem:", description = "Problem properties")
+  @DynamicParameter(names = "--problem:", description = "Problem properties")
   Map<String, String> problemProperties = new HashMap<String, String>();
   
   private Map<String, ProblemSimulator> simulators ;
