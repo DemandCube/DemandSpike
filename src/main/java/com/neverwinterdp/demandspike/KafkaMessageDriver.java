@@ -17,11 +17,17 @@ public class KafkaMessageDriver implements MessageDriver {
     this.appMonitor = appMonitor ;
   }
   
-  public void init(List<String> connect, String topic) {
+  public void init(List<String> connect, String topic, MessageDriverConfig messageDriverConfig) {
     this.topic = topic ;
     String connectUrls = StringUtil.join(connect, ",") ;
     ComponentMonitor monitor = appMonitor.createComponentMonitor(KafkaMessageProducer.class) ;
-    producer = new KafkaMessageProducer(monitor, connectUrls) ;
+    producer = new KafkaMessageProducer(monitor, connectUrls,
+    		    messageDriverConfig.getRequiredAcks(),messageDriverConfig.getCompressionCodec(), 
+    		    messageDriverConfig.getSendBufferBytes(), messageDriverConfig.getProducerType(),
+    		    messageDriverConfig.getBatchNumMessages(), messageDriverConfig.getEnqueueTimeout(),
+    		    messageDriverConfig.getClientId(), messageDriverConfig.getRequestTimeout(),
+    		    messageDriverConfig.getSendMaxRetries(), messageDriverConfig.getRetryBackoff()) ;
+
   }
   
   public void send(Message message) throws Exception {

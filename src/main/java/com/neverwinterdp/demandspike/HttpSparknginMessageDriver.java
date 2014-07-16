@@ -19,7 +19,7 @@ public class HttpSparknginMessageDriver implements MessageDriver {
     driverMonitor   = appMonitor.createComponentMonitor(HttpSparknginMessageDriver.class) ;
   }
   
-  public void init(List<String> connect, String topic) {
+  public void init(List<String> connect, String topic, MessageDriverConfig messageDriverConfig) {
     this.topic = topic ;
     try {
       for(String selConnect : connect) {

@@ -26,15 +26,14 @@ public class DemandSpikeAppContainerUnitTest extends AbstractMiniClusterUnitTest
     shell = clusterBuilder.shell ;
     
     miniYarnCluster = createMiniYARNCluster(1);
-    Thread.sleep(1000);
+    Thread.sleep(5000);
     Configuration conf = miniYarnCluster.getConfig() ;
   }
 
   @AfterClass
   static public void teardown() throws Exception {
     miniYarnCluster.stop();
-    miniYarnCluster.close();
-    
+    miniYarnCluster.close();  
     clusterBuilder.destroy() ;
   }
 
@@ -51,7 +50,17 @@ public class DemandSpikeAppContainerUnitTest extends AbstractMiniClusterUnitTest
       "--conf:demandspike.job.driver=kafka",
       "--conf:demandspike.job.topic=" + DemandSpikeClusterBuilder.TOPIC ,
       "--conf:demandspike.job.broker-connect=" + clusterBuilder.getKafkaConnect(),
-      "--conf:demandspike.job.max-duration=15000"
+      "--conf:demandspike.job.max-duration=25000",
+      "--conf:demandspike.job.requiredAcks=1",
+      "--conf:demandspike.job.compressionCodec=snappy",
+      "--conf:demandspike.job.sendBufferBytes=65536",
+      "--conf:demandspike.job.producerType=async",
+      "--conf:demandspike.job.batchNumMessages=200",
+      "--conf:demandspike.job.enqueueTimeout=-1",
+      "--conf:demandspike.job.clientId=producer",
+      "--conf:demandspike.job.requestTimeout=6000",
+      "--conf:demandspike.job.sendMaxRetries=3",
+      "--conf:demandspike.job.retryBackoff=300"
     } ;
     
     AppClient appClient = new AppClient() ;

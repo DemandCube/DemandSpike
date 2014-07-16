@@ -129,7 +129,7 @@ function submitDemandSpikeJob(profile) {
     "driver": "kafka", "broker-connect": kafkaConnect, "topic": "metrics.consumer", 
     "num-of-task": 2,  "num-of-thread": 2, "message-size": profile.messageSize,
     "member-role": "demandspike", "max-duration": profile.maxDuration, "max-num-of-message": 3000000,
-    "requiredAcks": 1, "compressionCodec" : 1, "sendBufferBytes" : 65536, "producerType": "async",
+    "messageSendGap" : 0, "requiredAcks": 1, "compressionCodec" : 1, "sendBufferBytes" : 65536, "producerType": "async",
     "batchNumMessages": 200, "enqueueTimeout": -1, "clientId": "producer1",
     "requestTimeout": 6000, "sendMaxRetries": 3, "retryBackoff": 300,
   };
