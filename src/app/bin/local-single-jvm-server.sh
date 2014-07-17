@@ -31,6 +31,8 @@ function runServer {
 
 startServer \
   -Pgeneric:server.name=generic -Pgeneric:server.roles=generic  \
+  -Pelasticsearch1:server.name=elasticsearch1 -Pgeneric:server.roles=elasticsearch  \
+  -Pelasticsearch2:server.name=elasticsearch2 -Pgeneric:server.roles=elasticsearch  \
   -Pzookeeper1:server.name=zookeeper1 -Pzookeeper1:server.roles=zookeeper \
   -Pkafka1:server.name=kafka1 -Pkafka1:server.roles=kafka \
   -Pkafka2:server.name=kafka2 -Pkafka2:server.roles=kafka \

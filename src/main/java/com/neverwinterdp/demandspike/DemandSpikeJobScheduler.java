@@ -1,18 +1,24 @@
 package com.neverwinterdp.demandspike;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import com.neverwinterdp.server.gateway.ClusterGateway;
 import com.neverwinterdp.util.monitor.ApplicationMonitor;
 
 public class DemandSpikeJobScheduler {
+  private AtomicLong idTracker = new AtomicLong() ;
   private ApplicationMonitor appMonitor ;
   private BlockingQueue<DemandSpikeJob> jobQueue = new LinkedBlockingQueue<DemandSpikeJob>() ;
+  private DemandSpikeJob  runningJob = null ;
   private JobSchedulerThread schedulerThread; 
 
   public DemandSpikeJobScheduler(ApplicationMonitor appMonitor) {
@@ -20,7 +26,24 @@ public class DemandSpikeJobScheduler {
   }
   
   public boolean submit(DemandSpikeJob job, long timeout) throws InterruptedException {
+    job.setId(idTracker.incrementAndGet());
     return jobQueue.offer(job, timeout, TimeUnit.MILLISECONDS) ;
+  }
+  
+  public List<DemandSpikeJob> getWaittingJobs() {
+    List<DemandSpikeJob> holder = new ArrayList<DemandSpikeJob>() ;
+    Iterator<DemandSpikeJob> i = jobQueue.iterator() ;
+    while(i.hasNext()) holder.add(i.next()) ;
+    return holder ;
+  }
+  
+  public DemandSpikeJob getRunningJob() { return this.runningJob  ; }
+  
+  public DemandSpikeJobSchedulerInfo getInfo() {
+    DemandSpikeJobSchedulerInfo info = new DemandSpikeJobSchedulerInfo() ;
+    info.setRunningJob(getRunningJob());
+    info.setWaittingJobs(getWaittingJobs());
+    return info ;
   }
   
   public void start() {
@@ -40,11 +63,13 @@ public class DemandSpikeJobScheduler {
       DemandSpikeJob job = null ;
       try {
         while((job = jobQueue.take()) != null) {
+          runningJob = job ;
           jobRunner = new JobRunner(job) ;
           jobRunner.start(); 
           while(jobRunner.isAlive()) {
             Thread.sleep(100);
           }
+          runningJob = null;
         }
       } catch (InterruptedException e) {
         if(jobRunner != null) jobRunner.interrupt();

@@ -32,6 +32,8 @@ public class DemandSpikeJob implements Serializable {
   @ParametersDelegate
   final public MemberSelector memberSelector = new MemberSelector();
   
+  private long id ;
+  
   public DemandSpikeJob() {
   }
   
@@ -54,6 +56,9 @@ public class DemandSpikeJob implements Serializable {
     String[] args = holder.toArray(new String[holder.size()]) ;
     new JCommander(this, args) ;
   }
+  
+  public long getId() { return this.id ; }
+  public void setId(long id) { this.id = id ; }
   
   public DemandSpikeTask[] createTasks(ApplicationMonitor appMonitor) {
     DemandSpikeTask[] task = new DemandSpikeTask[numOfTask] ;

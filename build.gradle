@@ -40,6 +40,9 @@ dependencies {
   compile group: 'com.neverwinterdp', name: 'commons.cluster', version: '1.0-SNAPSHOT', classifier: 'js'
   compile group: 'com.neverwinterdp', name: 'commons.cluster', version: '1.0-SNAPSHOT', classifier: 'webapp'
   compile group: 'com.neverwinterdp', name: 'commons.hadoop-framework', version: '1.0-SNAPSHOT'
+
+  compile group: 'com.neverwinterdp', name: 'commons.elasticsearch', version: '1.0-SNAPSHOT'
+
   testCompile group: 'com.neverwinterdp', name: 'commons.hadoop-framework', version: '1.0-SNAPSHOT', classifier: 'tests'
 
   compile group: 'com.neverwinterdp', name: 'queuengin', version: '1.0-SNAPSHOT'
@@ -84,6 +87,8 @@ def doRelease(String releaseDir) {
 
   def dependencyJars = [ 
     "commons.utils", "commons.api", "commons.cluster","commons.netty", "commons.hadoop-framework", "queuengin", "sparkngin",
+    "commons.elasticsearch",
+
     "jackson-core-2.2.2", "jackson-databind", "jackson-annotations", "jcommander", "reflections", "guava", "javassist",
     'guice', 'javax.inject', 'hazelcast', 'aopalliance',
     "kafka", "scala-library",
@@ -93,6 +98,8 @@ def doRelease(String releaseDir) {
     "hadoop-common", "hadoop-hdfs", "hadoop-auth", 
     "hadoop-yarn-api", "hadoop-yarn-common", "hadoop-yarn-client",
     "protobuf",
+
+    "elasticsearch", "lucene",
     
     "metrics-core", "metrics-json", "metrics-annotation",
     "commons-collections", "commons-configuration","commons-lang", "commons-cli",

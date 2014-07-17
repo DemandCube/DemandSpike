@@ -74,6 +74,7 @@ public class DemandSpikeServiceUnitTest {
       "  -Problem:kafka.period=10000" +
       "  -Problem:kafka.failure-time=1000"
     );
+    
     Thread.sleep(30000);
     shell.execute(
       "server metric --filter * " 

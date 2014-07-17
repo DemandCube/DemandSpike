@@ -28,6 +28,10 @@ public class DemandSpikeClusterService extends AbstractService {
     return jobScheduler.submit(job, timeout) ;
   }
 
+  public DemandSpikeJobSchedulerInfo getSchedulerInfo() {
+    return jobScheduler.getInfo() ;
+  }
+  
   public void start() throws Exception {
     logger.info("Start start()");
     jobScheduler = new DemandSpikeJobScheduler(appMonitor) ;
