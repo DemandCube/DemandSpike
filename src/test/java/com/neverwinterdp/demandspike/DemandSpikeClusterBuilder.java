@@ -2,7 +2,6 @@ package com.neverwinterdp.demandspike;
 
 import com.neverwinterdp.server.Server;
 import com.neverwinterdp.server.gateway.ClusterGateway;
-import com.neverwinterdp.server.gateway.CommandParams;
 import com.neverwinterdp.server.shell.Shell;
 import com.neverwinterdp.sparkngin.http.NullDevMessageForwarder;
 import com.neverwinterdp.util.FileUtil;
@@ -62,53 +61,41 @@ public class DemandSpikeClusterBuilder {
   }
  
   public void install() throws Exception {
-    gateway.module.execute(
-        "install", 
-        new CommandParams().
-          field("member-role", "zookeeper").
-          field("autostart", true).
-          field("module", new String[] { "Zookeeper" }).
-          field("-Pmodule.data.drop", "true")
+    gateway.execute(
+      "module install --member-role zookeeper -Pmodule.data.drop=true --autostart --module Zookeeper"
     ) ;
 
     String kafkaReplication = kafkaServer.length >= 2 ? "2" : "1" ;
     for(int i  = 0; i < kafkaServer.length; i++) {
       int id = i + 1;
-      gateway.module.execute(
-          "install", 
-          new CommandParams().
-            field("member-name", "kafka" + id).
-            field("autostart", true).
-            field("module", new String[] { "Kafka" }).
-            field("-Pmodule.data.drop", "true").
-            field("-Pkafka:broker.id", Integer.toString(id)).
-            field("-Pkafka:port", Integer.toString(9092 + i)).
-            field("-Pkafka:zookeeper.connect", "127.0.0.1:2181").
-            field("-Pkafka:default.replication.factor", kafkaReplication).
-            field("-Pkafka:controller.socket.timeout.ms", "90000").
-            field("-Pkafka:controlled.shutdown.enable", "true"). 
-            field("-Pkafka:controlled.shutdown.max.retries", "3").
-            field("-Pkafka:controlled.shutdown.retry.backoff.ms", "60000")
+      gateway.execute(
+          "module install "+ 
+          "  --member-name kafka" + id +
+          "  --autostart" +
+          "  --module Kafka" +
+          "  -Pmodule.data.drop=true" +
+          "  -Pkafka:broker.id=" + Integer.toString(id) +
+          "  -Pkafka:port=" + Integer.toString(9092 + i) +
+          "  -Pkafka:zookeeper.connect=127.0.0.1:2181" +
+          "  -Pkafka:default.replication.factor=" + kafkaReplication +
+          "  -Pkafka:controller.socket.timeout.ms=90000" +
+          "  -Pkafka:controlled.shutdown.enable=true" + 
+          "  -Pkafka:controlled.shutdown.max.retries=3" +
+          "  -Pkafka:controlled.shutdown.retry.backoff.ms=60000"
       ) ;
     }
 
-    gateway.module.execute(
-        "install", 
-        new CommandParams().
-          field("member-role", "sparkngin").
-          field("autostart", true).
-          field("module", new String[] { "Sparkngin" }).
-          field("-Pmodule.data.drop", "true").
-          field("-Phttp-listen-port", "8181").
-          field("-Pforwarder-class",NullDevMessageForwarder.class.getName())
+    gateway.execute(
+        "module install" +
+        "  --member-role sparkngin" +
+        "  --autostart --module Sparkngin" +
+        "  -Pmodule.data.drop=true" +
+        "  -Phttp-listen-port=8181" +
+        "  -Pforwarder-class=" + NullDevMessageForwarder.class.getName()
     ) ;
     
-    gateway.module.execute(
-        "install", 
-        new CommandParams().
-          field("member-role", "demandspike").
-          field("autostart", true).
-          field("module", new String[] { "DemandSpike" })
+    gateway.execute(
+      "module install --member-role demandspike --autostart --module DemandSpike"
     ) ;
          ;
     shell.execute("server registration");

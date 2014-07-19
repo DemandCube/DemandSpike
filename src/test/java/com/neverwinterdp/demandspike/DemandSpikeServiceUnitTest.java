@@ -52,9 +52,7 @@ public class DemandSpikeServiceUnitTest {
       "  --member-role demandspike --max-duration 5000 --max-num-of-message 100000"
     );
     Thread.sleep(10000);
-    shell.execute(
-      "server metric --filter * " 
-    );
+    shell.execute("server metric --filter * ");
     clusterBuilder.uninstall();
   }
   

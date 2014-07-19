@@ -38,7 +38,6 @@ dependencies {
   compile group: 'com.neverwinterdp', name: 'commons.api', version: '1.0-SNAPSHOT'
   compile group: 'com.neverwinterdp', name: 'commons.cluster', version: '1.0-SNAPSHOT'
   compile group: 'com.neverwinterdp', name: 'commons.cluster', version: '1.0-SNAPSHOT', classifier: 'js'
-  compile group: 'com.neverwinterdp', name: 'commons.cluster', version: '1.0-SNAPSHOT', classifier: 'webapp'
   compile group: 'com.neverwinterdp', name: 'commons.hadoop-framework', version: '1.0-SNAPSHOT'
 
   compile group: 'com.neverwinterdp', name: 'commons.elasticsearch', version: '1.0-SNAPSHOT'
@@ -109,18 +108,10 @@ def doRelease(String releaseDir) {
   println "Copy the dependency library"
   configurations.compile.each { File file -> 
     if(isIn(dependencyJars, file)) {
-      if(file.name.indexOf("webapp") > 0) { 
-        println "  Extract $file.name to DemandSpike/webapp"
-        copy {
-          from zipTree(file)
-          into "${releaseDir}/webapp"
-        }
-      } else {
-        println "  Copy $file.name to DemandSpike/libs"
-        copy {
-          from file
+      println "  Copy $file.name to DemandSpike/libs"
+      copy {
+        from file
           into "${releaseDir}/libs"
-        }
       }
     } else {
       //println "Ignore $file.name "

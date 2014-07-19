@@ -29,17 +29,10 @@ function runServer {
   $JAVACMD -Djava.ext.dirs=$APP_DIR/libs $JAVA_OPTS $APP_OPT $LOG_OPT $MAIN_CLASS "$@"
 }
 
-startServer -Pserver.name=generic -Pserver.roles=generic
-
-startServer -Pserver.name=elasticsearch1 -Pserver.roles=elasticsearch
-startServer -Pserver.name=elasticsearch2 -Pserver.roles=elasticsearch
-
 startServer -Pserver.name=zookeeper1 -Pserver.roles=zookeeper
 
-startServer -Pserver.name=kafka1 -Pserver.roles=kafka
-startServer -Pserver.name=kafka2 -Pserver.roles=kafka
-startServer -Pserver.name=kafka3 -Pserver.roles=kafka
+startServer -Pserver.name=kafka -Pserver.roles=kafka
 
 startServer -Pserver.name=sparkngin1 -Pserver.roles=sparkngin
 
-startServer -Pserver.name=demandspike1 -Pserver.roles=demandspike
+startServer -Pserver.name=demandspike -Pserver.roles=demandspike
