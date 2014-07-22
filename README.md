@@ -48,7 +48,7 @@ cd build/release/DemandSpike/bin
 # check the status
 ./shell.sh -c server ping 
 # launch the batch script test
-./shell.sh -f  hello-demandspike.csh  , 
+./shell.sh -f  hello-demandspike.csh
 
 #To kill the servers
 ./bin/shell.sh -c server exit
