@@ -43,9 +43,12 @@ gradle clean build release
 # Run Job in Standalone mode
 ```
 cd build/release/DemandSpike/bin
-./server.sh  to launch the server
-./shell.sh -c server ping to check the status
-./shell.sh -f  hello-demandspike.csh to launch the batch script test , 
+# launch the server
+./server.sh 
+# check the status
+./shell.sh -c server ping 
+# launch the batch script test
+./shell.sh -f  hello-demandspike.csh  , 
 
 #To kill the servers
 ./bin/shell.sh -c server exit
