@@ -74,8 +74,8 @@ public class DemandSpikeClusterBuilder {
           "  --autostart" +
           "  --module Kafka" +
           "  -Pmodule.data.drop=true" +
-          "  -Pkafka:broker.id=" + Integer.toString(id) +
-          "  -Pkafka:port=" + Integer.toString(9092 + i) +
+          "  -Pkafka:broker.id=" + id +
+          "  -Pkafka:port=" + (9092 + i) +
           "  -Pkafka:zookeeper.connect=127.0.0.1:2181" +
           "  -Pkafka:default.replication.factor=" + kafkaReplication +
           "  -Pkafka:controller.socket.timeout.ms=90000" +

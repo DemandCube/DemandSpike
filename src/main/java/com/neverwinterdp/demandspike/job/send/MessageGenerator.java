@@ -1,4 +1,4 @@
-package com.neverwinterdp.demandspike;
+package com.neverwinterdp.demandspike.job.send;
 
 import com.neverwinterdp.message.Message;
 

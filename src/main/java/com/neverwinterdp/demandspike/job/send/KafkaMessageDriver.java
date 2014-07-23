@@ -1,4 +1,4 @@
-package com.neverwinterdp.demandspike;
+package com.neverwinterdp.demandspike.job.send;
 
 import java.util.List;
 import java.util.Map;

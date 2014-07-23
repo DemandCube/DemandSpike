@@ -1,14 +1,15 @@
-package com.neverwinterdp.demandspike;
+package com.neverwinterdp.demandspike.job;
 
 import org.slf4j.Logger;
 
 import com.google.inject.Inject;
+import com.neverwinterdp.demandspike.job.config.DemandSpikeJob;
 import com.neverwinterdp.server.module.ModuleProperties;
 import com.neverwinterdp.server.service.AbstractService;
 import com.neverwinterdp.util.LoggerFactory;
 import com.neverwinterdp.util.monitor.ApplicationMonitor;
 
-public class DemandSpikeClusterService extends AbstractService {
+public class DemandSpikeJobService extends AbstractService {
   private Logger logger ;
   
   @Inject

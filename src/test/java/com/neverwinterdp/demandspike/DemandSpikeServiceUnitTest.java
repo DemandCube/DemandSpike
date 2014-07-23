@@ -45,13 +45,14 @@ public class DemandSpikeServiceUnitTest {
   public void testKafka() throws Exception {
     clusterBuilder.install() ; 
     Thread.sleep(3000);
+    
     shell.execute(
       "demandspike submit " + 
       "  --driver kafka --driver:request.required.acks=1" + 
       "  --broker-connect " +  clusterBuilder.getKafkaConnect() + " --topic " + TOPIC +
       "  --member-role demandspike --max-duration 5000 --max-num-of-message 100000"
     );
-    Thread.sleep(10000);
+    Thread.sleep(7000);
     shell.execute("server metric --filter * ");
     clusterBuilder.uninstall();
   }

@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.neverwinterdp.demandspike.DemandSpikeJob;
-import com.neverwinterdp.demandspike.DemandSpikeTask;
+import com.neverwinterdp.demandspike.job.send.MessageSenderTask;
 import com.neverwinterdp.hadoop.yarn.app.AppContainer;
 import com.neverwinterdp.hadoop.yarn.app.AppWorker;
 import com.neverwinterdp.util.monitor.ApplicationMonitor;
@@ -15,7 +15,7 @@ public class DemandSpikeWorker implements AppWorker {
   public void run(AppContainer appContainer) throws Exception {
     ApplicationMonitor appMonitor = new ApplicationMonitor() ;
     DemandSpikeJob job = new DemandSpikeJob(appContainer.getConfig().conf) ;
-    DemandSpikeTask task = job.taskConfig.createTask(appMonitor, "DemandSpikeTask") ;
+    MessageSenderTask task = job.messageSenderConfig.createMessageSender(appMonitor, "DemandSpikeTask") ;
     task.setLogger(LOGGER);
     task.run() ; 
     System.out.println(appMonitor.toJSON());

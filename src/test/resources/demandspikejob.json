@@ -1,0 +1,23 @@
+{
+  "id":   "1",
+  "description": "Sample DemandSpike job",
+
+  "tasks": [
+    {
+      "description": "clean metric task",
+      "command":     "server metric-clear --expression *"
+    },
+    {
+      "description": "send by the dummy driver",
+      "command":     "demandspike:job send --max-num-of-message 1000"
+    },
+    {
+      "description": "Run service failure simulation",
+      "command":     "demandspike:job simulation --name service-failure --target-member-role kafka --module Kafka --service-id KafkaClusterService --delay 3000 --period 5000 --failure-time 1000"
+    },
+    {
+      "description": "send by the kafka driver",
+      "command":     "demandspike:job send --driver kafka --broker-connect 127.0.0.1:9092 --topic metrics.consumer --max-num-of-message 1000"
+    }
+  ]
+}

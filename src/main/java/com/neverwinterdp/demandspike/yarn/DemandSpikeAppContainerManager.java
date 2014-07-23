@@ -29,16 +29,16 @@ public class DemandSpikeAppContainerManager implements ContainerManager {
     int instanceMemory  = conf.getInt("demandspike.instance.memory", 128) ;
     int instanceCores   = conf.getInt("demandspike.instance.core", 1) ;
     DemandSpikeJob job = new DemandSpikeJob(appMaster.getConfig().conf) ;
-    for (int i = 0; i < job.numOfTask; i++) {
+    for (int i = 0; i < job.messageSenderConfig.numOfTasks; i++) {
       ContainerRequest containerReq = 
           appMaster.createContainerRequest(0/*priority*/, instanceCores, instanceMemory);
       appMaster.add(containerReq) ;
     }
     try {
       int allocatedContainer = 0 ;
-      while(allocatedContainer < job.numOfTask) {
+      while(allocatedContainer < job.messageSenderConfig.numOfTasks) {
         Thread.sleep(1000);
-        AllocateResponse response = appMaster.getAMRMClient().allocate((float)allocatedContainer/job.numOfTask);
+        AllocateResponse response = appMaster.getAMRMClient().allocate((float)allocatedContainer/job.messageSenderConfig.numOfTasks);
         Resource resource = response.getAvailableResources() ;
         LOGGER.info("getAllocatedContainers() Avaiable Cores: " + resource.getVirtualCores());
         LOGGER.info("getAllocatedContainers() Avaiable Memory: " + resource.getMemory());

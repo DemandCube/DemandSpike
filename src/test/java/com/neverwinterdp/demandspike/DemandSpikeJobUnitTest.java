@@ -1,12 +1,15 @@
 package com.neverwinterdp.demandspike;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Map;
 
 import org.junit.Test;
 
 import com.beust.jcommander.JCommander;
+import com.neverwinterdp.demandspike.job.send.MessageSenderTask;
 import com.neverwinterdp.queuengin.kafka.SimplePartitioner;
 import com.neverwinterdp.util.monitor.ApplicationMonitor;
 
@@ -15,7 +18,6 @@ public class DemandSpikeJobUnitTest {
   public void testNormalTask() throws Exception {
     ApplicationMonitor appMonitor = new ApplicationMonitor() ;
     String[] args = {
-      "--type", "normal",
       "--driver", "dummy",
       "--driver:serializer.class=kafka.serializer.StringEncoder",
       "--driver:partitioner.class=" + SimplePartitioner.class.getName(),
@@ -33,8 +35,7 @@ public class DemandSpikeJobUnitTest {
     DemandSpikeJob job = new DemandSpikeJob() ;
     new JCommander(job, args) ;
     
-    DemandSpikeTask[] task = job.createTasks(appMonitor) ;
-    assertTrue(task[0] instanceof NormalTask) ;
+    MessageSenderTask[] task = job.createTasks(appMonitor) ;
     assertEquals(3, task.length) ;
     task[0].run() ;
     
@@ -53,14 +54,12 @@ public class DemandSpikeJobUnitTest {
   public void testPeriodicTask() {
     ApplicationMonitor appMonitor = new ApplicationMonitor() ;
     String[] args = {
-      "--type", "periodic",
-      "--max-duration", "500", "--num-of-task", "3", "--max-num-of-message", "30"
+      "--max-duration", "500", "--num-of-task", "3", "--max-num-of-message", "30", "--send-period", "100"
     };
     DemandSpikeJob job = new DemandSpikeJob() ;
     new JCommander(job, args) ;
     
-    DemandSpikeTask[] task = job.createTasks(appMonitor) ;
-    assertTrue(task[0] instanceof PeriodicTask) ;
+    MessageSenderTask[] task = job.createTasks(appMonitor) ;
     assertEquals(3, task.length) ;
     task[0].run() ;
   }

@@ -1,24 +1,25 @@
-package com.neverwinterdp.demandspike;
+package com.neverwinterdp.demandspike.job;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.neverwinterdp.demandspike.job.send.MessageSenderTask;
-import com.neverwinterdp.server.gateway.ClusterGateway;
+import com.neverwinterdp.demandspike.job.config.DemandSpikeJob;
+import com.neverwinterdp.demandspike.job.config.DemandSpikeTask;
+import com.neverwinterdp.server.shell.Shell;
 import com.neverwinterdp.util.monitor.ApplicationMonitor;
 
 public class DemandSpikeJobScheduler {
   private AtomicLong idTracker = new AtomicLong() ;
   private ApplicationMonitor appMonitor ;
   private BlockingQueue<DemandSpikeJob> jobQueue = new LinkedBlockingQueue<DemandSpikeJob>() ;
+  private Map<String, DemandSpikeJob> finishedJobs = new LinkedHashMap<String, DemandSpikeJob>() ;
   private DemandSpikeJob  runningJob = null ;
   private JobSchedulerThread schedulerThread; 
 
@@ -27,7 +28,9 @@ public class DemandSpikeJobScheduler {
   }
   
   public boolean submit(DemandSpikeJob job, long timeout) throws InterruptedException {
-    job.setId(idTracker.incrementAndGet());
+    if(job.getId() == null) {
+      job.setId(Long.toString(idTracker.incrementAndGet()));
+    }
     return jobQueue.offer(job, timeout, TimeUnit.MILLISECONDS) ;
   }
   
@@ -38,12 +41,20 @@ public class DemandSpikeJobScheduler {
     return holder ;
   }
   
+  public List<DemandSpikeJob> getfinishedJobs() {
+    List<DemandSpikeJob> holder = new ArrayList<DemandSpikeJob>() ;
+    Iterator<DemandSpikeJob> i = finishedJobs.values().iterator() ;
+    while(i.hasNext()) holder.add(i.next()) ;
+    return holder ;
+  }
+  
   public DemandSpikeJob getRunningJob() { return this.runningJob  ; }
   
   public DemandSpikeJobSchedulerInfo getInfo() {
     DemandSpikeJobSchedulerInfo info = new DemandSpikeJobSchedulerInfo() ;
     info.setRunningJob(getRunningJob());
     info.setWaittingJobs(getWaittingJobs());
+    info.setFinishedJobs(getfinishedJobs());
     return info ;
   }
   
@@ -60,16 +71,17 @@ public class DemandSpikeJobScheduler {
   
   public class JobSchedulerThread extends Thread {
     public void run() {
-      JobRunner jobRunner = null ;
+      DemandSpikeJobRunner jobRunner = null ;
       DemandSpikeJob job = null ;
       try {
         while((job = jobQueue.take()) != null) {
           runningJob = job ;
-          jobRunner = new JobRunner(job) ;
+          jobRunner = new DemandSpikeJobRunner(job) ;
           jobRunner.start(); 
           while(jobRunner.isAlive()) {
             Thread.sleep(100);
           }
+          finishedJobs.put(runningJob.getId(), runningJob) ;
           runningJob = null;
         }
       } catch (InterruptedException e) {
@@ -78,49 +90,29 @@ public class DemandSpikeJobScheduler {
     }
   }
   
-  public class JobRunner extends Thread {
+  public class DemandSpikeJobRunner extends Thread {
     DemandSpikeJob job ;
     
-    public JobRunner(DemandSpikeJob job) {
+    public DemandSpikeJobRunner(DemandSpikeJob job) {
       this.job = job ;
     }
     
     public void run() {
-      ExecutorService taskExecutor = null ;
-      Map<String, ProblemSimulator> simulators = null ;
-      ClusterGateway cluster = new ClusterGateway() ;
+      Shell shell = new Shell() ;
       try {
-        cluster.connect();
-        simulators = job.problemConfig.getProblemSimulators() ;
-        for(ProblemSimulator simulator : simulators.values()) {
-          simulator.onInit(cluster);
-          simulator.start();
+        shell.getShellContext().connect();
+        List<DemandSpikeTask> tasks = job.getTasks() ;
+        StringBuilder consoleOutput = new StringBuilder() ;
+        for(DemandSpikeTask task : tasks) {
+          shell.execute(task.getCommand());
+          consoleOutput.append(shell.getShellContext().console().getTextOutput()).append("\n\n") ;
         }
-        
-        taskExecutor = Executors.newFixedThreadPool(job.messageSenderConfig.numOfProcesses);
-        MessageSenderTask[] task = job.createTasks(appMonitor) ;
-        for(int i = 0; i < task.length; i++) {
-          taskExecutor.submit(task[i]) ;
-        }
-        taskExecutor.shutdown();
-        boolean terminated = taskExecutor.awaitTermination(job.messageSenderConfig.maxDuration, TimeUnit.MILLISECONDS);
-        if(!terminated) {
-          taskExecutor.shutdownNow() ;
-        }
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      } catch(Exception ex) {
-        ex.printStackTrace(); 
+        job.setOutputAttribute("consoleOutput", consoleOutput.toString());
+      } catch(Throwable t) {
+        job.setOutputAttribute("error", t);
+        t.printStackTrace(); 
       } finally {
-        if(simulators != null) {
-          for(ProblemSimulator simulator : simulators.values()) {
-            simulator.stop();
-          }
-        }
-        if(taskExecutor != null) {
-          taskExecutor.shutdownNow() ;
-        }
-        cluster.close() ;
+        shell.close() ;
       }
     }
   }

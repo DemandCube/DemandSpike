@@ -29,7 +29,7 @@ public class AsyncDemandSpikeAppContainerManager implements ContainerManager {
     int instanceMemory  = conf.getInt("demandspike.instance.memory", 128) ;
     int instanceCores   = conf.getInt("demandspike.instance.core", 1) ;
     demandspikeJob = new DemandSpikeJob(appMaster.getConfig().conf) ;
-    for (int i = 0; i < demandspikeJob.numOfTask; i++) {
+    for (int i = 0; i < demandspikeJob.messageSenderConfig.numOfTasks; i++) {
       ContainerRequest containerReq = 
           appMaster.createContainerRequest(0/*priority*/, instanceCores, instanceMemory);
       appMaster.add(containerReq) ;
@@ -53,7 +53,7 @@ public class AsyncDemandSpikeAppContainerManager implements ContainerManager {
     try {
       AppMonitor monitor = master.getAppMonitor() ;
       int complete = monitor.getCompletedContainerCount().intValue() ;
-      master.getAMRMClient().allocate(complete/(float)demandspikeJob.numOfTask) ;
+      master.getAMRMClient().allocate(complete/(float)demandspikeJob.messageSenderConfig.numOfTasks) ;
     } catch (Exception e) {
       LOGGER.error("onCompleteContainer() report error", e);
     }
@@ -74,7 +74,7 @@ public class AsyncDemandSpikeAppContainerManager implements ContainerManager {
         } 
         AppMonitor monitor = appMaster.getAppMonitor() ;
         ContainerInfo[] cinfos = monitor.getContainerInfos() ;
-        if(cinfos.length < demandspikeJob.numOfTask)  continue ;
+        if(cinfos.length < demandspikeJob.messageSenderConfig.numOfTasks)  continue ;
         finished = true; 
         for(ContainerInfo sel : cinfos) {
           if(!sel.getProgressStatus().getContainerState().equals(ContainerState.FINISHED)) {

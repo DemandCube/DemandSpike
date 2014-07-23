@@ -1,4 +1,4 @@
-package com.neverwinterdp.demandspike;
+package com.neverwinterdp.demandspike.job.send;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -43,7 +43,7 @@ public class MessageDriverConfig implements Serializable {
     } else if("sparkngin".equals(driver)) {
         mdriver = new HttpSparknginMessageDriver(appMonitor) ;
     } else {
-      mdriver = new DummyMessageDriver() ;
+      mdriver = new DummyMessageDriver(appMonitor) ;
     }
     mdriver.init(driverProperties, connect, topic);
     return mdriver ;
