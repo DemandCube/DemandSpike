@@ -67,7 +67,9 @@ public class ServiceFailureSimulator extends TimerTask {
       System.out.println("ServiceFailureSimulator: stop " + serviceId + "!!!");
       System.out.println(JSONSerializer.INSTANCE.toString(stopResult)) ;
       if(stopResult.hasError()) this.cancel() ;
+      
       Thread.sleep(faillureTime);
+      
       ServiceCommands.Start start = new ServiceCommands.Start() ;
       start.setTargetService(module, serviceId);
       ServiceCommandResult<ServiceRegistration> startResult = client.execute(start, member) ;

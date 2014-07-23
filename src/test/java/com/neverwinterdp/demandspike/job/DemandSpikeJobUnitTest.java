@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import com.neverwinterdp.demandspike.DemandSpikeClusterBuilder;
 import com.neverwinterdp.server.shell.Shell;
+import com.neverwinterdp.util.IOUtil;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
@@ -30,7 +31,7 @@ public class DemandSpikeJobUnitTest {
   @Test
   public void testDemandSpikeJobCommands() throws Exception {
     clusterBuilder.install() ; 
-    Thread.sleep(3000);
+    Thread.sleep(10000);
     shell.execute("demandspike:job send --max-num-of-message 1000");
     shell.execute("demandspike:job send --driver kafka --broker-connect 127.0.0.1:9092 --topic metrics.consumer --max-num-of-message 1000");
     shell.execute(
@@ -43,9 +44,11 @@ public class DemandSpikeJobUnitTest {
   
   @Test
   public void testDemandSpikeJobService() throws Exception {
+    String json = IOUtil.getFileContentAsString("src/test/resources/demandspikejob.json") ;
     clusterBuilder.install() ; 
     Thread.sleep(3000);
-    shell.execute("demandspike submit --member-name demandspike --file src/test/resources/demandspikejob.json");
+    shell.execute("demandspike submit --member-name demandspike #{data " + json + " }#");
+    //shell.execute("demandspike submit --member-name demandspike --file src/test/resources/demandspikejob.json");
     Thread.sleep(10000);
     shell.execute("demandspike scheduler --member-name demandspike");
     clusterBuilder.uninstall();

@@ -28,9 +28,7 @@ public class DemandSpikeJobScheduler {
   }
   
   public boolean submit(DemandSpikeJob job, long timeout) throws InterruptedException {
-    if(job.getId() == null) {
-      job.setId(Long.toString(idTracker.incrementAndGet()));
-    }
+    job.setId(Long.toString(idTracker.incrementAndGet()));
     return jobQueue.offer(job, timeout, TimeUnit.MILLISECONDS) ;
   }
   

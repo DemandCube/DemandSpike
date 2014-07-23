@@ -18,7 +18,7 @@ public class DemandSpikeClusterBuilder {
   
   public static String TOPIC = "metrics.consumer" ;
   
-  public Server zkServer, sparknginServer, demandSpikeServer ;
+  public Server zkServer, sparknginServer, demandSpikeServer, genericServer ;
   public Server[] kafkaServer ;
   public Shell shell ;
   public ClusterGateway gateway ;
@@ -33,6 +33,7 @@ public class DemandSpikeClusterBuilder {
 
   public void start() throws Exception {
     FileUtil.removeIfExist("build/cluster", false);
+    genericServer = Server.create("-Pserver.name=generic", "-Pserver.roles=generic") ;
     zkServer = Server.create("-Pserver.name=zookeeper", "-Pserver.roles=zookeeper") ;
     
     for(int i  = 0; i < kafkaServer.length; i++) {
@@ -54,6 +55,7 @@ public class DemandSpikeClusterBuilder {
     shell.close();
     demandSpikeServer.destroy() ;
     sparknginServer.destroy() ;
+    genericServer.destroy() ; 
     for(int i  = 0; i < kafkaServer.length; i++) {
       kafkaServer[i].destroy() ;
     }
@@ -84,7 +86,9 @@ public class DemandSpikeClusterBuilder {
           "  -Pkafka:controlled.shutdown.retry.backoff.ms=60000"
       ) ;
     }
-
+    gateway.execute(
+        "module install --member-role generic -Pmodule.data.drop=true --autostart --module KafkaConsumer"
+    ) ;
     gateway.execute(
         "module install" +
         "  --member-role sparkngin" +
@@ -105,6 +109,7 @@ public class DemandSpikeClusterBuilder {
   public void uninstall() {
     shell.execute("module uninstall --member-role demandspike --timeout 20000 --module DemandSpike");
     shell.execute("module uninstall --member-role sparkngin --timeout 20000 --module Sparkngin");
+    shell.execute("module uninstall --member-role generic --timeout 20000 --module KafkaConsumer");
     shell.execute("module uninstall --member-role kafka --timeout 20000 --module Kafka");
     shell.execute("module uninstall --member-role zookeeper --timeout 20000 --module Zookeeper");
   }
