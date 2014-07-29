@@ -20,7 +20,7 @@ public class DemandSpikeJobCommand extends ShellCommand {
   }
   
   static public class SendCommand extends ShellSubCommand {
-    public void execute(ShellContext ctx, Command command) throws Exception {
+    public void execute(Shell shell, ShellContext ctx, Command command) throws Exception {
       MessageSenderConfig config = new MessageSenderConfig() ;
       command.mapAll(config);
       ApplicationMonitor appMonitor = new ApplicationMonitor() ;
@@ -39,7 +39,7 @@ public class DemandSpikeJobCommand extends ShellCommand {
     )
     private String name ;
     
-    public void execute(ShellContext ctx, Command command) throws Exception {
+    public void execute(Shell shell, ShellContext ctx, Command command) throws Exception {
       command.mapPartial(this);
       if("service-failure".equals(ServiceFailureSimulator.NAME)) {
         ServiceFailureSimulator simulator = new ServiceFailureSimulator(ctx.getClusterGateway()) ;

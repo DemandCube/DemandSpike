@@ -14,7 +14,7 @@ public class DemandSpikeCommand extends ShellCommand {
   }
   
   static public class SubmitCommand extends ShellSubCommand {
-    public void execute(ShellContext ctx, Command command) throws Exception {
+    public void execute(Shell shell, ShellContext ctx, Command command) throws Exception {
       ServiceCommandResult<Boolean>[] results = ctx.getClusterGateway().execute(command) ;
       
       ctx.console().header("Submit job");
@@ -37,7 +37,7 @@ public class DemandSpikeCommand extends ShellCommand {
   }
   
   static public class SchedulerCommand extends ShellSubCommand {
-    public void execute(ShellContext ctx, Command command) throws Exception {
+    public void execute(Shell shell, ShellContext ctx, Command command) throws Exception {
       ServiceCommandResult<DemandSpikeJobSchedulerInfo>[] results = ctx.getClusterGateway().execute(command) ;
       ctx.console().header("Get DemandSpike Scheduler Job");
       for(int i = 0; i < results.length; i++) {

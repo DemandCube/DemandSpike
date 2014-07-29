@@ -2,13 +2,14 @@ package com.neverwinterdp.demandspike.job.config;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class DemandSpikeJob implements Serializable {
   private String id ;
   private String description ;
-  private List<DemandSpikeTask> tasks ;
+  private String script ;
+  private Map<String, Object> scriptProperties = new HashMap<String, Object>();
+  
   private Map<String, Object> outputAttributes = new HashMap<String, Object>() ;
   
   public String getId() { return this.id ; }
@@ -19,9 +20,12 @@ public class DemandSpikeJob implements Serializable {
     this.description = description;
   }
   
-  public List<DemandSpikeTask> getTasks() { return tasks; }
-  public void setTasks(List<DemandSpikeTask> tasks) {
-    this.tasks = tasks;
+  public String getScript() { return this.script;}
+  public void   setScript(String script) { this.script = script ;}
+  
+  public Map<String, Object> getScriptProperties() { return scriptProperties; }
+  public void setScriptProperties(Map<String, Object> scriptProperties) {
+    this.scriptProperties = scriptProperties;
   }
   
   public Map<String, Object> getOutputAttributes() {

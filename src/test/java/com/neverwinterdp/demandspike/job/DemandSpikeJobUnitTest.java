@@ -32,6 +32,7 @@ public class DemandSpikeJobUnitTest {
   public void testDemandSpikeJobCommands() throws Exception {
     clusterBuilder.install() ; 
     Thread.sleep(10000);
+    shell.execute("service restart --member-role kafka --cleanup --module Kafka --service-id KafkaClusterService");
     shell.execute("demandspike:job send --max-num-of-message 1000");
     shell.execute("demandspike:job send --driver kafka --broker-connect 127.0.0.1:9092 --topic metrics.consumer --max-num-of-message 1000");
     shell.execute(
@@ -44,11 +45,10 @@ public class DemandSpikeJobUnitTest {
   
   @Test
   public void testDemandSpikeJobService() throws Exception {
-    String json = IOUtil.getFileContentAsString("src/test/resources/demandspikejob.json") ;
+    String script = IOUtil.getFileContentAsString("src/test/resources/demandspikejob.js") ;
     clusterBuilder.install() ; 
     Thread.sleep(3000);
-    shell.execute("demandspike submit --member-name demandspike #{data " + json + " }#");
-    //shell.execute("demandspike submit --member-name demandspike --file src/test/resources/demandspikejob.json");
+    shell.execute("demandspike submit --member-name demandspike --description \"This is a hello job\" #{data " + script + " }#");
     Thread.sleep(10000);
     shell.execute("demandspike scheduler --member-name demandspike");
     clusterBuilder.uninstall();

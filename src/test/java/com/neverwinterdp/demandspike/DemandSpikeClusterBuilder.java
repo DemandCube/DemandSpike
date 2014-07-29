@@ -64,7 +64,7 @@ public class DemandSpikeClusterBuilder {
  
   public void install() throws Exception {
     gateway.execute(
-      "module install --member-role zookeeper -Pmodule.data.drop=true --autostart --module Zookeeper"
+      "module install --member-role zookeeper -Pmodule.data.drop=true -Pzk:clientPort=2181 --autostart --module Zookeeper"
     ) ;
 
     String kafkaReplication = kafkaServer.length >= 2 ? "2" : "1" ;

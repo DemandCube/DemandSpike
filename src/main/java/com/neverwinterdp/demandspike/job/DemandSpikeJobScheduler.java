@@ -1,5 +1,7 @@
 package com.neverwinterdp.demandspike.job;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -11,7 +13,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.neverwinterdp.demandspike.job.config.DemandSpikeJob;
-import com.neverwinterdp.demandspike.job.config.DemandSpikeTask;
 import com.neverwinterdp.server.shell.Shell;
 import com.neverwinterdp.util.monitor.ApplicationMonitor;
 
@@ -98,14 +99,12 @@ public class DemandSpikeJobScheduler {
     public void run() {
       Shell shell = new Shell() ;
       try {
+        ByteArrayOutputStream bout = new ByteArrayOutputStream() ;
+        PrintStream pout = new PrintStream(bout) ;
+        shell.getShellContext().console().setPrintStream(pout, System.out);
         shell.getShellContext().connect();
-        List<DemandSpikeTask> tasks = job.getTasks() ;
-        StringBuilder consoleOutput = new StringBuilder() ;
-        for(DemandSpikeTask task : tasks) {
-          shell.execute(task.getCommand());
-          consoleOutput.append(shell.getShellContext().console().getTextOutput()).append("\n\n") ;
-        }
-        job.setOutputAttribute("consoleOutput", consoleOutput.toString());
+        shell.evalJScript(job.getScript(), job.getScriptProperties()) ;
+        job.setOutputAttribute("consoleOutput", new String(bout.toByteArray()));
       } catch(Throwable t) {
         job.setOutputAttribute("error", t);
         t.printStackTrace(); 
