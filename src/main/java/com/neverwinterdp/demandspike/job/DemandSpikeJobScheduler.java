@@ -99,10 +99,10 @@ public class DemandSpikeJobScheduler {
     public void run() {
       Shell shell = new Shell() ;
       try {
+        shell.getShellContext().connect();
         ByteArrayOutputStream bout = new ByteArrayOutputStream() ;
         PrintStream pout = new PrintStream(bout) ;
         shell.getShellContext().console().setPrintStream(pout, System.out);
-        shell.getShellContext().connect();
         shell.evalJScript(job.getScript(), job.getScriptProperties()) ;
         job.setOutputAttribute("consoleOutput", new String(bout.toByteArray()));
       } catch(Throwable t) {

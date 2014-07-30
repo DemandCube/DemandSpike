@@ -42,7 +42,7 @@ public class DemandSpikeJobCommand extends ShellCommand {
     public void execute(Shell shell, ShellContext ctx, Command command) throws Exception {
       command.mapPartial(this);
       if("service-failure".equals(ServiceFailureSimulator.NAME)) {
-        ServiceFailureSimulator simulator = new ServiceFailureSimulator(ctx.getClusterGateway()) ;
+        ServiceFailureSimulator simulator = new ServiceFailureSimulator(ctx) ;
         command.mapAll(simulator);
         simulator.schedule(ctx.getTimer());
       }

@@ -8,9 +8,9 @@ import com.neverwinterdp.server.cluster.ClusterClient;
 import com.neverwinterdp.server.cluster.ClusterMember;
 import com.neverwinterdp.server.command.ServiceCommandResult;
 import com.neverwinterdp.server.command.ServiceCommands;
-import com.neverwinterdp.server.gateway.ClusterGateway;
 import com.neverwinterdp.server.gateway.MemberSelector;
 import com.neverwinterdp.server.service.ServiceRegistration;
+import com.neverwinterdp.server.shell.Console;
 import com.neverwinterdp.server.shell.ShellContext;
 import com.neverwinterdp.util.JSONSerializer;
 
@@ -38,10 +38,10 @@ public class ServiceFailureSimulator extends TimerTask {
   @Parameter(names = "--target-member-name", description = "repeat simulation period")
   private String    targetMemberName ;
   
-  private ClusterGateway cluster ;
+  private ShellContext shellContext ;
   
-  public ServiceFailureSimulator(ClusterGateway cluster) {
-    this.cluster = cluster ;
+  public ServiceFailureSimulator(ShellContext shellContext ) {
+    this.shellContext = shellContext ;
   }
   
   public long getRepeatPeriod() { return period ; }
@@ -51,12 +51,13 @@ public class ServiceFailureSimulator extends TimerTask {
   }
   
   public void run() {
-    if(cluster == null) {
+    if(shellContext == null || shellContext.isClose()) {
       System.out.println("Cluster is not available!!!");
       return ;
     }
+    Console out = shellContext.console() ;
     try {
-      ClusterClient client = cluster.getClusterClient() ;
+      ClusterClient client = shellContext.getClusterGateway().getClusterClient() ;
       MemberSelector memberSelector = new MemberSelector();
       memberSelector.memberName = targetMemberName; 
       memberSelector.memberRole = targetMemberRole; 
@@ -64,8 +65,8 @@ public class ServiceFailureSimulator extends TimerTask {
       ServiceCommands.Stop stop = new ServiceCommands.Stop() ;
       stop.setTargetService(module, serviceId);
       ServiceCommandResult<ServiceRegistration> stopResult = client.execute(stop, member) ;
-      System.out.println("ServiceFailureSimulator: stop " + serviceId + "!!!");
-      System.out.println(JSONSerializer.INSTANCE.toString(stopResult)) ;
+      
+      out.println("ServiceFailureSimulator: Stop " + serviceId + ", service state = " + stopResult.getResult().getState());
       if(stopResult.hasError()) this.cancel() ;
       
       Thread.sleep(faillureTime);
@@ -73,8 +74,7 @@ public class ServiceFailureSimulator extends TimerTask {
       ServiceCommands.Start start = new ServiceCommands.Start() ;
       start.setTargetService(module, serviceId);
       ServiceCommandResult<ServiceRegistration> startResult = client.execute(start, member) ;
-      System.out.println("ServiceFailureSimulator: start " + serviceId + "!!!");
-      System.out.println(JSONSerializer.INSTANCE.toString(startResult)) ;
+      out.println("ServiceFailureSimulator: Start " + serviceId + ", service state = " + startResult.getResult().getState());
       if(startResult.hasError()) this.cancel() ;
     } catch(Exception ex) {
       ex.printStackTrace();
