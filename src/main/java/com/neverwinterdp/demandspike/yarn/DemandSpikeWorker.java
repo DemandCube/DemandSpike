@@ -1,10 +1,10 @@
 package com.neverwinterdp.demandspike.yarn;
 
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.neverwinterdp.demandspike.DemandSpikeJob;
-import com.neverwinterdp.demandspike.job.send.MessageSenderTask;
 import com.neverwinterdp.hadoop.yarn.app.AppContainer;
 import com.neverwinterdp.hadoop.yarn.app.AppWorker;
 import com.neverwinterdp.util.monitor.ApplicationMonitor;
@@ -14,10 +14,10 @@ public class DemandSpikeWorker implements AppWorker {
   
   public void run(AppContainer appContainer) throws Exception {
     ApplicationMonitor appMonitor = new ApplicationMonitor() ;
-    DemandSpikeJob job = new DemandSpikeJob(appContainer.getConfig().conf) ;
-    MessageSenderTask task = job.messageSenderConfig.createMessageSender(appMonitor, "DemandSpikeTask") ;
-    task.setLogger(LOGGER);
-    task.run() ; 
+    
+    Map<String, String> props = appContainer.getConfig().conf ;
+    MessageSender sender = new MessageSender() ;
+    sender.run(); 
     System.out.println(appMonitor.toJSON());
   }
 } 

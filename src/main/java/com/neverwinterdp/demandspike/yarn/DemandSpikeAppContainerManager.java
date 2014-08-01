@@ -11,7 +11,6 @@ import org.apache.hadoop.yarn.client.api.AMRMClient.ContainerRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.neverwinterdp.demandspike.DemandSpikeJob;
 import com.neverwinterdp.hadoop.yarn.app.AppContainerConfig;
 import com.neverwinterdp.hadoop.yarn.app.AppMaster;
 import com.neverwinterdp.hadoop.yarn.app.AppMonitor;
@@ -28,17 +27,17 @@ public class DemandSpikeAppContainerManager implements ContainerManager {
     Configuration conf = appMaster.getConfiguration() ;
     int instanceMemory  = conf.getInt("demandspike.instance.memory", 128) ;
     int instanceCores   = conf.getInt("demandspike.instance.core", 1) ;
-    DemandSpikeJob job = new DemandSpikeJob(appMaster.getConfig().conf) ;
-    for (int i = 0; i < job.messageSenderConfig.numOfTasks; i++) {
+    int numOfTasks = 3 ;
+    for (int i = 0; i < numOfTasks; i++) {
       ContainerRequest containerReq = 
           appMaster.createContainerRequest(0/*priority*/, instanceCores, instanceMemory);
       appMaster.add(containerReq) ;
     }
     try {
       int allocatedContainer = 0 ;
-      while(allocatedContainer < job.messageSenderConfig.numOfTasks) {
+      while(allocatedContainer < numOfTasks) {
         Thread.sleep(1000);
-        AllocateResponse response = appMaster.getAMRMClient().allocate((float)allocatedContainer/job.messageSenderConfig.numOfTasks);
+        AllocateResponse response = appMaster.getAMRMClient().allocate((float)allocatedContainer/numOfTasks);
         Resource resource = response.getAvailableResources() ;
         LOGGER.info("getAllocatedContainers() Avaiable Cores: " + resource.getVirtualCores());
         LOGGER.info("getAllocatedContainers() Avaiable Memory: " + resource.getMemory());
