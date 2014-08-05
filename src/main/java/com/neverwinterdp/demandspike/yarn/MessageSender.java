@@ -20,17 +20,17 @@ public class MessageSender {
   private int bufferSize ;
   private int errorCount ;
   
-  public MessageSender(String host, int port, int bufferSize) throws Exception {
+  public MessageSender(String brokerConnect, int bufferSize) throws Exception {
+    System.out.println("BROKER CONNECT: " + brokerConnect);
+    String[] array = brokerConnect.split(":") ;
+    String host = array[0] ;
+    int    port = Integer.parseInt(array[1]) ;
     client = new HttpClient (host, port, new MessageResponseHandler()) ;
     this.bufferSize = bufferSize ;
     messages = new LinkedHashMap<String, Message>() ;
   }
   
   public int getErrorCount() { return errorCount ;}
-  
-  public void run() {
-    
-  }
   
   public void send(Message message, long timeout) throws Exception {
     synchronized(messages) {

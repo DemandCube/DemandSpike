@@ -45,7 +45,9 @@ public class DemandSpikeAppMasterContainerUnitTest extends AbstractMiniClusterUn
       "--app-name", "NeverwinterDP_DemandSpike_App",
       "--app-container-manager", "com.neverwinterdp.demandspike.yarn.AsyncDemandSpikeAppMasterContainerManager",
       "--app-rpc-port", "63200" ,
-      "--conf:yarn.resourcemanager.scheduler.address=0.0.0.0:8030"
+      "--conf:yarn.resourcemanager.scheduler.address=0.0.0.0:8030",
+      "--conf:broker-connect=127.0.0.1:7080",
+      "--conf:max-duration=5000"
     } ;
     
     AppClient appClient = new AppClient() ;

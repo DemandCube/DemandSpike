@@ -28,7 +28,7 @@ public class MessageSenderUnitTest extends AbstractMiniClusterUnitTest {
 
   @Test
   public void testMessageSender() throws Exception {
-    MessageSender sender = new MessageSender("127.0.0.1", 8080, 10) ;
+    MessageSender sender = new MessageSender("127.0.0.1:7080", 10) ;
     for(int i = 0; i < 100; i++) {
       Message message = new Message("m" + i, "message " + i, true) ;
       sender.send(message, 3000);
