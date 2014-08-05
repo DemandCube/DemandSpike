@@ -1,26 +1,31 @@
 package com.neverwinterdp.demandspike.yarn ;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapred.Master;
 import org.apache.hadoop.yarn.api.records.Container;
 import org.apache.hadoop.yarn.api.records.ContainerStatus;
 import org.apache.hadoop.yarn.client.api.AMRMClient.ContainerRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.neverwinterdp.hadoop.yarn.app.AppContainerConfig;
-import com.neverwinterdp.hadoop.yarn.app.AppMaster;
-import com.neverwinterdp.hadoop.yarn.app.AppMonitor;
-import com.neverwinterdp.hadoop.yarn.app.ContainerInfo;
-import com.neverwinterdp.hadoop.yarn.app.ContainerManager;
-import com.neverwinterdp.hadoop.yarn.app.ContainerState;
+import com.neverwinterdp.hadoop.yarn.app.AppConfig;
+import com.neverwinterdp.hadoop.yarn.app.master.AppMasterContainerManager;
+import com.neverwinterdp.hadoop.yarn.app.master.AppMasterMonitor;
+import com.neverwinterdp.hadoop.yarn.app.master.AppMaster;
+import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainerInfo;
+import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainerState;
+import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.text.TabularPrinter;
 
-public class AsyncDemandSpikeAppContainerManager implements ContainerManager {
-  protected static final Logger LOGGER = LoggerFactory.getLogger(AsyncDemandSpikeAppContainerManager.class);
+public class AsyncDemandSpikeAppMasterContainerManager implements AppMasterContainerManager {
+  protected static final Logger LOGGER = LoggerFactory.getLogger(AsyncDemandSpikeAppMasterContainerManager.class);
   private int numOfTasks = 3 ;
   
   public void onInit(AppMaster appMaster) {
     LOGGER.info("Start onInit(AppMaster appMaster)");
+    AppConfig appMasterConfig = appMaster.getConfig() ;
+    appMasterConfig.setWorker(DemandSpikeAppWorker.class) ;
+    System.out.println("AppConfig: " + JSONSerializer.INSTANCE.toString(appMasterConfig));
     Configuration conf = appMaster.getConfiguration() ;
     int instanceMemory  = conf.getInt("demandspike.instance.memory", 128) ;
     int instanceCores   = conf.getInt("demandspike.instance.core", 1) ;
@@ -35,18 +40,15 @@ public class AsyncDemandSpikeAppContainerManager implements ContainerManager {
   public void onAllocatedContainer(AppMaster appMaster, Container container) {
     try {
       LOGGER.info("onAllocateContainer(...), container id = " + container.getId());
-      AppContainerConfig config = new AppContainerConfig(appMaster, container) ;
-      config.setWorker(DemandSpikeWorker.class) ;
-      config.conf.putAll(appMaster.getConfig().conf);
-      appMaster.startContainer(container, config.toCommand()) ;
+      appMaster.startContainer(container) ;
     } catch(Exception ex) {
       LOGGER.error("Start container error", ex);
     }
   }
 
-  public void onCompleteContainer(AppMaster master, ContainerStatus status, ContainerInfo containerInfo) {
+  public void onCompleteContainer(AppMaster master, ContainerStatus status, AppWorkerContainerInfo containerInfo) {
     try {
-      AppMonitor monitor = master.getAppMonitor() ;
+      AppMasterMonitor monitor = master.getAppMonitor() ;
       int complete = monitor.getCompletedContainerCount().intValue() ;
       master.getAMRMClient().allocate(complete/(float)numOfTasks) ;
     } catch (Exception e) {
@@ -55,7 +57,7 @@ public class AsyncDemandSpikeAppContainerManager implements ContainerManager {
     LOGGER.info("on complete container " + status.getContainerId());
   }
 
-  public void onFailedContainer(AppMaster master, ContainerStatus status, ContainerInfo containerInfo) {
+  public void onFailedContainer(AppMaster master, ContainerStatus status, AppWorkerContainerInfo containerInfo) {
     LOGGER.info("on failed container " + status.getContainerId());
   }
 
@@ -67,12 +69,12 @@ public class AsyncDemandSpikeAppContainerManager implements ContainerManager {
         synchronized(this) {
           this.wait(500);
         } 
-        AppMonitor monitor = appMaster.getAppMonitor() ;
-        ContainerInfo[] cinfos = monitor.getContainerInfos() ;
+        AppMasterMonitor monitor = appMaster.getAppMonitor() ;
+        AppWorkerContainerInfo[] cinfos = monitor.getContainerInfos() ;
         if(cinfos.length < numOfTasks)  continue ;
         finished = true; 
-        for(ContainerInfo sel : cinfos) {
-          if(!sel.getProgressStatus().getContainerState().equals(ContainerState.FINISHED)) {
+        for(AppWorkerContainerInfo sel : cinfos) {
+          if(!sel.getProgressStatus().getContainerState().equals(AppWorkerContainerState.FINISHED)) {
             finished = false ;
             break ;
           }
@@ -94,14 +96,14 @@ public class AsyncDemandSpikeAppContainerManager implements ContainerManager {
 
   public void onExit(AppMaster appMaster) {
     LOGGER.info("Start onExit(AppMaster appMaster)");
-    AppMonitor appMonitor = appMaster.getAppMonitor() ;
-    ContainerInfo[] info = appMonitor.getContainerInfos() ;
+    AppMasterMonitor appMonitor = appMaster.getAppMonitor() ;
+    AppWorkerContainerInfo[] info = appMonitor.getContainerInfos() ;
     int[] colWidth = {20, 20, 20, 20} ;
     TabularPrinter printer = new TabularPrinter(System.out, colWidth) ;
     printer.header("Id", "Progress", "Error", "State");
-    for(ContainerInfo sel : info) {
+    for(AppWorkerContainerInfo sel : info) {
       printer.row(
-        sel.getContainerId().getId(), 
+        sel.getContainerId(), 
         sel.getProgressStatus().getProgress(),
         sel.getProgressStatus().getError() != null,
         sel.getProgressStatus().getContainerState());

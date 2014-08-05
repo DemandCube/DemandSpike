@@ -13,7 +13,7 @@ import com.neverwinterdp.hadoop.yarn.app.AppClient;
 import com.neverwinterdp.hadoop.yarn.app.AppClientMonitor;
 import com.neverwinterdp.server.shell.Shell;
 
-public class DemandSpikeAppContainerUnitTest extends AbstractMiniClusterUnitTest {
+public class DemandSpikeAppMasterContainerUnitTest extends AbstractMiniClusterUnitTest {
   static MiniYARNCluster miniYarnCluster ;
   static DemandSpikeClusterBuilder clusterBuilder ;
   static protected Shell shell ;
@@ -42,16 +42,10 @@ public class DemandSpikeAppContainerUnitTest extends AbstractMiniClusterUnitTest
   public void testDemandSpikeApp() throws Exception {
     String[] args = { 
       "--mini-cluster-env",
-      "--app-name", "NeverwinterDP DemandSpike App",
-      "--container-manager", "com.neverwinterdp.demandspike.yarn.AsyncDemandSpikeAppContainerManager",
-      "--conf:yarn.resourcemanager.scheduler.address=0.0.0.0:8030",
-      "--conf:demandspike.instance.core=1",
-      "--conf:demandspike.instance.memory=128",
-      "--conf:demandspike.job.num-of-task=3",
-      "--conf:demandspike.job.driver=kafka",
-      "--conf:demandspike.job.topic=" + DemandSpikeClusterBuilder.TOPIC ,
-      "--conf:demandspike.job.broker-connect=" + clusterBuilder.getKafkaConnect(),
-      "--conf:demandspike.job.max-duration=15000"
+      "--app-name", "NeverwinterDP_DemandSpike_App",
+      "--app-container-manager", "com.neverwinterdp.demandspike.yarn.AsyncDemandSpikeAppMasterContainerManager",
+      "--app-rpc-port", "63200" ,
+      "--conf:yarn.resourcemanager.scheduler.address=0.0.0.0:8030"
     } ;
     
     AppClient appClient = new AppClient() ;
@@ -59,5 +53,7 @@ public class DemandSpikeAppContainerUnitTest extends AbstractMiniClusterUnitTest
         appClient.run(args, new YarnConfiguration(miniYarnCluster.getConfig()));
     appMonitor.monitor() ;
     appMonitor.report(System.out);
+    Thread.sleep(3000);
+    clusterBuilder.shell.exec("server metric");
   }
 }

@@ -31,7 +31,7 @@ runClient \
    --app-home /tmp/app/DemmandSpike \
    --upload-app $APP_DIR \
    --app-name "NeverwinterDP DemandSpike App" \
-   --container-manager com.neverwinterdp.demandspike.yarn.AsyncDemandSpikeAppContainerManager \
+   --container-manager com.neverwinterdp.demandspike.yarn.AsyncDemandSpikeAppMasterContainerManager \
    --conf:fs.default.name=hdfs://hadoop:9000 \
    --conf:dfs.replication=1 \
    --conf:yarn.resourcemanager.scheduler.address=hadoop:8030 \
