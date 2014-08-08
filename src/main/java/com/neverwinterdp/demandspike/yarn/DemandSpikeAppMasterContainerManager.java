@@ -11,34 +11,35 @@ import org.apache.hadoop.yarn.client.api.AMRMClient.ContainerRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.neverwinterdp.demandspike.DemandSpikeJob;
-import com.neverwinterdp.hadoop.yarn.app.AppContainerConfig;
-import com.neverwinterdp.hadoop.yarn.app.AppMaster;
-import com.neverwinterdp.hadoop.yarn.app.AppMonitor;
-import com.neverwinterdp.hadoop.yarn.app.ContainerInfo;
-import com.neverwinterdp.hadoop.yarn.app.ContainerManager;
-import com.neverwinterdp.hadoop.yarn.app.ContainerState;
+import com.neverwinterdp.hadoop.yarn.app.master.AppMaster;
+import com.neverwinterdp.hadoop.yarn.app.master.AppMasterContainerManager;
+import com.neverwinterdp.hadoop.yarn.app.master.AppMasterMonitor;
+import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainerInfo;
+import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainerState;
 import com.neverwinterdp.util.text.TabularPrinter;
 
-public class DemandSpikeAppContainerManager implements ContainerManager {
-  protected static final Logger LOGGER = LoggerFactory.getLogger(DemandSpikeAppContainerManager.class);
+public class DemandSpikeAppMasterContainerManager implements AppMasterContainerManager {
+  protected static final Logger LOGGER = LoggerFactory.getLogger(DemandSpikeAppMasterContainerManager.class);
   
   public void onInit(AppMaster appMaster) {
+  }
+  
+  public void onRequestContainer(AppMaster appMaster) {
     LOGGER.info("Start onInit(AppMaster appMaster)");
     Configuration conf = appMaster.getConfiguration() ;
     int instanceMemory  = conf.getInt("demandspike.instance.memory", 128) ;
     int instanceCores   = conf.getInt("demandspike.instance.core", 1) ;
-    DemandSpikeJob job = new DemandSpikeJob(appMaster.getConfig().conf) ;
-    for (int i = 0; i < job.messageSenderConfig.numOfTasks; i++) {
+    int numOfTasks = 3 ;
+    for (int i = 0; i < numOfTasks; i++) {
       ContainerRequest containerReq = 
           appMaster.createContainerRequest(0/*priority*/, instanceCores, instanceMemory);
       appMaster.add(containerReq) ;
     }
     try {
       int allocatedContainer = 0 ;
-      while(allocatedContainer < job.messageSenderConfig.numOfTasks) {
+      while(allocatedContainer < numOfTasks) {
         Thread.sleep(1000);
-        AllocateResponse response = appMaster.getAMRMClient().allocate((float)allocatedContainer/job.messageSenderConfig.numOfTasks);
+        AllocateResponse response = appMaster.getAMRMClient().allocate((float)allocatedContainer/numOfTasks);
         Resource resource = response.getAvailableResources() ;
         LOGGER.info("getAllocatedContainers() Avaiable Cores: " + resource.getVirtualCores());
         LOGGER.info("getAllocatedContainers() Avaiable Memory: " + resource.getMemory());
@@ -46,10 +47,7 @@ public class DemandSpikeAppContainerManager implements ContainerManager {
         List<Container> containers = response.getAllocatedContainers() ;
         LOGGER.info("Allocated " + containers.size() + " containers");
         for(Container container : containers) {
-          AppContainerConfig config = new AppContainerConfig(appMaster, container) ;
-          config.setWorker(DemandSpikeWorker.class) ;
-          config.conf.putAll(appMaster.getConfig().conf);
-          appMaster.startContainer(container, config.toCommand()) ;
+          appMaster.startContainer(container) ;
           allocatedContainer++ ;
         }
       }
@@ -62,18 +60,18 @@ public class DemandSpikeAppContainerManager implements ContainerManager {
   public void onAllocatedContainer(AppMaster master, Container container) {
   }
 
-  public void onCompleteContainer(AppMaster master, ContainerStatus status, ContainerInfo containerInfo) {
+  public void onCompleteContainer(AppMaster master, ContainerStatus status, AppWorkerContainerInfo containerInfo) {
     LOGGER.info("on complete container " + status.getContainerId());
   }
 
-  public void onFailedContainer(AppMaster master, ContainerStatus status, ContainerInfo containerInfo) {
+  public void onFailedContainer(AppMaster master, ContainerStatus status, AppWorkerContainerInfo containerInfo) {
     LOGGER.info("on failed container " + status.getContainerId());
   }
 
   public void waitForComplete(AppMaster appMaster) {
     LOGGER.info("Start waitForComplete(AppMaster appMaster)");
-    AppMonitor monitor = appMaster.getAppMonitor() ;
-    ContainerInfo[] cinfos = monitor.getContainerInfos() ;
+    AppMasterMonitor monitor = appMaster.getAppMonitor() ;
+    AppWorkerContainerInfo[] cinfos = monitor.getContainerInfos() ;
     
     try {
       boolean finished = false ;
@@ -82,8 +80,8 @@ public class DemandSpikeAppContainerManager implements ContainerManager {
           this.wait(500);
         } 
         finished = true; 
-        for(ContainerInfo sel : cinfos) {
-          if(!sel.getProgressStatus().getContainerState().equals(ContainerState.FINISHED)) {
+        for(AppWorkerContainerInfo sel : cinfos) {
+          if(!sel.getProgressStatus().getContainerState().equals(AppWorkerContainerState.FINISHED)) {
             finished = false ;
             break ;
           }
@@ -105,18 +103,24 @@ public class DemandSpikeAppContainerManager implements ContainerManager {
 
   public void onExit(AppMaster appMaster) {
     LOGGER.info("Start onExit(AppMaster appMaster)");
-    AppMonitor appMonitor = appMaster.getAppMonitor() ;
-    ContainerInfo[] info = appMonitor.getContainerInfos() ;
+    AppMasterMonitor appMonitor = appMaster.getAppMonitor() ;
+    AppWorkerContainerInfo[] info = appMonitor.getContainerInfos() ;
     int[] colWidth = {20, 20, 20, 20} ;
     TabularPrinter printer = new TabularPrinter(System.out, colWidth) ;
     printer.header("Id", "Progress", "Error", "State");
-    for(ContainerInfo sel : info) {
+    for(AppWorkerContainerInfo sel : info) {
       printer.row(
-        sel.getContainerId().getId(), 
+        sel.getContainerId(), 
         sel.getProgressStatus().getProgress(),
         sel.getProgressStatus().getError() != null,
         sel.getProgressStatus().getContainerState());
     }
     LOGGER.info("Finish onExit(AppMaster appMaster)");
   }
+
+  @Override
+  public String getTrackingURL() { return null; }
+
+  @Override
+  public int getAppRPCPort() { return 0; }
 }

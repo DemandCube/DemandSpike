@@ -3,7 +3,6 @@ package com.neverwinterdp.demandspike;
 import com.neverwinterdp.server.Server;
 import com.neverwinterdp.server.gateway.ClusterGateway;
 import com.neverwinterdp.server.shell.Shell;
-import com.neverwinterdp.sparkngin.http.NullDevMessageForwarder;
 import com.neverwinterdp.util.FileUtil;
 /**
  * @author Tuan Nguyen
@@ -94,8 +93,9 @@ public class DemandSpikeClusterBuilder {
         "  --member-role sparkngin" +
         "  --autostart --module Sparkngin" +
         "  -Pmodule.data.drop=true" +
-        "  -Phttp-listen-port=8181" +
-        "  -Pforwarder-class=" + NullDevMessageForwarder.class.getName()
+        "  -Psparkngin:http-listen-port=7080" +
+        "  -Psparkngin:forwarder-class=com.neverwinterdp.sparkngin.http.KafkaMessageForwarder" +
+        "  -Pkafka-producer:metadata.broker.list=" + getKafkaConnect()
     ) ;
     
     gateway.execute(
