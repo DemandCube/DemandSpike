@@ -19,7 +19,10 @@ public class AsyncDemandSpikeAppMasterContainerManager implements AppMasterConta
   protected static final Logger LOGGER = LoggerFactory.getLogger(AsyncDemandSpikeAppMasterContainerManager.class);
   
   public void onInit(AppMaster appMaster) {
-    LOGGER.info("Start onInit(AppMaster appMaster)");
+  }
+  
+  public void onRequestContainer(AppMaster appMaster) {
+    LOGGER.info("Start onRequestContainer(AppMaster appMaster)");
     AppConfig appConfig = appMaster.getConfig() ;
     appConfig.setWorker(DemandSpikeAppWorker.class) ;
     System.out.println("AppConfig: " + JSONSerializer.INSTANCE.toString(appConfig));
@@ -28,7 +31,7 @@ public class AsyncDemandSpikeAppMasterContainerManager implements AppMasterConta
           appMaster.createContainerRequest(0/*priority*/, appConfig.workerNumOfCore, appConfig.workerMaxMemory);
       appMaster.add(containerReq) ;
     }
-    LOGGER.info("Finish onInit(AppMaster appMaster)");
+    LOGGER.info("Finish onRequestContainer(AppMaster appMaster)");
   }
 
   public void onAllocatedContainer(AppMaster appMaster, Container container) {
@@ -56,6 +59,31 @@ public class AsyncDemandSpikeAppMasterContainerManager implements AppMasterConta
     LOGGER.info("on failed container " + status.getContainerId());
   }
 
+  public void onShutdownRequest(AppMaster appMaster)  {
+    LOGGER.info("Start onShutdownRequest(AppMaster appMaster)");
+    synchronized(this) {
+      this.notify();
+    }
+    LOGGER.info("Finish onShutdownRequest(AppMaster appMaster)");
+  }
+
+  public void onExit(AppMaster appMaster) {
+    LOGGER.info("Start onExit(AppMaster appMaster)");
+    AppMasterMonitor appMonitor = appMaster.getAppMonitor() ;
+    AppWorkerContainerInfo[] info = appMonitor.getContainerInfos() ;
+    int[] colWidth = {20, 20, 20, 20} ;
+    TabularPrinter printer = new TabularPrinter(System.out, colWidth) ;
+    printer.header("Id", "Progress", "Error", "State");
+    for(AppWorkerContainerInfo sel : info) {
+      printer.row(
+        sel.getContainerId(), 
+        sel.getProgressStatus().getProgress(),
+        sel.getProgressStatus().getError() != null,
+        sel.getProgressStatus().getContainerState());
+    }
+    LOGGER.info("Finish onExit(AppMaster appMaster)");
+  }
+
   public void waitForComplete(AppMaster appMaster) {
     LOGGER.info("Start waitForComplete(AppMaster appMaster)");
     AppConfig appConfig = appMaster.getConfig() ;
@@ -81,29 +109,10 @@ public class AsyncDemandSpikeAppMasterContainerManager implements AppMasterConta
     }
     LOGGER.info("Finish waitForComplete(AppMaster appMaster)");
   }
+  
+  @Override
+  public String getTrackingURL() { return null; }
 
-  public void onShutdownRequest(AppMaster appMaster)  {
-    LOGGER.info("Start onShutdownRequest(AppMaster appMaster)");
-    synchronized(this) {
-      this.notify();
-    }
-    LOGGER.info("Finish onShutdownRequest(AppMaster appMaster)");
-  }
-
-  public void onExit(AppMaster appMaster) {
-    LOGGER.info("Start onExit(AppMaster appMaster)");
-    AppMasterMonitor appMonitor = appMaster.getAppMonitor() ;
-    AppWorkerContainerInfo[] info = appMonitor.getContainerInfos() ;
-    int[] colWidth = {20, 20, 20, 20} ;
-    TabularPrinter printer = new TabularPrinter(System.out, colWidth) ;
-    printer.header("Id", "Progress", "Error", "State");
-    for(AppWorkerContainerInfo sel : info) {
-      printer.row(
-        sel.getContainerId(), 
-        sel.getProgressStatus().getProgress(),
-        sel.getProgressStatus().getError() != null,
-        sel.getProgressStatus().getContainerState());
-    }
-    LOGGER.info("Finish onExit(AppMaster appMaster)");
-  }
+  @Override
+  public int getAppRPCPort() { return 0; }
 }

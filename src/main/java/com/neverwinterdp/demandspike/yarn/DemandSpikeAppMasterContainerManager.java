@@ -22,6 +22,9 @@ public class DemandSpikeAppMasterContainerManager implements AppMasterContainerM
   protected static final Logger LOGGER = LoggerFactory.getLogger(DemandSpikeAppMasterContainerManager.class);
   
   public void onInit(AppMaster appMaster) {
+  }
+  
+  public void onRequestContainer(AppMaster appMaster) {
     LOGGER.info("Start onInit(AppMaster appMaster)");
     Configuration conf = appMaster.getConfiguration() ;
     int instanceMemory  = conf.getInt("demandspike.instance.memory", 128) ;
@@ -114,4 +117,10 @@ public class DemandSpikeAppMasterContainerManager implements AppMasterContainerM
     }
     LOGGER.info("Finish onExit(AppMaster appMaster)");
   }
+
+  @Override
+  public String getTrackingURL() { return null; }
+
+  @Override
+  public int getAppRPCPort() { return 0; }
 }
