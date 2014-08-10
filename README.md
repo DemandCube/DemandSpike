@@ -19,6 +19,8 @@ Load Testing Framework for Distributed Applications built on Top of Yarn
 #Current Design And Implementation#
 
 DemandSpike is designed as a command of the cluster shell. The demandspike command has several subcommand and it can be used with the existing cluster command to create a powerful test script.
+
+![DemandSpike Architecture](diagrams/images/demandspike_architecture.png?raw=true "DemandSpike Architecture")
  
 ##DemandSpike Command##
 
@@ -120,3 +122,19 @@ To import the project into the  eclipse
 2. Choose General > Existing Projects into Workspace
 3. Check Select root directory and browse to path/DemandSpike
 4. Select all the projects then click Finish
+
+#Run DemandSpike job
+Build the release
+```
+gradle clean build install release
+```
+Start demandSpike job
+```
+cd build/release/DemandSpike/bin
+#To launch the server
+./server.sh 
+#Ping to check the server status
+./shell.sh -c server ping 
+#To launch the batch script tets
+./shell.sh -f  hello-demandspike.csh
+```
