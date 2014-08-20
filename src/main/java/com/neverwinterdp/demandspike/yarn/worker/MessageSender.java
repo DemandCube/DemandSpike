@@ -1,4 +1,4 @@
-package com.neverwinterdp.demandspike.yarn;
+package com.neverwinterdp.demandspike.yarn.worker;
 
 import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpResponse;
@@ -9,13 +9,13 @@ import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 import com.neverwinterdp.message.Message;
-import com.neverwinterdp.netty.http.client.HttpClient;
+import com.neverwinterdp.netty.http.client.AsyncHttpClient;
 import com.neverwinterdp.netty.http.client.ResponseHandler;
 import com.neverwinterdp.sparkngin.SendAck;
 import com.neverwinterdp.util.JSONSerializer;
 
 public class MessageSender {
-  private HttpClient client ;
+  private AsyncHttpClient client ;
   private LinkedHashMap<String, Message> messages ;
   private int bufferSize ;
   private int errorCount ;
@@ -25,7 +25,7 @@ public class MessageSender {
     String[] array = brokerConnect.split(":") ;
     String host = array[0] ;
     int    port = Integer.parseInt(array[1]) ;
-    client = new HttpClient (host, port, new MessageResponseHandler()) ;
+    client = new AsyncHttpClient (host, port, new MessageResponseHandler()) ;
     this.bufferSize = bufferSize ;
     messages = new LinkedHashMap<String, Message>() ;
   }
