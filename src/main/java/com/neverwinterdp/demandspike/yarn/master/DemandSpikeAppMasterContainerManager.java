@@ -1,4 +1,4 @@
-package com.neverwinterdp.demandspike.yarn ;
+package com.neverwinterdp.demandspike.yarn.master ;
 
 import java.util.List;
 
@@ -117,10 +117,4 @@ public class DemandSpikeAppMasterContainerManager implements AppMasterContainerM
     }
     LOGGER.info("Finish onExit(AppMaster appMaster)");
   }
-
-  @Override
-  public String getTrackingURL() { return null; }
-
-  @Override
-  public int getAppRPCPort() { return 0; }
 }

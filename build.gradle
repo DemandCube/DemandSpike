@@ -125,6 +125,40 @@ def doRelease(String releaseDir) {
   }
 }
 
+task createYarnAppHome(dependsOn: 'build') << {
+  def appHomeDir = "${buildDir}/DemandSpike"
+  createYarnAppHome(appHomeDir)
+}
+
+def createYarnAppHome(String appHomeDir) {
+  println "\n\n"
+  println "*************************************************"
+  println "Preparing the app home directory ${appHomeDir}"
+  println "*************************************************"
+
+  def jars = [ 
+    "commons.utils", "commons.netty", "commons.hadoop-framework",
+    "jackson-core-2.2.2", "jackson-databind", "jackson-annotations", "jcommander", "netty-all", "compiler-0.8.16"
+  ] 
+
+  println "Copy the dependencies library"
+  configurations.compile.each { File file -> 
+    if(isIn(jars, file)) {
+      println "  Copy $file.name to $appHomeDir"
+      copy {
+        from file
+        into "${appHomeDir}/libs"
+      }
+    }
+  }
+
+  copy {
+    from "${buildDir}/libs"
+    into "${appHomeDir}/libs"
+  }
+}
+
+
 def isIn(set, File file) {
   for(item in set) {
     if(file.name.startsWith(item)) return true ;

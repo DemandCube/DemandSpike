@@ -43,7 +43,7 @@ public class DemandSpikeAppMasterContainerUnitTest extends AbstractMiniClusterUn
     String[] args = { 
       "--mini-cluster-env",
       "--app-name", "NeverwinterDP_DemandSpike_App",
-      "--app-container-manager", "com.neverwinterdp.demandspike.yarn.AsyncDemandSpikeAppMasterContainerManager",
+      "--app-container-manager", "com.neverwinterdp.demandspike.yarn.master.AsyncDemandSpikeAppMasterContainerManager",
       "--app-rpc-port", "63200" ,
       "--conf:yarn.resourcemanager.scheduler.address=0.0.0.0:8030",
       "--conf:broker-connect=127.0.0.1:7080",

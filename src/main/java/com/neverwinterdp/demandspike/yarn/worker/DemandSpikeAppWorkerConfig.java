@@ -1,4 +1,4 @@
-package com.neverwinterdp.demandspike.yarn;
+package com.neverwinterdp.demandspike.yarn.worker;
 
 import java.util.Map;
 
