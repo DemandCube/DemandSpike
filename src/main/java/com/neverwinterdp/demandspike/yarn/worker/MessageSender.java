@@ -11,7 +11,7 @@ import java.util.concurrent.TimeoutException;
 import com.neverwinterdp.message.Message;
 import com.neverwinterdp.netty.http.client.AsyncHttpClient;
 import com.neverwinterdp.netty.http.client.ResponseHandler;
-import com.neverwinterdp.sparkngin.SendAck;
+import com.neverwinterdp.sparkngin.Ack;
 import com.neverwinterdp.util.JSONSerializer;
 
 public class MessageSender {
@@ -46,7 +46,7 @@ public class MessageSender {
     }
   }
   
-  public void onFailedMessage(SendAck ack, Message message) {
+  public void onFailedMessage(Ack ack, Message message) {
     errorCount++ ;
     System.out.println("Failed message: " + ack.getMessageId() + ", message = " + ack.getMessage());
   }
@@ -80,10 +80,10 @@ public class MessageSender {
       if(response instanceof HttpContent) {
         HttpContent content = (HttpContent) response;
         String json = content.content().toString(CharsetUtil.UTF_8);
-        SendAck ack = JSONSerializer.INSTANCE.fromString(json, SendAck.class) ;
+        Ack ack = JSONSerializer.INSTANCE.fromString(json, Ack.class) ;
         String messageId = (String) ack.getMessageId() ;
         Message message = messages.get(messageId) ;
-        if(!SendAck.Status.OK.equals(ack.getStatus())) {
+        if(!Ack.Status.OK.equals(ack.getStatus())) {
           onFailedMessage(ack, message) ;
         }
         synchronized(messages) {
