@@ -1,4 +1,4 @@
-package com.neverwinterdp.demandspike.yarn.worker;
+package com.neverwinterdp.demandspike.http;
 
 import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpResponse;
@@ -8,23 +8,17 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
-import com.neverwinterdp.demandspike.http.Message;
-import com.neverwinterdp.demandspike.http.SendAck;
 import com.neverwinterdp.netty.http.client.AsyncHttpClient;
 import com.neverwinterdp.netty.http.client.ResponseHandler;
-import com.neverwinterdp.util.JSONSerializer;
 
-public class MessageSender {
+
+public class HttpMessageClient {
   private AsyncHttpClient client ;
   private LinkedHashMap<String, Message> messages ;
   private int bufferSize ;
   private int errorCount ;
   
-  public MessageSender(String brokerConnect, int bufferSize) throws Exception {
-    System.out.println("BROKER CONNECT: " + brokerConnect);
-    String[] array = brokerConnect.split(":") ;
-    String host = array[0] ;
-    int    port = Integer.parseInt(array[1]) ;
+  public HttpMessageClient(String host, int port, int bufferSize) throws Exception {
     client = new AsyncHttpClient (host, port, new MessageResponseHandler()) ;
     this.bufferSize = bufferSize ;
     messages = new LinkedHashMap<String, Message>() ;
@@ -44,6 +38,10 @@ public class MessageSender {
       String messageId = message.getHeader().getKey() ;
       messages.put(messageId, message) ;
     }
+  }
+  
+  public void get(String url) throws Exception{
+	  client.get(url);
   }
   
   public void onFailedMessage(SendAck ack, Message message) {
@@ -80,16 +78,22 @@ public class MessageSender {
       if(response instanceof HttpContent) {
         HttpContent content = (HttpContent) response;
         String json = content.content().toString(CharsetUtil.UTF_8);
-        SendAck ack = JSONSerializer.INSTANCE.fromString(json, SendAck.class) ;
-        String messageId = (String) ack.getMessageId() ;
-        Message message = messages.get(messageId) ;
-        if(!SendAck.Status.OK.equals(ack.getStatus())) {
-          onFailedMessage(ack, message) ;
+        //System.out.println(json);
+        try{
+        	SendAck ack = JSONSerializer.INSTANCE.fromString(json, SendAck.class) ;
+            String messageId = (String) ack.getMessageId() ;
+            Message message = messages.get(messageId) ;
+            if(!SendAck.Status.OK.equals(ack.getStatus())) {
+              onFailedMessage(ack, message) ;
+            }
+            synchronized(messages) {
+              messages.remove(messageId) ;
+              messages.notify() ;
+            }
+        }catch(Exception e){
+        	
         }
-        synchronized(messages) {
-          messages.remove(messageId) ;
-          messages.notify() ;
-        }
+        
       }
     }
   }

@@ -9,7 +9,7 @@ bin=`dirname "$0"`
 bin=`cd "$bin"; pwd`
 APP_DIR=`cd $bin/..; pwd; cd $bin`
 JAVACMD=$JAVA_HOME/bin/java
-
+JAVACMD=java
 if $cygwin; then
   APP_DIR=`cygpath --absolute --windows "$APP_DIR"`
 fi
@@ -17,11 +17,11 @@ fi
 PID_FILE="$APP_DIR/bin/kafka.pid"
 APP_OPT="-Dapp.dir=$APP_DIR -Duser.dir=$APP_DIR"
 
-MAIN_CLASS="com.neverwinterdp.server.shell.Shell"
+MAIN_CLASS="com.neverwinterdp.demandspike.DemandSpike"
 
 function runShell {
   $JAVACMD -Djava.ext.dirs=$APP_DIR/libs $APP_OPT $MAIN_CLASS "$@"
 }
 
-echo "runShell $@"
+#echo "$@"
 runShell $@

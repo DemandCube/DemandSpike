@@ -45,20 +45,22 @@ configurations.all {
 
 dependencies {
   compile group: 'com.neverwinterdp', name: 'commons.utils', version: '1.0-SNAPSHOT'
-  compile group: 'com.neverwinterdp', name: 'commons.api', version: '1.0-SNAPSHOT'
+  //compile group: 'com.neverwinterdp', name: 'commons.api', version: '1.0-SNAPSHOT'
   compile group: 'com.neverwinterdp', name: 'commons.cluster', version: '1.0-SNAPSHOT'
-  compile group: 'com.neverwinterdp', name: 'commons.cluster', version: '1.0-SNAPSHOT', classifier: 'js'
+  //compile group: 'com.neverwinterdp', name: 'commons.cluster', version: '1.0-SNAPSHOT', classifier: 'js'
   compile group: 'com.neverwinterdp', name: 'commons.hadoop-framework', version: '1.0-SNAPSHOT'
-  compile group: 'com.neverwinterdp', name: 'commons.zookeeper', version: '1.0-SNAPSHOT'
+  //compile group: 'com.neverwinterdp', name: 'commons.zookeeper', version: '1.0-SNAPSHOT'
 
-  testCompile group: 'com.neverwinterdp', name: 'commons.hadoop-framework', version: '1.0-SNAPSHOT', classifier: 'tests'
+  //testCompile group: 'com.neverwinterdp', name: 'commons.hadoop-framework', version: '1.0-SNAPSHOT', classifier: 'tests'
 
-  compile group: 'com.neverwinterdp', name: 'queuengin', version: '1.0-SNAPSHOT'
-  compile group: 'com.neverwinterdp', name: 'sparkngin', version: '1.0-SNAPSHOT'
+  //compile group: 'com.neverwinterdp', name: 'queuengin', version: '1.0-SNAPSHOT'
+  //compile group: 'com.neverwinterdp', name: 'sparkngin', version: '1.0-SNAPSHOT'
 
 
-  compile group: 'com.yammer.metrics', name: 'metrics-core', version: '2,2.0'
-
+//  compile group: 'com.yammer.metrics', name: 'metrics-core', version: '2,2.0'
+  compile group: 'com.codahale.metrics', name: 'metrics-core', version: '3.0.2'
+  compile group: 'com.codahale.metrics', name: 'metrics-json', version: '3.0.2'
+  
   compile group: 'org.apache.hadoop', name: 'hadoop-common', version: '2.4.0'
   compile group: 'org.apache.hadoop', name: 'hadoop-hdfs', version: '2.4.0'
 
@@ -94,7 +96,8 @@ def doRelease(String releaseDir) {
 
 
   def dependencyJars = [ 
-    "commons.utils", "commons.api", "commons.cluster","commons.netty", "commons.zookeeper", "commons.hadoop-framework", "queuengin", "sparkngin",
+   // "commons.utils", "commons.api", "commons.cluster","commons.netty", "commons.zookeeper", "commons.hadoop-framework", "queuengin", "sparkngin",
+    "commons.utils","commons.cluster","commons.netty","commons.hadoop-framework",
     "jackson-core-2.2.2", "jackson-databind", "jackson-annotations", "jcommander", "reflections", "guava", "javassist",
     'guice', 'javax.inject', 'hazelcast', 'aopalliance',
     "kafka", "scala-library",

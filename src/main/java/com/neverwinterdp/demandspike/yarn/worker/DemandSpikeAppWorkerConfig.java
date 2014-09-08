@@ -8,16 +8,26 @@ public class DemandSpikeAppWorkerConfig {
   private String topic       ;
   private long   maxDuration ;
   private int    numOfMessages ;
+  private int messageSize;
   
-  public DemandSpikeAppWorkerConfig() {} 
+
+
+public DemandSpikeAppWorkerConfig() {} 
   
   public DemandSpikeAppWorkerConfig(Map<String, String> conf) {
     this.brokerConnect = getString(conf, "broker-connect", "127.0.0.1:8080") ;
     this.topic = getString(conf, "topic", "metrics.consumer") ;
     this.numOfMessages = getInt(conf, "num-of-message", 1000000) ;
     this.maxDuration = getLong(conf, "max-duration", (3 * 60 * 1000l)) ;
+    this.messageSize = getInt(conf, "message-size", 1024) ;
   }
-  
+  public int getMessageSize() {
+	return messageSize;
+}
+
+public void setMessageSize(int messageSize) {
+	this.messageSize = messageSize;
+}
   public String getBrokerConnect() { return brokerConnect ; }
   
   public String getTopic() { return topic; }
