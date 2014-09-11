@@ -12,7 +12,7 @@ public class DemandSpikeYarnTest extends AbstractMiniClusterUnitTest {
 		try {
 
 			System.out.println("Sending 1000 messages of 1Ko");
-			String[] args = { "--useYarn" ,"true", "run", "--target", "http://127.0.0.1:7080",
+			String[] args = { "run", "--mode" ,"distributed","--useYarn" ,"true","--target", "127.0.0.1:7080",
 					"--method", "POST", "--protocol", "HTTP", "--nMessages",
 					"1000" };
 			DemandSpike.main(args);
@@ -28,9 +28,9 @@ public class DemandSpikeYarnTest extends AbstractMiniClusterUnitTest {
 	public void testMessageSize() {
 		try {
 			System.out.println("Sending 1000 messages of 2Ko");
-			String[] args = { "--useYarn" ,"true", "run", "--target", "http://127.0.0.1:7080",
+			String[] args = {  "run", "--mode" ,"distributed","--useYarn" ,"true","--target", "127.0.0.1:7080",
 					"--method", "POST", "--protocol", "HTTP", "--messageSize",
-					"2048" };
+					"2048" , "--nMessages", "1000"};
 			DemandSpike.main(args);
 			System.out.println(" =============================================================================");
 		} catch (Exception e) {
@@ -43,7 +43,7 @@ public class DemandSpikeYarnTest extends AbstractMiniClusterUnitTest {
 	public void testSendingPeriod() {
 		try {
 			System.out.println("Sending messages for 1 munite");
-			String[] args = {"--useYarn" ,"true", "run", "--target", "http://127.0.0.1:7080",
+			String[] args = {"run", "--mode" ,"distributed","--useYarn" ,"true","--target", "127.0.0.1:7080",
 					"--method", "POST", "--protocol", "HTTP", "--time", "60000" };
 			DemandSpike.main(args);
 			System.out.println(" =============================================================================");

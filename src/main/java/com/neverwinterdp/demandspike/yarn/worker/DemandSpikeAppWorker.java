@@ -1,13 +1,23 @@
 package com.neverwinterdp.demandspike.yarn.worker;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.neverwinterdp.demandspike.http.Message;
-import com.neverwinterdp.demandspike.job.MessageGenerator;
+import com.neverwinterdp.demandspike.constants.Method;
+import com.neverwinterdp.demandspike.job.DemandSpikeJob;
+import com.neverwinterdp.demandspike.job.JobConfig;
+import com.neverwinterdp.demandspike.job.send.MessageDriverConfig;
 import com.neverwinterdp.hadoop.yarn.app.AppInfo;
 import com.neverwinterdp.hadoop.yarn.app.worker.AppWorker;
 import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainer;
+import com.neverwinterdp.util.monitor.ApplicationMonitor;
+import com.neverwinterdp.util.monitor.snapshot.ApplicationMonitorSnapshot;
+import com.neverwinterdp.util.monitor.snapshot.MetricFormater;
+import com.neverwinterdp.util.monitor.snapshot.TimerSnapshot;
 
 
 public class DemandSpikeAppWorker implements AppWorker {
@@ -16,21 +26,26 @@ public class DemandSpikeAppWorker implements AppWorker {
   public void run(AppWorkerContainer appContainer) throws Exception {
     MessageSender sender = null ;
     try {
-      AppInfo config = appContainer.getConfig() ;
-      DemandSpikeAppWorkerConfig demandSpikeWorkerConfig = new DemandSpikeAppWorkerConfig(config.yarnConf) ;
-      sender = new MessageSender(demandSpikeWorkerConfig.getBrokerConnect(), 1000) ;
-      long stopTime = System.currentTimeMillis() + demandSpikeWorkerConfig.getMaxDuration() ;
-      for(int i = 0; i < demandSpikeWorkerConfig.getNumOfMessages(); i++) {
-        MessageGenerator messageGenerator = new MessageGenerator();
-		messageGenerator.setMessageSize(demandSpikeWorkerConfig.getMessageSize());
-		Message message = messageGenerator.next();
-        message.getHeader().setTopic(demandSpikeWorkerConfig.getTopic());
-        System.out.println("Sending Message N° "+ i);
-        sender.send(message, 3000);
-        if(i % 100 == 0) {
-          if(System.currentTimeMillis() >= stopTime) break ;
-        }
-      }
+      AppInfo appConfig = appContainer.getConfig() ;
+      DemandSpikeAppWorkerConfig demandSpikeWorkerConfig = new DemandSpikeAppWorkerConfig(appConfig.yarnConf) ;
+    
+      List<String> connect = new ArrayList<String>();
+	  
+	  connect.add("http://" + demandSpikeWorkerConfig.getBrokerConnect());
+	  Method method = Method.GET;
+	  JobConfig config;
+	  if(method.equals(Method.POST)){
+		  config = new JobConfig(new MessageDriverConfig("sparkngin", connect,"metrics.consumer",method), 1, demandSpikeWorkerConfig.getMessageSize(), demandSpikeWorkerConfig.getMaxDuration(), demandSpikeWorkerConfig.getNumOfMessages(), 0);
+	  }else{
+		  config = new JobConfig(new MessageDriverConfig(connect,method), 1, demandSpikeWorkerConfig.getMessageSize(), demandSpikeWorkerConfig.getMaxDuration(), demandSpikeWorkerConfig.getNumOfMessages(),  0); 
+	  }
+      ApplicationMonitor appMonitor = new ApplicationMonitor() ;
+      DemandSpikeJob job = new DemandSpikeJob("sparkngin producer",appMonitor, config) ;
+      job.run();
+      ApplicationMonitorSnapshot snapshot = appMonitor.snapshot() ;
+      Map<String, TimerSnapshot> timers = snapshot.getRegistry().getTimers() ;
+      MetricFormater formater = new MetricFormater("  ") ;    
+      System.out.println(formater.format(timers));
     } finally {
       if(sender != null)  sender.waitAndClose(15000);
     }
