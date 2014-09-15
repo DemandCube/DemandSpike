@@ -94,7 +94,7 @@ public class DemandSpikeClusterBuilder {
         "  --autostart --module Sparkngin" +
         "  -Pmodule.data.drop=true" +
         "  -Psparkngin:http-listen-port=7080" +
-        "  -Psparkngin:forwarder-class=com.neverwinterdp.sparkngin.http.KafkaMessageForwarder" +
+        "  -Psparkngin:forwarder-class=com.neverwinterdp.sparkngin.KafkaMessageForwarder" +
         "  -Pkafka-producer:metadata.broker.list=" + getKafkaConnect()
     ) ;
     
