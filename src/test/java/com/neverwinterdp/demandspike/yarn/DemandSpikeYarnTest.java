@@ -3,9 +3,8 @@ package com.neverwinterdp.demandspike.yarn;
 import org.junit.Test;
 
 import com.neverwinterdp.demandspike.DemandSpike;
-import com.neverwinterdp.hadoop.AbstractMiniClusterUnitTest;
 
-public class DemandSpikeYarnTest extends AbstractMiniClusterUnitTest {
+public class DemandSpikeYarnTest  {
 
 	@Test
 	public void testNumberOfMessages() {

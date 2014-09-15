@@ -9,8 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.neverwinterdp.demandspike.constants.Method;
 import com.neverwinterdp.demandspike.job.DemandSpikeJob;
-import com.neverwinterdp.demandspike.job.JobConfig;
-import com.neverwinterdp.demandspike.job.send.MessageDriverConfig;
+import com.neverwinterdp.demandspike.job.DemandSpikeJobConfig;
 import com.neverwinterdp.hadoop.yarn.app.AppInfo;
 import com.neverwinterdp.hadoop.yarn.app.worker.AppWorker;
 import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainer;
@@ -27,20 +26,14 @@ public class DemandSpikeAppWorker implements AppWorker {
     MessageSender sender = null ;
     try {
       AppInfo appConfig = appContainer.getConfig() ;
-      DemandSpikeAppWorkerConfig demandSpikeWorkerConfig = new DemandSpikeAppWorkerConfig(appConfig.yarnConf) ;
+      DemandSpikeJobConfig demandSpikeWorkerConfig = new DemandSpikeJobConfig(appConfig.yarnConf) ;
     
       List<String> connect = new ArrayList<String>();
 	  
-	  connect.add("http://" + demandSpikeWorkerConfig.getBrokerConnect());
+	  connect.add(demandSpikeWorkerConfig.getBrokerConnect());
 	  Method method = Method.GET;
-	  JobConfig config;
-	  if(method.equals(Method.POST)){
-		  config = new JobConfig(new MessageDriverConfig("sparkngin", connect,"metrics.consumer",method), 1, demandSpikeWorkerConfig.getMessageSize(), demandSpikeWorkerConfig.getMaxDuration(), demandSpikeWorkerConfig.getNumOfMessages(), 0);
-	  }else{
-		  config = new JobConfig(new MessageDriverConfig(connect,method), 1, demandSpikeWorkerConfig.getMessageSize(), demandSpikeWorkerConfig.getMaxDuration(), demandSpikeWorkerConfig.getNumOfMessages(),  0); 
-	  }
       ApplicationMonitor appMonitor = new ApplicationMonitor() ;
-      DemandSpikeJob job = new DemandSpikeJob("sparkngin producer",appMonitor, config) ;
+      DemandSpikeJob job = new DemandSpikeJob("sparkngin producer",appMonitor, demandSpikeWorkerConfig) ;
       job.run();
       ApplicationMonitorSnapshot snapshot = appMonitor.snapshot() ;
       Map<String, TimerSnapshot> timers = snapshot.getRegistry().getTimers() ;

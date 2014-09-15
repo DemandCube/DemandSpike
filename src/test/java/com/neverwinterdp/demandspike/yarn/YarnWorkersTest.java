@@ -8,11 +8,10 @@ import org.junit.Test;
 
 import com.neverwinterdp.demandspike.http.Message;
 import com.neverwinterdp.demandspike.yarn.worker.MessageSender;
-import com.neverwinterdp.hadoop.AbstractMiniClusterUnitTest;
 import com.neverwinterdp.hadoop.yarn.app.AppClient;
 import com.neverwinterdp.hadoop.yarn.app.AppClientMonitor;
 
-public class YarnWorkersTest extends AbstractMiniClusterUnitTest {
+public class YarnWorkersTest {
 
   
 

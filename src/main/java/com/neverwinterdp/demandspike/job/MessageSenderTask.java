@@ -13,7 +13,7 @@ import com.neverwinterdp.util.monitor.ApplicationMonitor;
 
 public class MessageSenderTask implements Runnable, Serializable {
 	Logger logger;
-	private JobConfig config;
+	private DemandSpikeJobConfig config;
 
 	String taskId;
 
@@ -21,10 +21,10 @@ public class MessageSenderTask implements Runnable, Serializable {
 	protected MessageDriver messageDriver;
 
 	public MessageSenderTask(String id, ApplicationMonitor monitor,
-			JobConfig config) {
+			DemandSpikeJobConfig config) {
 		this.taskId = id;
 		this.config = config;
-		messageDriver = config.driverConfig.createDriver(monitor);
+		messageDriver = config.createDriver(monitor);
 
 		messageGenerator = new MessageGenerator();
 		messageGenerator.setIdPrefix(taskId);
@@ -49,7 +49,7 @@ public class MessageSenderTask implements Runnable, Serializable {
 	void sendContinuous() {
 		try {
 			long stopTime = System.currentTimeMillis() + config.maxDuration;
-			for (long i = 0; i < config.maxNumOfMessage; i++) {
+			for (long i = 0; i < config.nMessages; i++) {
 				Message message = messageGenerator.next();
 				messageDriver.send(message);
 				if (System.currentTimeMillis() > stopTime)
@@ -92,7 +92,7 @@ public class MessageSenderTask implements Runnable, Serializable {
 				Message message = messageGenerator.next();
 				messageDriver.send(message);
 				messageSent++;
-				if (messageSent >= config.maxNumOfMessage) {
+				if (messageSent >= config.nMessages) {
 					cancel();
 				}
 			} catch (Exception e) {

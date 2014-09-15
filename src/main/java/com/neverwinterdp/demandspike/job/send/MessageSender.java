@@ -7,6 +7,8 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.neverwinterdp.demandspike.job.DemandSpikeJobConfig;
+import com.neverwinterdp.demandspike.job.MessageSenderTask;
 import com.neverwinterdp.server.gateway.ClusterGateway;
 import com.neverwinterdp.util.monitor.ApplicationMonitor;
 
@@ -14,10 +16,10 @@ public class MessageSender implements Runnable {
   protected static final Logger LOGGER = LoggerFactory.getLogger(MessageSender.class);
   
   ApplicationMonitor appMonitor ;
-  MessageSenderConfig config ;
+  DemandSpikeJobConfig config ;
 
   
-  public MessageSender(ApplicationMonitor monitor, MessageSenderConfig config ) {
+  public MessageSender(ApplicationMonitor monitor, DemandSpikeJobConfig config ) {
     this.appMonitor = monitor ;
     this.config = config ;
 
@@ -26,7 +28,7 @@ public class MessageSender implements Runnable {
   public void run() {
     ExecutorService taskExecutor = null ;
     try {
-      taskExecutor = Executors.newFixedThreadPool(config.numOfProcesses);
+      taskExecutor = Executors.newFixedThreadPool((int)config.nMessages);
       MessageSenderTask[] task = config.createMessageSender(appMonitor) ;
       for(int i = 0; i < task.length; i++) {
         task[i].setLogger(LOGGER) ;
