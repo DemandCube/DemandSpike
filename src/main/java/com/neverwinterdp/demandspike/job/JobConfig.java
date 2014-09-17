@@ -5,12 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.neverwinterdp.demandspike.commandline.RunCommands;
+import com.neverwinterdp.demandspike.commandline.SpikeEnums;
 import com.neverwinterdp.demandspike.constants.Method;
 import com.neverwinterdp.demandspike.job.send.HttpDriver;
 import com.neverwinterdp.demandspike.job.send.MessageDriver;
 import com.neverwinterdp.util.monitor.ApplicationMonitor;
 
-public class DemandSpikeJobConfig {
+public class JobConfig {
 	private String brokerConnect;
 
 	private String topic;
@@ -31,8 +33,39 @@ public class DemandSpikeJobConfig {
 
 	List<String> connect = new ArrayList<String>();
 	
-	Method method;
+	  public List<String> targets;
+	  public int numOfThreads = 1;
 
+	  public int maxNumOfRequests = 1000000; // 1 million messages by default
+	  public String data;
+	  public String inputFile;
+	  public String inputTemplate;
+	  public int requestsPerThread = 0;
+	  public int nWorkers = 1;
+	  public SpikeEnums.METHOD method;
+	  public List<String> autoGeneratorString;
+
+	  public List<String> getTargets() {
+	    return targets;
+	  }
+
+
+	  public JobConfig(RunCommands commands) {
+	    this.numOfThreads = commands.cLevel;
+	    this.messageSize = commands.dataSize;
+	    this.maxDuration = commands.time;
+	    this.maxNumOfRequests = commands.maxRequests;
+	    this.sendPeriod = commands.sendPeriod;
+	    this.data = commands.inputData;
+	    this.nWorkers = commands.nWorkers;
+	    this.method = commands.method;
+	    this.targets = commands.targets;
+	    this.requestsPerThread = maxNumOfRequests / nWorkers / numOfThreads;
+	    this.data = commands.inputData;
+	    this.autoGeneratorString = commands.autoAutoString;
+	    this.inputFile = commands.inputFile;
+	    this.inputTemplate = commands.inputTemplate;
+	  }
 	public String getDriver() {
 		return this.driver;
 	}
@@ -43,7 +76,7 @@ public class DemandSpikeJobConfig {
 		return mdriver;
 	}
 
-	public DemandSpikeJobConfig(List<String> connect, Method method, int numOfTasks, int messageSize, long maxDuration,
+	public JobConfig(List<String> connect, SpikeEnums.METHOD method, int numOfTasks, int messageSize, long maxDuration,
 			long maxNumOfMessage, long sendPeriod) {
 		this.cLevel = numOfTasks;
 		this.messageSize = messageSize;
@@ -51,13 +84,14 @@ public class DemandSpikeJobConfig {
 		this.nMessages = maxNumOfMessage;
 		this.sendPeriod = sendPeriod;
 		this.connect = connect;
+		this.method = method;
 		// To Do parse topic and driver
 		//this.topic = topic;
 		//$+this.driver = driver;
 
 	}
 
-	public DemandSpikeJobConfig(Map<String, String> conf) {
+	public JobConfig(Map<String, String> conf) {
 		this.brokerConnect = getString(conf, "broker-connect", "127.0.0.1:8080");
 		this.topic = getString(conf, "topic", "metrics.consumer");
 		this.nMessages = getInt(conf, "num-of-message", 1000000);

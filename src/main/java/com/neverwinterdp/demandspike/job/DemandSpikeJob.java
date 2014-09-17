@@ -14,10 +14,10 @@ public class DemandSpikeJob implements Runnable {
 			.getLogger(DemandSpikeJob.class);
 
 	ApplicationMonitor appMonitor;
-	DemandSpikeJobConfig config;
+	JobConfig config;
 	String name;
 
-	public DemandSpikeJob(String name, ApplicationMonitor monitor, DemandSpikeJobConfig config) {
+	public DemandSpikeJob(String name, ApplicationMonitor monitor, JobConfig config) {
 		this.name = name;
 		this.appMonitor = monitor;
 		this.config = config;

@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Timer;
+import com.neverwinterdp.demandspike.commandline.SpikeEnums;
 import com.neverwinterdp.demandspike.constants.Method;
 import com.neverwinterdp.demandspike.http.HttpMessageClient;
 import com.neverwinterdp.demandspike.http.Message;
@@ -22,7 +23,7 @@ public class HttpDriver implements MessageDriver {
   private ComponentMonitor   driverMonitor ;
   private String topic = "";
   private HttpMessageClient client ;
-  private Method method;
+  private SpikeEnums.METHOD method;
   private List<String> connect;
   
   
@@ -47,7 +48,7 @@ public class HttpDriver implements MessageDriver {
   }
   
   
-  public void init(List<String> connect, Method method, String topic) {
+  public void init(List<String> connect, SpikeEnums.METHOD method, String topic) {
 	  this.topic = topic ;
 	  this.method = method;
 	  this.connect = connect;

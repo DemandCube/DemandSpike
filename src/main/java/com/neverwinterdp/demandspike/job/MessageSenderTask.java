@@ -13,7 +13,7 @@ import com.neverwinterdp.util.monitor.ApplicationMonitor;
 
 public class MessageSenderTask implements Runnable, Serializable {
 	Logger logger;
-	private DemandSpikeJobConfig config;
+	private JobConfig config;
 
 	String taskId;
 
@@ -21,7 +21,7 @@ public class MessageSenderTask implements Runnable, Serializable {
 	protected MessageDriver messageDriver;
 
 	public MessageSenderTask(String id, ApplicationMonitor monitor,
-			DemandSpikeJobConfig config) {
+			JobConfig config) {
 		this.taskId = id;
 		this.config = config;
 		messageDriver = config.createDriver(monitor);

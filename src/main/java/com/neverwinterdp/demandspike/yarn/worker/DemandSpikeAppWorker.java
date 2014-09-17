@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.neverwinterdp.demandspike.constants.Method;
 import com.neverwinterdp.demandspike.job.DemandSpikeJob;
-import com.neverwinterdp.demandspike.job.DemandSpikeJobConfig;
+import com.neverwinterdp.demandspike.job.JobConfig;
 import com.neverwinterdp.hadoop.yarn.app.AppInfo;
 import com.neverwinterdp.hadoop.yarn.app.worker.AppWorker;
 import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainer;
@@ -26,7 +26,7 @@ public class DemandSpikeAppWorker implements AppWorker {
     MessageSender sender = null ;
     try {
       AppInfo appConfig = appContainer.getConfig() ;
-      DemandSpikeJobConfig demandSpikeWorkerConfig = new DemandSpikeJobConfig(appConfig.yarnConf) ;
+      JobConfig demandSpikeWorkerConfig = new JobConfig(appConfig.yarnConf) ;
     
       List<String> connect = new ArrayList<String>();
 	  

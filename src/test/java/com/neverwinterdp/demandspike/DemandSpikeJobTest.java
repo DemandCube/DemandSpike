@@ -6,9 +6,10 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import com.neverwinterdp.demandspike.commandline.SpikeEnums.METHOD;
 import com.neverwinterdp.demandspike.constants.Method;
 import com.neverwinterdp.demandspike.job.DemandSpikeJob;
-import com.neverwinterdp.demandspike.job.DemandSpikeJobConfig;
+import com.neverwinterdp.demandspike.job.JobConfig;
 import com.neverwinterdp.util.monitor.ApplicationMonitor;
 import com.neverwinterdp.util.monitor.snapshot.ApplicationMonitorSnapshot;
 import com.neverwinterdp.util.monitor.snapshot.MetricFormater;
@@ -23,9 +24,8 @@ public class DemandSpikeJobTest  {
 	  List<String> connect = new ArrayList<String>();
 	  
 	  connect.add("http://127.0.0.1:7080");
-	  Method method = Method.GET;
-	  DemandSpikeJobConfig config;
-	  config = new DemandSpikeJobConfig(connect,method, 1, 1024, 30000, 100000, 0);
+	  JobConfig config;
+	  config = new JobConfig(connect,METHOD.GET, 1, 1024, 30000, 100000, 0);
       ApplicationMonitor appMonitor = new ApplicationMonitor() ;
       DemandSpikeJob job = new DemandSpikeJob("sparkngin producer",appMonitor, config) ;
       job.run();
