@@ -86,7 +86,9 @@ public class DemandSpikeClusterBuilder {
       ) ;
     }
     gateway.execute(
-        "module install --member-role generic -Pmodule.data.drop=true --autostart --module KafkaConsumer"
+      "module install " + 
+      " -Pmodule.data.drop=true -Pkafka:zookeeper.connect=127.0.0.1:2181 " + 
+      " --member-role generic --autostart --module KafkaConsumer"
     ) ;
     gateway.execute(
         "module install" +

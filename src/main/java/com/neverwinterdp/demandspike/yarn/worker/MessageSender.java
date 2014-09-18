@@ -40,7 +40,7 @@ public class MessageSender {
           throw new TimeoutException("fail to send the message in " + timeout + "ms") ;
         }
       }
-      client.post("/message", message);
+      client.post("/message/json", message);
       String messageId = message.getHeader().getKey() ;
       messages.put(messageId, message) ;
     }
