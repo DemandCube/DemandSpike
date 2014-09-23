@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.HttpContent;
+import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.util.CharsetUtil;
@@ -18,6 +19,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.codahale.metrics.Histogram;
+import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import com.neverwinterdp.demandspike.client.Client;
 import com.neverwinterdp.demandspike.client.HttpClient;
@@ -106,7 +109,7 @@ public class SpikeRunner implements Runnable, Serializable {
     final long stopTime = System.currentTimeMillis() + config.maxDuration;
     for (long i = 0; i < config.requestsPerThread; i++) {
       bufferSize.incrementAndGet();
-      while (bufferSize.get() >= 10) {
+      while (bufferSize.get() >= 30) {
         Thread.sleep(500);
       }
       if (config.autoGeneratorString != null
@@ -114,18 +117,28 @@ public class SpikeRunner implements Runnable, Serializable {
         request = c.createRequest(method, getByteBuf(dataGenerator.next(
             config.autoGeneratorString, config.data)));
       }
-      final Timer.Context cxt = SpikeWorker.getContext();
+      final Timer.Context cxt = SpikeWorker.getTimerContext("responses");
+      final Meter meter = SpikeWorker.getMeter("requests");
+      final Histogram histogram = SpikeWorker.getHistogram("response-sizes");
       c.sendRequest(request, new ResponseHandler() {
         @Override
         public void onResponse(HttpResponse response) {
           cxt.close();
+          meter.mark();
+          
+  //  System.out.println(HttpHeaders.Names.CONTENT_LENGTH); 
           HttpContent content = (HttpContent) response;
+          
+          
+        //  System.out.println(content.content().array().length+"");
+        //  System.out.println(content.content().readableBytes());  
+          histogram.update(content.content().readableBytes());
           String json = content.content().toString(CharsetUtil.UTF_8);
-
+//System.out.println(json);
           if (json.trim() != "" && json != null) {
             logger.info("Response string : " + json);
           }
-
+          
           bufferSize.decrementAndGet();
           if (response.getStatus().code() >= 200
               && response.getStatus().code() < 300) {

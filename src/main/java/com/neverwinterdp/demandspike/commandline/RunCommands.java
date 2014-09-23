@@ -47,6 +47,9 @@ public class RunCommands {
   @Parameter(names = { "--input-file" }, description = "Input file path. (File will be directly uploaded)")
   public String inputFile;
 
+  @Parameter(names = { "--output-file" }, description = "CSV export file path.")
+  public String outputFile;
+  
   @Parameter(names = { "--nWorkers" }, description = "Number of workers to handle the job")
   public Integer nWorkers = 1;
 

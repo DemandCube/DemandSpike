@@ -9,9 +9,6 @@ import org.slf4j.LoggerFactory;
 import com.neverwinterdp.demandspike.commandline.DemandSpikeParser;
 
 public class DemandSpike {
-//  static {
-//    System.setProperty("log4j.configuration", "file:config/log4j.properties");
-//  }
 
   private static Logger logger;
   private boolean help;

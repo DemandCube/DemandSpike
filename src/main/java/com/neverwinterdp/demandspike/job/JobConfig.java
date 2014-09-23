@@ -26,6 +26,7 @@ public class JobConfig implements Serializable {
   public int nWorkers = 1;
   public SpikeEnums.METHOD method;
   public List<String> autoGeneratorString;
+  public String outputFile;
 
   public List<String> getTargets() {
     return targets;
@@ -47,6 +48,7 @@ public class JobConfig implements Serializable {
     this.autoGeneratorString = commands.autoAutoString;
     this.inputFile = commands.inputFile;
     this.inputTemplate = commands.inputTemplate;
+    this.outputFile = commands.outputFile;
   }
   
 }

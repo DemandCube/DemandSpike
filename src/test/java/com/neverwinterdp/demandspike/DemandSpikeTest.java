@@ -1,9 +1,8 @@
 package com.neverwinterdp.demandspike;
 
 import org.junit.Test;
-import com.neverwinterdp.hadoop.AbstractMiniClusterUnitTest;
 
-public class DemandSpikeTest extends AbstractMiniClusterUnitTest {
+public class DemandSpikeTest {
 
 	@Test
 	public void testNumberOfMessages() {
