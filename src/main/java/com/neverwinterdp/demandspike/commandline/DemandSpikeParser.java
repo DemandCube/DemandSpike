@@ -27,6 +27,7 @@ import com.neverwinterdp.demandspike.cluster.SpikeCluster;
 import com.neverwinterdp.demandspike.job.JobConfig;
 import com.neverwinterdp.demandspike.result.Result;
 import com.neverwinterdp.demandspike.result.ResultAggregator;
+import com.neverwinterdp.demandspike.util.CSVGenerator;
 import com.neverwinterdp.demandspike.worker.SpikeWorker;
 
 public class DemandSpikeParser {
@@ -163,6 +164,24 @@ public class DemandSpikeParser {
     System.out.println("Number of threads used     : " + config.numOfThreads);
     System.out.println("Processing time            : " + pTime);
 
+    List<Result> list= new ArrayList<Result>(); 
+    list.add(finalResult);
+    CSVGenerator<Result> csvGenerator = new CSVGenerator<Result>(Result.class);
+    try {
+      csvGenerator.generateCSVFile(results, config.outputFile);
+    } catch (NoSuchFieldException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (SecurityException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (IllegalArgumentException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (IllegalAccessException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
     return true;
   }
 }

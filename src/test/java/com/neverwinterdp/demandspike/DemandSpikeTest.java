@@ -2,7 +2,7 @@ package com.neverwinterdp.demandspike;
 
 import org.junit.Test;
 
-public class DemandSpikeTest  {
+public class DemandSpikeTest {
 
 	@Test
 	public void testNumberOfMessages() {
@@ -25,7 +25,8 @@ public class DemandSpikeTest  {
 		try {
 			System.out.println("Sending 1000 messages of 2Ko");
 			String[] args = { "run", "--target", "http://127.0.0.1:7080",
-					"--method", "POST", "--protocol", "HTTP" };
+					"--method", "POST", "--protocol", "HTTP", "--messageSize",
+					"2048" };
 			DemandSpike.main(args);
 			System.out.println(" =============================================================================");
 		} catch (Exception e) {

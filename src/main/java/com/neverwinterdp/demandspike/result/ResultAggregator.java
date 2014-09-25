@@ -42,7 +42,6 @@ public class ResultAggregator {
     }
     result.setMean(mean / size);
     
-    
     //merge stddev
     double stddev = 0;
     for (Result r : results) {
