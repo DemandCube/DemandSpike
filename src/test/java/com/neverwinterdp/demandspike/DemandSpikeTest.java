@@ -1,9 +1,8 @@
 package com.neverwinterdp.demandspike;
 
 import org.junit.Test;
-import com.neverwinterdp.hadoop.AbstractMiniClusterUnitTest;
 
-public class DemandSpikeTest extends AbstractMiniClusterUnitTest {
+public class DemandSpikeTest {
 
 	@Test
 	public void testNumberOfMessages() {
@@ -11,8 +10,7 @@ public class DemandSpikeTest extends AbstractMiniClusterUnitTest {
 
 			System.out.println("Sending 1000 messages of 1Ko");
 			String[] args = { "run", "--target", "http://127.0.0.1:7080",
-					"--method", "POST", "--protocol", "HTTP", "--nMessages",
-					"1000" };
+					"--method", "POST", "--protocol", "HTTP" };
 			DemandSpike.main(args);
 			System.out.println(" =============================================================================");
 
