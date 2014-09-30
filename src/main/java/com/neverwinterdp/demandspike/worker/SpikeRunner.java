@@ -50,6 +50,14 @@ public class SpikeRunner implements Runnable, Serializable {
     this.latch = latch;
     this.dataGenerator = new DataGenerator();
   }
+  
+  public SpikeRunner(JobConfig config) {
+	    logger = LoggerFactory.getLogger("DemandSpike");
+	    this.url = config.getTargets().get(0);
+	    this.config = config;
+	    this.latch = new CountDownLatch(1);
+	    this.dataGenerator = new DataGenerator();
+	  }
 
   @Override
   public void run() {

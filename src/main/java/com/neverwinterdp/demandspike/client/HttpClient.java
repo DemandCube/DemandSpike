@@ -59,6 +59,7 @@ public class HttpClient implements Client {
   @Override
   public void sendRequest(DefaultFullHttpRequest request,
       ResponseHandler response) {
+	  System.out.print("Sendind message "+request.toString());
     if (this.channel.isActive()) {
       if (this.channel.pipeline().get("handler") == null) {
         this.channel.pipeline().addLast("handler", new HttpClientHandler(response));
