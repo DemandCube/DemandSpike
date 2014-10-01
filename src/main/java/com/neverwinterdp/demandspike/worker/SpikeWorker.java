@@ -19,6 +19,7 @@ import com.codahale.metrics.Timer;
 import com.neverwinterdp.demandspike.DemandSpike;
 import com.neverwinterdp.demandspike.job.JobConfig;
 import com.neverwinterdp.demandspike.result.Result;
+import com.neverwinterdp.util.JSONSerializer;
 
 public class SpikeWorker implements Callable<Result>, Serializable {
 
@@ -27,7 +28,7 @@ public class SpikeWorker implements Callable<Result>, Serializable {
    */
   private static final long serialVersionUID = 1L;
   private final JobConfig config;
-  public static MetricRegistry timerRegistry = new MetricRegistry();
+  public static MetricRegistry metricRegistry = new MetricRegistry();
 
   public static Integer response2xx = 0;
   public static Integer response3xx = 0;
@@ -57,15 +58,15 @@ public class SpikeWorker implements Callable<Result>, Serializable {
 
   
   public static synchronized Timer.Context getTimerContext(String...name) {
-   return SpikeWorker.timerRegistry.timer(getName(name)).time();
+   return SpikeWorker.metricRegistry.timer(getName(name)).time();
   }
   
   public static synchronized Meter getMeter(String name) {
-    return SpikeWorker.timerRegistry.meter(getName(name));
+    return SpikeWorker.metricRegistry.meter(getName(name));
    }
   
   public static synchronized Histogram getHistogram(String...name) {
-    return SpikeWorker.timerRegistry.histogram(getName(name));
+    return SpikeWorker.metricRegistry.histogram(getName(name));
    }
   
   
@@ -89,24 +90,24 @@ public class SpikeWorker implements Callable<Result>, Serializable {
     }
     latch.await();
   
-    
-    ConsoleReporter reporter = ConsoleReporter
-        .forRegistry(SpikeWorker.timerRegistry)
-        .convertRatesTo(TimeUnit.SECONDS)
-        .convertDurationsTo(TimeUnit.MILLISECONDS).build();
-    reporter.report();
-    
-    
-    CsvReporter reporter2 = CsvReporter
-        .forRegistry(SpikeWorker.timerRegistry)
-        .build(new File("/Users/peterjeroldleslie/"));
-    reporter2.report();
-    Timer timer = SpikeWorker.timerRegistry.getTimers().get("response");
+//    
+//    ConsoleReporter reporter = ConsoleReporter
+//        .forRegistry(SpikeWorker.metricRegistry)
+//        .convertRatesTo(TimeUnit.SECONDS)
+//        .convertDurationsTo(TimeUnit.MILLISECONDS).build();
+//    reporter.report();
+//    
+//    
+//    CsvReporter reporter2 = CsvReporter
+//        .forRegistry(SpikeWorker.metricRegistry)
+//        .build(new File("/Users/peterjeroldleslie/"));
+//    reporter2.report();
+    Timer timer = SpikeWorker.metricRegistry.getTimers().get(getName("responses"));
     Snapshot snapshot = timer.getSnapshot();
     Result result = new Result();
+   // SpikeWorker.metricRegistry.getTimer
     
-    
-    
+    //System.out.println(JSONSerializer.INSTANCE.toString(metricRegistry));
     result.setResponse2xx(SpikeWorker.response2xx);
     result.setResponse3xx(SpikeWorker.response3xx);
     result.setResponse4xx(SpikeWorker.response4xx);
