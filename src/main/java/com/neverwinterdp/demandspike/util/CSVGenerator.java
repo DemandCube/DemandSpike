@@ -42,7 +42,6 @@ public class CSVGenerator<T> {
           field.setAccessible(true);
           Header column = field.getAnnotation(Header.class);
           Object o = field.get(t);
-          System.out.println(column.enable());
           if (column.enable()) {
             if (o == null) {
               o = "";

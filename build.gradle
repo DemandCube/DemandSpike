@@ -141,16 +141,18 @@ def doRelease(String releaseDir) {
     }
   }
   
-  def jarsForHadoop = [ 
-    "commons.hadoop-framework", "commons.netty", "commons.utils", "jackson-core-2.2.2", "jackson-databind",
-    "jackson-annotations", "jcommander","metrics-core", "netty-all",
-  ] 
+
 
   copy {
     from "${buildDir}/libs"
     into "${releaseDir}/libs"
   }
-  
+
+  def jarsForHadoop = [ 
+    "commons.hadoop-framework", "commons.netty", "commons.utils", "jackson-core-2.2.2", "jackson-databind",
+    "jackson-annotations", "jcommander","metrics-core", "netty-all",
+  ] 
+    
   println "Copy the dependencies library for hadoop worker and AM"
   configurations.compile.each { File file -> 
     if(isIn(jarsForHadoop, file)) {
@@ -200,9 +202,6 @@ def createYarnAppHome(String appHomeDir) {
       }
     }
   }
-  
-  
-
 
   copy {
     from "${buildDir}/libs"
