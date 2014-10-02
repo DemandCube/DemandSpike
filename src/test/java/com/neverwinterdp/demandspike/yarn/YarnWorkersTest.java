@@ -22,7 +22,7 @@ public class YarnWorkersTest {
 		yarnConf.set("yarn.resourcemanager.scheduler.address", "0.0.0.0:8030");
 
 		String[] args = {
-				"--mini-cluster-env",
+		
 				"--app-name",
 				"NeverwinterDP_DemandSpike_App",
 				"--app-container-manager",

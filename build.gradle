@@ -44,11 +44,11 @@ configurations.all {
 }
 
 dependencies {
- // compile group: 'com.neverwinterdp', name: 'commons.utils', version: '1.0-SNAPSHOT'
+    compile group: 'com.neverwinterdp', name: 'commons.utils', version: '1.0-SNAPSHOT'
   //compile group: 'com.neverwinterdp', name: 'commons.api', version: '1.0-SNAPSHOT'
   //compile group: 'com.neverwinterdp', name: 'commons.cluster', version: '1.0-SNAPSHOT'
   //compile group: 'com.neverwinterdp', name: 'commons.cluster', version: '1.0-SNAPSHOT', classifier: 'js'
- // compile group: 'com.neverwinterdp', name: 'commons.hadoop-framework', version: '1.0-SNAPSHOT'
+    compile group: 'com.neverwinterdp', name: 'commons.hadoop-framework', version: '1.0-SNAPSHOT'
   //compile group: 'com.neverwinterdp', name: 'commons.zookeeper', version: '1.0-SNAPSHOT'
 
   //testCompile group: 'com.neverwinterdp', name: 'commons.hadoop-framework', version: '1.0-SNAPSHOT', classifier: 'tests'
@@ -110,7 +110,7 @@ def doRelease(String releaseDir) {
    // "commons.utils", "commons.api", "commons.cluster","commons.netty", "commons.zookeeper", "commons.hadoop-framework", "queuengin", "sparkngin",
    // "commons.utils","commons.cluster","commons.netty","commons.hadoop-framework",
    //"commons.utils",
-    "jackson-core-2.2.2", "jackson-databind", "jackson-annotations", "jcommander", "reflections", "guava", "javassist",
+    "commons.utils", "commons.hadoop-framework", "jackson-core-2.2.2", "jackson-databind", "jackson-annotations", "jcommander", "reflections", "guava", "javassist",
     'guice', 'javax.inject', 'hazelcast', 'aopalliance',
     "kafka", "scala-library",
     'zookeeper', 'zkclient',
@@ -140,10 +140,31 @@ def doRelease(String releaseDir) {
       //println "Ignore $file.name "
     }
   }
+  
+  def jarsForHadoop = [ 
+    "commons.hadoop-framework", "commons.netty", "commons.utils", "jackson-core-2.2.2", "jackson-databind",
+    "jackson-annotations", "jcommander","metrics-core", "netty-all",
+  ] 
 
   copy {
     from "${buildDir}/libs"
     into "${releaseDir}/libs"
+  }
+  
+  println "Copy the dependencies library for hadoop worker and AM"
+  configurations.compile.each { File file -> 
+    if(isIn(jarsForHadoop, file)) {
+      println "  Copy $file.name to jarsForHadoop"
+      copy {
+        from file
+        into "${releaseDir}/libs/jarsforhadoop"
+      }
+    }
+
+  }
+  copy {
+    from "${buildDir}/libs"
+    into "${releaseDir}/libs/jarsforhadoop"
   }
 
   println "Copy and override app"
@@ -179,6 +200,9 @@ def createYarnAppHome(String appHomeDir) {
       }
     }
   }
+  
+  
+
 
   copy {
     from "${buildDir}/libs"

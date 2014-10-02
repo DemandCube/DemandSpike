@@ -14,9 +14,7 @@ public class DemandSpikeAppWorker implements AppWorker {
 
 	public void run(AppWorkerContainer appContainer) throws Exception {
 		JobConfig config = new JobConfig(appContainer.getConfig().yarnConf);
-		
 		System.out.println("Test started. please wait to complete...");
-		
 		Thread t = new Thread(new SpikeRunner(config));
 		t.start();
 	}
