@@ -50,6 +50,14 @@ public class SpikeRunner implements Runnable, Serializable {
     this.latch = latch;
     this.dataGenerator = new DataGenerator();
   }
+  
+  public SpikeRunner(JobConfig config) {
+	    logger = LoggerFactory.getLogger("DemandSpike");
+	    this.url = config.getTargets().get(0);
+	    this.config = config;
+	    this.latch = new CountDownLatch(1);
+	    this.dataGenerator = new DataGenerator();
+	  }
 
   @Override
   public void run() {
@@ -120,25 +128,18 @@ public class SpikeRunner implements Runnable, Serializable {
       final Timer.Context cxt = SpikeWorker.getTimerContext("responses");
       final Meter meter = SpikeWorker.getMeter("requests");
       final Histogram histogram = SpikeWorker.getHistogram("response-sizes");
+      
       c.sendRequest(request, new ResponseHandler() {
         @Override
         public void onResponse(HttpResponse response) {
           cxt.close();
           meter.mark();
-          
-  //  System.out.println(HttpHeaders.Names.CONTENT_LENGTH); 
           HttpContent content = (HttpContent) response;
-          
-          
-        //  System.out.println(content.content().array().length+"");
-        //  System.out.println(content.content().readableBytes());  
           histogram.update(content.content().readableBytes());
           String json = content.content().toString(CharsetUtil.UTF_8);
-//System.out.println(json);
           if (json.trim() != "" && json != null) {
             logger.info("Response string : " + json);
           }
-          
           bufferSize.decrementAndGet();
           if (response.getStatus().code() >= 200
               && response.getStatus().code() < 300) {

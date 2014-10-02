@@ -33,7 +33,7 @@ public class RunCommands {
   public Integer time = 30000;
 
   @Parameter(names = { "--maxRequests" }, description = "Maximum number of requests to send")
-  public Integer maxRequests = 100000;
+  public Integer maxRequests = 1000;
 
   @Parameter(names = { "--sendPeriod" }, description = "")
   public Integer sendPeriod = 0;
