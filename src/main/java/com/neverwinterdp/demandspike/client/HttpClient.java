@@ -25,6 +25,7 @@ public class HttpClient implements Client {
   private URL url;
   private Channel channel;
   private EventLoopGroup group;
+  private long counter;
 
   public HttpClient(String url) throws MalformedURLException {
     this.url = new URL(url);
@@ -59,7 +60,8 @@ public class HttpClient implements Client {
   @Override
   public void sendRequest(DefaultFullHttpRequest request,
       ResponseHandler response) {
-	  System.out.print("Sendind message "+request.toString());
+	  System.out.println("Sendind message "+counter);
+	  counter++;
     if (this.channel.isActive()) {
       if (this.channel.pipeline().get("handler") == null) {
         this.channel.pipeline().addLast("handler", new HttpClientHandler(response));
