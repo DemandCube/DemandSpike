@@ -30,14 +30,9 @@ public class DemandSpikeAppWorker implements AppWorker {
 
     ExecutorService executor = Executors.newCachedThreadPool();
 
-    long timeStart = System.currentTimeMillis();
-
-    List<Result> results = new ArrayList<Result>();
     Future<Result> future = executor.submit(new SpikeWorker(config));
-    long proccessingTime = System.currentTimeMillis() - timeStart;
 
     data.setJsonData(JSONSerializer.INSTANCE.toString(future.get()));
-    appContainer.getAppMasterRPC().report("demandspike",
-        appContainer.getConfig().getAppWorkerContainerId(), data);
+    appContainer.getAppMasterRPC().report("demandspike",appContainer.getConfig().getAppWorkerContainerId(), data);
   }
 }

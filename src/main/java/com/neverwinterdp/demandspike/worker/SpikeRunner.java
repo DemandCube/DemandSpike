@@ -117,9 +117,9 @@ public class SpikeRunner implements Runnable, Serializable {
     final long stopTime = System.currentTimeMillis() + config.maxDuration;
     for (long i = 0; i < config.requestsPerThread; i++) {
       bufferSize.incrementAndGet();
-      while (bufferSize.get() >= 30) {
+      /*while (bufferSize.get() >= 30) {
         Thread.sleep(500);
-      }
+      }*/
       if (config.autoGeneratorString != null
           && config.autoGeneratorString.size() > 0) {
         request = c.createRequest(method, getByteBuf(dataGenerator.next(
@@ -128,7 +128,6 @@ public class SpikeRunner implements Runnable, Serializable {
       final Timer.Context cxt = SpikeWorker.getTimerContext("responses");
       final Meter meter = SpikeWorker.getMeter("requests");
       final Histogram histogram = SpikeWorker.getHistogram("response-sizes");
-      
       c.sendRequest(request, new ResponseHandler() {
         @Override
         public void onResponse(HttpResponse response) {
