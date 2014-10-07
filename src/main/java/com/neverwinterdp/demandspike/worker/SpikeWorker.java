@@ -107,7 +107,8 @@ public class SpikeWorker implements Callable<Result>, Serializable {
     Result result = new Result();
    // SpikeWorker.metricRegistry.getTimer
     
-    //System.out.println(JSONSerializer.INSTANCE.toString(metricRegistry));
+    
+    
     result.setResponse2xx(SpikeWorker.response2xx);
     result.setResponse3xx(SpikeWorker.response3xx);
     result.setResponse4xx(SpikeWorker.response4xx);

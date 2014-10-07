@@ -2,8 +2,6 @@ package com.neverwinterdp.demandspike.result;
 
 import java.io.Serializable;
 
-import com.codahale.metrics.Snapshot;
-import com.codahale.metrics.Timer;
 import com.neverwinterdp.demandspike.util.Header;
 
 public class Result implements Serializable {

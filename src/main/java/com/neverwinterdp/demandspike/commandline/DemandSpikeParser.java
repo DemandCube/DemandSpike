@@ -101,34 +101,7 @@ public class DemandSpikeParser {
   }
 
   
-  private boolean launchYarnMode(RunCommands commands) throws Exception{
-    YarnConfiguration yarnConf = new YarnConfiguration();
-    yarnConf.setInt(YarnConfiguration.RM_SCHEDULER_MINIMUM_ALLOCATION_MB,
-        64);
-    yarnConf.setClass(YarnConfiguration.RM_SCHEDULER, FifoScheduler.class,
-        ResourceScheduler.class);
-    yarnConf.set("yarn.resourcemanager.scheduler.address", "0.0.0.0:8030");
-
-    String[] args = {
-        "--mini-cluster-env",
-        "--app-name",
-        "NeverwinterDP_DemandSpike_App",
-        "--app-container-manager",
-        "com.neverwinterdp.demandspike.yarn.master.AsyncDemandSpikeAppMasterContainerManager",
-        "--app-rpc-port", "63200", "--app-num-of-worker", "2",
-        "--conf:yarn.resourcemanager.scheduler.address=0.0.0.0:8030",
-        "--conf:broker-connect=http://www.facebook.com:80",
-        "--conf:max-duration=30000",
-        "--conf:message-size=1024",
-        "--conf:maxNumOfRequests=200"};
-
-    AppClient appClient = new AppClient();
-    AppClientMonitor appMonitor = appClient.run(args,yarnConf);
-    appMonitor.monitor();
-    appMonitor.report(System.out);
-    
-    return true;
-  }
+  
   private boolean launchDistributedMode(RunCommands commands)
       throws InterruptedException {
     // final CountDownLatch latch = new CountDownLatch(1);
@@ -216,4 +189,37 @@ public class DemandSpikeParser {
    
     return true;
   }
+
+	private boolean launchYarnMode(RunCommands commands)  {
+		YarnConfiguration yarnConf = new YarnConfiguration();
+		yarnConf.setInt(YarnConfiguration.RM_SCHEDULER_MINIMUM_ALLOCATION_MB,
+				64);
+	//	yarnConf.setClass(YarnConfiguration.RM_SCHEDULER, FifoScheduler.class,ResourceScheduler.class);
+		yarnConf.set("yarn.resourcemanager.scheduler.address", "0.0.0.0:8030");
+
+		String[] args = {
+				"--app-name",
+				"NeverwinterDP_DemandSpike_App",
+				"--app-container-manager",
+				"com.neverwinterdp.demandspike.yarn.master.AsyncDemandSpikeAppMasterContainerManager",
+				"--app-rpc-port", "63200", "--app-num-of-worker",""+commands.cLevel,
+				"--conf:yarn.resourcemanager.scheduler.address=0.0.0.0:8030",
+				"--conf:broker-connect="+commands.targets.get(0),
+				"--conf:max-duration="+commands.time,
+				"--conf:message-size="+commands.dataSize,
+				"--conf:maxNumOfRequests="+commands.maxRequests};
+
+		AppClient appClient = new AppClient();
+		try {
+			AppClientMonitor appMonitor = appClient.run(args,yarnConf);
+			appMonitor.monitor();
+			appMonitor.report(System.out);
+		} catch (Exception e) {
+			// TODO Handle exception
+			e.printStackTrace();
+		}
+		
+
+		return true;
+	}
 }

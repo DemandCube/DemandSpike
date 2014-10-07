@@ -1,4 +1,4 @@
-package com.neverwinterdp.demandspike.yarn;
+package com.neverwinterdp.demandspike.yarn.worker;
 
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.server.MiniYARNCluster;
