@@ -30,10 +30,10 @@ public class RunCommands {
   public Integer dataSize = 1024;
 
   @Parameter(names = { "--time" }, description = "Time duration for test. Should be in seconds.")
-  public Integer time = 30000;
+  public Integer time = 300000000;
 
   @Parameter(names = { "--maxRequests" }, description = "Maximum number of requests to send")
-  public Integer maxRequests = 1000;
+  public Integer maxRequests = 100000000;
 
   @Parameter(names = { "--sendPeriod" }, description = "")
   public Integer sendPeriod = 0;

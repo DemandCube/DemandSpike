@@ -25,10 +25,6 @@ public class DemandSpike {
       IOException, ExecutionException {
 
     DemandSpikeParser demandSpikeParser = new DemandSpikeParser();
-    if (demandSpikeParser.parseCommandLine(args)) {
-      System.exit(0);
-    } else {
-      System.exit(1);
-    }
+    demandSpikeParser.parseCommandLine(args); 
   }
 }
