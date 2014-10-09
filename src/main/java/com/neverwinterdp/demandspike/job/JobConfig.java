@@ -36,7 +36,7 @@ public class JobConfig implements Serializable {
 
 	public JobConfig(RunCommands commands) {
 		this.numOfThreads = commands.cLevel;
-		this.messageSize = commands.dataSize;
+		this.messageSize = commands.messageSize;
 		this.maxDuration = commands.time;
 		this.maxNumOfRequests = commands.maxRequests;
 		this.sendPeriod = commands.sendPeriod;
@@ -48,7 +48,6 @@ public class JobConfig implements Serializable {
 		this.data = commands.inputData;
 		this.autoGeneratorString = commands.autoAutoString;
 		this.inputFile = commands.inputFile;
-		this.inputTemplate = commands.inputTemplate;
 		this.outputFile = commands.outputFile;
 	}
 

@@ -35,7 +35,7 @@ public class SpikeWorker implements Callable<Result>, Serializable {
   public static Integer response4xx = 0;
   public static Integer response5xx = 0;
   public static Integer responseOthers = 0;
-  
+
   public static synchronized void increaseResponse2xx() {
     response2xx++;
   }
@@ -56,20 +56,18 @@ public class SpikeWorker implements Callable<Result>, Serializable {
     responseOthers++;
   }
 
-  
-  public static synchronized Timer.Context getTimerContext(String...name) {
-   return SpikeWorker.metricRegistry.timer(getName(name)).time();
+  public static synchronized Timer.Context getTimerContext(String... name) {
+    return SpikeWorker.metricRegistry.timer(getName(name)).time();
   }
-  
+
   public static synchronized Meter getMeter(String name) {
     return SpikeWorker.metricRegistry.meter(getName(name));
-   }
-  
-  public static synchronized Histogram getHistogram(String...name) {
+  }
+
+  public static synchronized Histogram getHistogram(String... name) {
     return SpikeWorker.metricRegistry.histogram(getName(name));
-   }
-  
-  
+  }
+
   public SpikeWorker(JobConfig config) {
     this.config = config;
   }
@@ -77,10 +75,10 @@ public class SpikeWorker implements Callable<Result>, Serializable {
   @Override
   public Result call() throws Exception {
 
-    if(config.inputTemplate != null){
-       config.data = readFile(config.inputTemplate);
-     }
-    
+    if (config.inputFile != null) {
+      config.data = readFile(config.inputFile);
+    }
+
     final CountDownLatch latch = new CountDownLatch(config.numOfThreads);
     Thread t;
     System.out.println("Test started. please wait to complete...");
