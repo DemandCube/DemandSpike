@@ -1,43 +1,29 @@
 package com.neverwinterdp.demandspike.commandline;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
-import org.apache.hadoop.yarn.server.resourcemanager.scheduler.ResourceScheduler;
-import org.apache.hadoop.yarn.server.resourcemanager.scheduler.fifo.FifoScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
-import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IExecutorService;
-import com.hazelcast.core.Member;
-import com.neverwinterdp.demandspike.cluster.SpikeCluster;
 import com.neverwinterdp.demandspike.job.JobConfig;
 import com.neverwinterdp.demandspike.result.Result;
-import com.neverwinterdp.demandspike.result.ResultAggregator;
-import com.neverwinterdp.demandspike.util.CSVGenerator;
 import com.neverwinterdp.demandspike.worker.SpikeWorker;
 import com.neverwinterdp.hadoop.yarn.app.AppClient;
 import com.neverwinterdp.hadoop.yarn.app.AppClientMonitor;
+import com.neverwinterdp.hadoop.yarn.app.ipc.ReportData;
+import com.neverwinterdp.util.JSONSerializer;
 
 public class DemandSpikeParser {
   private static Logger logger;
-  HazelcastInstance hazelcastInstance;
+  //HazelcastInstance hazelcastInstance;
 
   public DemandSpikeParser() {
     logger = LoggerFactory.getLogger("DemandSpike");
@@ -93,7 +79,8 @@ public class DemandSpikeParser {
       return launchStandAloneTest(commands);
     } else {
       if (commands.useYarn) {
-        return true;
+        System.out.println("yarn mode started...");
+        return launchYarnMode(commands);
       } else {
         return launchDistributedMode(commands);
       }
@@ -115,86 +102,20 @@ public class DemandSpikeParser {
   private boolean launchStandAloneTest(RunCommands commands)
       throws IOException, InterruptedException, ExecutionException {
     JobConfig config = new JobConfig(commands);
-    final CountDownLatch latch = new CountDownLatch(1);
-    FutureTask<HazelcastInstance> clusterTask = new FutureTask<HazelcastInstance>(
-        new SpikeCluster(latch));
-    ExecutorService executorService = Executors.newCachedThreadPool();
-    executorService.execute(clusterTask);
-    latch.await();
-    hazelcastInstance = clusterTask.get();
-    //System.out.println("Demandspike cluster started");
+    ReportData data = new ReportData();
 
-    IExecutorService eS = hazelcastInstance.getExecutorService("default");
+    ExecutorService executor = Executors.newCachedThreadPool();
 
-    Set<Member> members = new HashSet<Member>();
-    for (Member member : hazelcastInstance.getCluster().getMembers()) {
-      members.add(member);
-      if (members.size() == config.nWorkers) {
-        break;
-      }
-    }
+    Future<Result> future = executor.submit(new SpikeWorker(config));
 
-    long timeStart = System.currentTimeMillis();
-    Map<Member, Future<Result>> futures = eS.submitToMembers(new SpikeWorker(
-        config), members);
-
-    List<Result> results = new ArrayList<Result>();
-    for (Future<Result> future : futures.values()) {
-      results.add(future.get());
-    }
-    long proccessingTime = System.currentTimeMillis() - timeStart;
-    
-    ResultAggregator resultAggregator = new ResultAggregator(new Result());
-    resultAggregator.merge(results);
-    resultAggregator.printResult();
-    
-    
-//    Result finalResult = resultAggregator.getResult();
-//    System.out.println("2xx response               : " + finalResult.getResponse2xx());
-//    System.out.println("3xx response               : " + finalResult.getResponse3xx());
-//    System.out.println("4xx response               : " + finalResult.getResponse4xx());
-//    System.out.println("5xx response               : " + finalResult.getResponse5xx());
-//    System.out.println("Other response             : " + finalResult.getResponseOthers());
-//   
-//    String pTime = String.format(
-//        "%02d:%02d:%02d",
-//        TimeUnit.MILLISECONDS.toHours(proccessingTime),
-//        TimeUnit.MILLISECONDS.toMinutes(proccessingTime)
-//            - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS
-//                .toHours(proccessingTime)),
-//        TimeUnit.MILLISECONDS.toSeconds(proccessingTime)
-//            - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS
-//                .toMinutes(proccessingTime)));
-//    System.out.println("Number of threads used     : " + config.numOfThreads);
-//    System.out.println("Processing time            : " + pTime);
-
-    if(config.outputFile!=null){
-      CSVGenerator<Result> csvGenerator = new CSVGenerator<Result>(Result.class);
-      try {
-        csvGenerator.generateCSVFile(results, config.outputFile);
-      } catch (NoSuchFieldException e) {
-        e.printStackTrace();
-        return false;
-      } catch (SecurityException e) {
-        e.printStackTrace();
-        return false;
-      } catch (IllegalArgumentException e) {
-        e.printStackTrace();
-        return false;
-      } catch (IllegalAccessException e) {
-        e.printStackTrace();
-        return false;
-      }
-    }
-   
+    data.setJsonData(JSONSerializer.INSTANCE.toString(future.get()));
+    System.out.println(JSONSerializer.INSTANCE.toString(future.get()));
     return true;
   }
 
 	private boolean launchYarnMode(RunCommands commands)  {
 		YarnConfiguration yarnConf = new YarnConfiguration();
-		yarnConf.setInt(YarnConfiguration.RM_SCHEDULER_MINIMUM_ALLOCATION_MB,
-				64);
-	//	yarnConf.setClass(YarnConfiguration.RM_SCHEDULER, FifoScheduler.class,ResourceScheduler.class);
+		yarnConf.setInt(YarnConfiguration.RM_SCHEDULER_MINIMUM_ALLOCATION_MB,64);
 		yarnConf.set("yarn.resourcemanager.scheduler.address", "0.0.0.0:8030");
 
 		String[] args = {
@@ -206,7 +127,7 @@ public class DemandSpikeParser {
 				"--conf:yarn.resourcemanager.scheduler.address=0.0.0.0:8030",
 				"--conf:broker-connect="+commands.targets.get(0),
 				"--conf:max-duration="+commands.time,
-				"--conf:message-size="+commands.dataSize,
+				"--conf:message-size="+commands.messageSize,
 				"--conf:maxNumOfRequests="+commands.maxRequests};
 
 		AppClient appClient = new AppClient();
