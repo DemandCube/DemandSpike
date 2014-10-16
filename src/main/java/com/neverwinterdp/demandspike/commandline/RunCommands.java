@@ -14,7 +14,7 @@ public class RunCommands {
   @Parameter(names = { "--mode" }, description = "Mode of testing environment standalone|distributed")
   public SpikeEnums.MODE mode = SpikeEnums.MODE.standalone;
 
-  @Parameter(names = { "--useYarn" }, description = "Run test using yarn or without yarn. works only on distributed mode", arity = 1)
+  @Parameter(names = { "--use-yarn" }, description = "Run test using yarn or without yarn. works only on distributed mode", arity = 1)
   public boolean useYarn = true;
 
   @Parameter(names = { "--protocol" }, description = "Protocol (For now only HTTP supports)", required = true)
@@ -27,7 +27,7 @@ public class RunCommands {
   public Integer cLevel = 1;
 
   @Parameter(names = { "--message-size" }, description = "Size of the message in bytes.")
-  public Integer messageSize = 1024;
+  public String messageSize = "1024";
 
   @Parameter(names = { "--time" }, description = "Time duration for test. Should be in seconds.")
   public Integer time = 30000;
@@ -49,8 +49,8 @@ public class RunCommands {
   
   @Parameter(names = { "--nWorkers" }, description = "Number of workers to handle the job")
   public Integer nWorkers = 1;
-
-  @Parameter(names = "--auto-generator-string", description = "Auto generation data string. This string will be replaced with auto generated value for data")
-  public List<String> autoAutoString;
+  
+  @Parameter(names = "--yarn-config", description = "Config files for yarn. file-path of resource to be added, the local filesystem is examined directly to find the resource.")
+  public List<String> yarnConfig;
 
 }
