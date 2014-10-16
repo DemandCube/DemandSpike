@@ -1,30 +1,21 @@
 package com.neverwinterdp.demandspike.yarn.master;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.SequenceFile.CompressionType;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.yarn.api.records.Container;
 import org.apache.hadoop.yarn.api.records.ContainerStatus;
 import org.apache.hadoop.yarn.client.api.AMRMClient.ContainerRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.neverwinterdp.demandspike.result.Result;
-import com.neverwinterdp.demandspike.result.ResultAggregator;
-import com.neverwinterdp.demandspike.util.Header;
 import com.neverwinterdp.demandspike.yarn.worker.DemandSpikeAppWorker;
 import com.neverwinterdp.hadoop.yarn.app.AppInfo;
 import com.neverwinterdp.hadoop.yarn.app.ipc.ReportData;
@@ -41,7 +32,7 @@ public class AsyncDemandSpikeAppMasterContainerManager implements
     AppMasterContainerManager {
   protected static final Logger LOGGER = LoggerFactory
       .getLogger(AsyncDemandSpikeAppMasterContainerManager.class);
-  ConcurrentMap<Integer, ReportData> map = new ConcurrentHashMap();
+  List<ReportData> reportDatas = new ArrayList<ReportData>();
 
   public void onInit(AppMaster appMaster) {
     appMaster.getIPCServiceServer().register("demandspike",
@@ -49,11 +40,11 @@ public class AsyncDemandSpikeAppMasterContainerManager implements
           @Override
           public void onReport(AppMaster appMaster,
               AppWorkerContainerInfo containerInfo, ReportData data) {
-            synchronized (map) {
-              map.put(containerInfo.getContainerId(), data);
+            synchronized (reportDatas) {
+              reportDatas.add(data);
             }
           }
-        });
+      });
   }
 
   public void onRequestContainer(AppMaster appMaster) {
@@ -122,23 +113,14 @@ public class AsyncDemandSpikeAppMasterContainerManager implements
     }
     LOGGER.info("Finish onExit(AppMaster appMaster)");
 
-    List<Result> results = new ArrayList<Result>();
-
-    for (ConcurrentMap.Entry<Integer, ReportData> entry : map.entrySet()) {
-      results.add(JSONSerializer.INSTANCE.fromString(entry.getValue()
-          .getJsonData(), Result.class));
-      System.out.println(entry.getValue().getJsonData());
-    }
-    ResultAggregator resultAggregator = new ResultAggregator(new Result());
-    resultAggregator.merge(results);
-    resultAggregator.printResult();
-    Result finalResult = resultAggregator.getResult();
-
     Configuration conf = appMaster.getConfiguration();
     Path tmpDir = new Path("temp");
     SequenceFile.Writer writer = null;
     try {
       final FileSystem fs = FileSystem.get(conf);
+      if (fs.exists(tmpDir)) {
+      }
+      
       if (!fs.mkdirs(tmpDir)) {
         throw new IOException("Cannot create input directory "
             + tmpDir.getName());
@@ -146,53 +128,19 @@ public class AsyncDemandSpikeAppMasterContainerManager implements
       Path outFile = new Path(tmpDir, "reduce-out");
       writer = SequenceFile.createWriter(fs, conf, outFile, Text.class,
           Text.class, CompressionType.NONE);
-      Field[] fields = Result.class.getDeclaredFields();
-
-      for (Field field : fields) {
-        if (field.isAnnotationPresent(Header.class)) {
-          field.setAccessible(true);
-          Header column = field.getAnnotation(Header.class);
-          Object o = null;
-          try {
-            o = field.get(finalResult);
-          } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-          } catch (IllegalAccessException e) {
-            e.printStackTrace();
-          }
-          if (o == null) {
-            o = "";
-          }
-          writer.append(new Text(column.name()), new Text(o.toString()));
-        }
+     
+      for(ReportData data:reportDatas){
+        writer.append(new Text(data.getName()), new Text(data.getJsonData()));
       }
       writer.close();
     } catch (IOException e) {
       e.printStackTrace();
     }
 
-    Configuration conf1 = new Configuration(appMaster.getConfiguration());
-    Path tmpDir1 = new Path("temp");
-    Path outFile1 = new Path(tmpDir1, "reduce-out");
-    FileSystem fileSys = null;
-
-    Text key = new Text();
-    Text value = new Text();
-    SequenceFile.Reader reader = null;
-    try {
-      fileSys = FileSystem.get(conf1);
-      reader = new SequenceFile.Reader(fileSys, outFile1, conf1);
-      while (reader.next(key, value)) {
-        System.out.println(key.toString() + "," + value.toString());
-      }
-    } catch (IOException e1) {
-      e1.printStackTrace();
-    }
-    try {
-      reader.close();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+   
+    
+    
+    
   }
 
   public void waitForComplete(AppMaster appMaster) {

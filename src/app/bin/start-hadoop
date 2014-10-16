@@ -2,8 +2,6 @@
 
 cp ../libs/jarsforhadoop/* $HADOOP_HOME/share/hadoop/common
 ## Start HDFS daemons
-# Format the namenode directory (DO THIS ONLY ONCE, THE FIRST TIME)
-$HADOOP_HOME/bin/hdfs namenode -format
 # Start the namenode daemon
 $HADOOP_HOME/sbin/hadoop-daemon.sh start namenode
 # Start the datanode daemon
