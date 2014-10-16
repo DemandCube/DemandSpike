@@ -11,15 +11,15 @@ public class Result implements Serializable {
   private static final long serialVersionUID = 1L;
 
   @Header(name="2XX_Response")
-  private int response2xx = 0;
+  private long response2xx = 0;
   @Header(name="3XX_Response")
-  private int response3xx = 0;
+  private long response3xx = 0;
   @Header(name="4XX_Response")
-  private int response4xx = 0;
+  private long response4xx = 0;
   @Header(name="5XX_Response")
-  private int response5xx = 0;
+  private long response5xx = 0;
   @Header(name="Other_Response")
-  private int responseOthers = 0;
+  private long responseOthers = 0;
   @Header(name="count")
   private long count;
   @Header(name="max")
@@ -57,40 +57,44 @@ public class Result implements Serializable {
   @Header(name="values",enable=false)
   private long[] values;
 
-  public int getResponse2xx() {
+  public long getResponse2xx() {
     return response2xx;
   }
 
-  public void setResponse2xx(int response2xx) {
+  public void setResponse2xx(long response2xx) {
     this.response2xx = response2xx;
   }
 
-  public int getResponse3xx() {
+  public long getResponse3xx() {
     return response3xx;
   }
 
-  public void setResponse3xx(int response3xx) {
+  public void setResponse3xx(long response3xx) {
     this.response3xx = response3xx;
   }
 
-  public int getResponse4xx() {
+  public long getResponse4xx() {
     return response4xx;
   }
 
-  public void setResponse4xx(int response4xx) {
+  public void setResponse4xx(long response4xx) {
     this.response4xx = response4xx;
   }
 
-  public int getResponse5xx() {
+  public long getResponse5xx() {
     return response5xx;
   }
 
-  public void setResponse5xx(int response5xx) {
+  public void setResponse5xx(long response5xx) {
     this.response5xx = response5xx;
   }
 
-  public int getResponseOthers() {
+  public long getResponseOthers() {
     return responseOthers;
+  }
+
+  public void setResponseOthers(long responseOthers) {
+    this.responseOthers = responseOthers;
   }
 
   public void setResponseOthers(int responseOthers) {

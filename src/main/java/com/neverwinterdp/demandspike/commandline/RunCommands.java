@@ -14,7 +14,7 @@ public class RunCommands {
   @Parameter(names = { "--mode" }, description = "Mode of testing environment standalone|distributed")
   public SpikeEnums.MODE mode = SpikeEnums.MODE.standalone;
 
-  @Parameter(names = { "--useYarn" }, description = "Run test using yarn or without yarn. works only on distributed mode", arity = 1)
+  @Parameter(names = { "--use-yarn" }, description = "Run test using yarn or without yarn. works only on distributed mode", arity = 1)
   public boolean useYarn = true;
 
   @Parameter(names = { "--protocol" }, description = "Protocol (For now only HTTP supports)", required = true)
@@ -26,14 +26,14 @@ public class RunCommands {
   @Parameter(names = { "--cLevel" }, description = "Concurrency level.Number of threads/containers per worker")
   public Integer cLevel = 1;
 
-  @Parameter(names = { "--dataSize" }, description = "Size of the message in bytes.")
-  public Integer dataSize = 1024;
+  @Parameter(names = { "--message-size" }, description = "Size of the message in bytes.")
+  public String messageSize = "1024";
 
   @Parameter(names = { "--time" }, description = "Time duration for test. Should be in seconds.")
-  public Integer time = 30000;
+  public Integer time = 300000;
 
   @Parameter(names = { "--maxRequests" }, description = "Maximum number of requests to send")
-  public Integer maxRequests = 1000;
+  public Integer maxRequests = 1000000;
 
   @Parameter(names = { "--sendPeriod" }, description = "")
   public Integer sendPeriod = 0;
@@ -41,10 +41,7 @@ public class RunCommands {
   @Parameter(names = { "--input-data" }, description = "Input data. (Reads data from the commanline)")
   public String inputData;
 
-  @Parameter(names = { "--input-template" }, description = "Input template file path. (Reads data from the template)")
-  public String inputTemplate;
-
-  @Parameter(names = { "--input-file" }, description = "Input file path. (File will be directly uploaded)")
+  @Parameter(names = { "--input-file" }, description = "Path of the input file")
   public String inputFile;
 
   @Parameter(names = { "--output-file" }, description = "CSV export file path.")
@@ -53,7 +50,15 @@ public class RunCommands {
   @Parameter(names = { "--nWorkers" }, description = "Number of workers to handle the job")
   public Integer nWorkers = 1;
 
-  @Parameter(names = "--auto-generator-string", description = "Auto generation data string. This string will be replaced with auto generated value for data")
-  public List<String> autoAutoString;
+  @Parameter(names = "--yarn-config", description = "Config files for yarn. file-path of resource to be added, the local filesystem is examined directly to find the resource.")
+  public List<String> yarnConfig;
+  
+  @Parameter(names = { "--rate" }, description = "Messages per second")
+  public Integer rate = 1000;
+  
+  @Parameter(names = { "--stopOnFailure" }, description = "stop on failure percentage")
+  public Float stopOnFailure = 10f;
 
+  @Parameter(names = { "--stopOnCondition" }, description = "stop On Condition")
+  public String stopOnCondition="";
 }

@@ -11,7 +11,11 @@ public class ResultAggregator {
   Result result;
 
   long[] values = new long[0];
-
+  
+  public ResultAggregator() {
+    this.result = new Result();
+  }
+  
   public ResultAggregator(Result result) {
     this.result = result;
   }

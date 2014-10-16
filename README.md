@@ -22,92 +22,406 @@ DemandSpike is designed as a command of the cluster shell. The demandspike comma
 
 ![DemandSpike Architecture](diagrams/images/demandspike_architecture.png?raw=true "DemandSpike Architecture")
  
-##DemandSpike Command##
+Command Line for DemandSpike
+============================
 
-Send Command
 
-```
-demandspike:job send --max-num-of-message 1000
+DemandSpike load test can be invoked by  demandspike [OPTIONS] [ARGS]
 
-demandspike:job send 
-  --driver kafka --broker-connect 127.0.0.1:9092 
-  --topic metrics.consumer --max-num-of-message 1000
-```
+Options:
+-------
 
-service failure simulation command
+run  : Used to run test. (eg: demandspike run --dest http://localhost:5070/message)
 
-```
- 
-demandspike:job simulation
-  --name service-failure --target-member-role kafka  
-  --module Kafka --service-id KafkaClusterService --delay 0 --period 5000 --failure-time 1000
+Arguments:
+---------
 
-```
+<table width="100%" border="1" cellpadding="5">
+<tr>
+<th>
+Argument
+</th>
+<th>
+Value
+</th>
+<th>
+Description
+</th>
+<th>
+Mandatory
+</th>
+</tr>
 
-TODO: Implement a send command that start an app master on yarn to create a load test for kafka and sparkngin
+<tr>
+<td>
+--help
+</td>
 
-##DemandSpike Job##
+<td>
+-
+</td>
 
-DemandSpike job is a test script that can be queued and run by the job scheduler. A demandspike job has the main attributes such job id, job description , the script to run. When a job is finished , the job runner can store some information such the output, the cluster metrics... with the demandspike job. 
+<td>
+Print usage in the screen
 
-To install the DemandSpike Job Service
+</td>
 
-```
-module install --member-role demandspike --autostart --module DemandSpike
-```
+<td>
+no
+</td>
 
-To submit a job to the job service
+</tr>
 
-```
-demandspike submit --member-name demandspike --file demandspikejob.json
+<tr>
+<td>
+--name
+</td>
 
-where the demandspikejob.json
+<td>
+[alphanumeric]
+</td>
 
-{
-  "id":   "1",
-  "description": "Sample DemandSpike job",
+<td>
+Name of the test. If name was not given it should take default random name like “DemandSpikeTest1”
 
-  "tasks": [
-    {
-      "description": "clean metric task",
-      "command":     "server metric-clear --expression *"
-    },
-    {
-      "description": "send by the dummy driver",
-      "command":     "demandspike:job send --max-num-of-message 1000"
-    },
-    {
-      "description": "Run service failure simulation",
-      "command":     "demandspike:job simulation --name service-failure --target-member-role kafka --module Kafka --service-id KafkaClusterService --delay 3000" 
-    },
-    {
-      "description": "send by the kafka driver",
-      "command":     "demandspike:job send --driver kafka --broker-connect 127.0.0.1:9092 --topic metrics.consumer --max-num-of-message 1000"
-    }
-  ]
-}
-```
+</td>
 
-To get the job service scheduler info
+<td>
+no
+</td>
 
-```
-demandspike scheduler --member-name demandspike
-```
+</tr>
 
-To uninstall the demandspike job service
+<tr>
+<td>
+--name
+</td>
 
-```
-module uninstall --member-role demandspike --timeout 20000 --module DemandSpike
-```
+<td>
+standalone
+distributed
+</td>
 
-To submit a demandspike job to the job service
+<td>
+This is used to tell demandspike to run in standalone or distributed mode.
+standalone - will run in single machine
+distributed – will run in distributed environment (master-worker environment)
+Default: standalone
+</td>
 
-#Build And Develop#
+<td>
+no
+</td>
 
-##Build With Gradle##
+</tr>
 
-1. cd Sparkngin
-2. gradle clean build install
+<tr>
+<td>
+--useYarn
+</td>
+
+<td>
+true
+<br>
+false
+</td>
+
+<td>
+When --mode is distributed this argument is used. It is used to say demandspike to run test using yarn or without yarn.
+Default: true
+</td>
+
+<td>
+no
+</td>
+
+</tr>
+
+<tr>
+<td>
+--target
+</td>
+
+<td>
+-
+</td>
+
+<td>
+Target url.
+</td>
+
+<td>
+yes
+</td>
+
+</tr>
+
+<tr>
+<td>
+--cLevel
+</td>
+
+<td>
+-
+</td>
+
+<td>
+Concurrency level. i.e., 
+number of threads for standalone mode.
+number of threads on single worker machine for distributed mode.
+number of container on single worker machine for yarn distributed mode.
+Default : 1
+</td>
+
+<td>
+no
+</td>
+
+</tr>
+
+<tr>
+<td>
+--message-size
+</td>
+
+<td>
+-
+</td>
+
+<td>
+Size of the message in bytes. 
+Default: 1024
+</td>
+
+<td>
+no
+</td>
+
+</tr>
+
+<tr>
+<td>
+--time
+</td>
+
+<td>
+-
+</td>
+
+<td>
+Test for given time period. 
+Default: 300 sec
+</td>
+
+<td>
+no
+</td>
+
+<tr>
+<td>
+--maxRequests
+</td>
+
+<td>
+-
+</td>
+
+<td>
+Test with maximum number of messages.
+Default: 1000
+</td>
+
+<td>
+no
+</td>
+
+</tr>
+
+<tr>
+<td>
+--method
+</td>
+
+<td>
+GET
+<br>
+POST
+</td>
+
+<td>
+Http request method
+</td>
+
+<td>
+no
+</td>
+
+</tr>
+
+<tr>
+<td>
+--protocol
+</td>
+
+<td>
+Http
+</td>
+
+<td>
+Communication protocol
+</td>
+
+<td>
+no
+</td>
+
+</tr>
+
+<tr>
+<td>
+--input-data
+</td>
+
+<td>
+data string
+</td>
+
+<td>
+Data String to be send to the target, this data string can have some keywords enclosed with '%' character like for example %RANDOM-STRING%
+Available keywords are :
+%AUTO-INCREMENT-INT%
+%RANDOM-STRING%
+
+</td>
+
+<td>
+no
+</td>
+
+</tr>
+
+<tr>
+<td>
+--input-file
+</td>
+
+<td>
+file path
+</td>
+
+<td>
+File that contains data, the content of the file is the same as input-data option value, it can have some keywords (look at input-data option for more detials)
+</td>
+
+<td>
+no
+</td>
+
+</tr>
+
+<tr>
+<td>
+--time
+</td>
+
+<td>
+-
+</td>
+
+<td>
+Test for given time period. 
+Default: 300 sec
+</td>
+
+<td>
+no
+</td>
+
+</tr>
+</table>
+
+
+
+
+Run demandspike
+===============
+
+**1. Run target**
+
+First you need to start you target (web server , kafka, sparkngin ..), if you are testing demandspike then you can use netcat to simulate your target.
+
+**2. build demandspike**
+    
+        cd DemandSpike
+
+        gradle clean build install release
+    
+        cd build/release/DemandSpike/bin
+
+**3. Submit job **
+
+**3.1 Stand alone mode**
+    
+    ./demandspike run  --target .........
+
+**3.2 Yarn mode**
+
+3.2.1 . install hadoop
+
+you need to install hadoop yarn 2.4, just download it from http://hadoop.apache.org/, then     export the variables below: 
+
+    export HADOOP_COMMON_HOME=/path to hadoop
+    export HADOOP_HDFS_HOME=/path to hadoop
+    export HADOOP_YARN_HOME=/path to hadoop
+
+3.2.2 start hadoop
+
+    ./start-hadoop
+
+3.2.3 run
+
+    ./demandspike run  --mode distributed --useYarn true --target ........
+
+Comandline example
+==================
+Target : web server
+-------------------
+The command below run 2 threads in standalone mode for 30 seconds to send 10000 random messages to 127.0.0.1:80/submit :
+./demandspike run  --target http://127.0.0.1:80/submit --method POST --protocol HTTP --time 30000 --cLevel 2 –nMessages  10000
+
+Target : sparkngin 
+------------------
+The command below run 2 thread in standalone mode for 30 seconds to send 10000  messages to sparkgin with data defined in data.json :
+./demandspike run  --target http://127.0.0.1:7080/submit --method POST --protocol HTTP --time 30000 --cLevel 2 –nMessages 10000 input-file data.json
+
+data.json content is below 
+
+
+{ 
+"header" : 
+    {"version" : 0.0, 
+     "topic" : "metrics.consumer" 
+    ,"key" ": "message-sender-task-0-%AUTO-INCREMENT-INT%", 
+     "traceEnable" : false, 
+     "instructionEnable" : false 
+    }, 
+
+ "data": 
+     {"type" : null, 
+      "data" : "%RANDOM-STRING%", 
+      "serializeType" : null 
+     }, 
+
+"traces" : null, 
+
+"instructions" ": null 
+
+} 
+
+
+
+
+
 
 ##Eclipse##
 
@@ -123,18 +437,5 @@ To import the project into the  eclipse
 3. Check Select root directory and browse to path/DemandSpike
 4. Select all the projects then click Finish
 
-#Run DemandSpike job
-Build the release
-```
-gradle clean build install release
-```
-Start demandSpike job
-```
-cd build/release/DemandSpike/bin
-#To launch the server
-./server.sh 
-#Ping to check the server status
-./shell.sh -c server ping 
-#To launch the batch script tets
-./shell.sh -f  hello-demandspike.csh
+
 ```
