@@ -30,10 +30,10 @@ public class RunCommands {
   public String messageSize = "1024";
 
   @Parameter(names = { "--time" }, description = "Time duration for test. Should be in seconds.")
-  public Integer time = 30000;
+  public Integer time = 300000;
 
   @Parameter(names = { "--maxRequests" }, description = "Maximum number of requests to send")
-  public Integer maxRequests = 1000;
+  public Integer maxRequests = 1000000;
 
   @Parameter(names = { "--sendPeriod" }, description = "")
   public Integer sendPeriod = 0;
@@ -49,8 +49,16 @@ public class RunCommands {
   
   @Parameter(names = { "--nWorkers" }, description = "Number of workers to handle the job")
   public Integer nWorkers = 1;
-  
+
   @Parameter(names = "--yarn-config", description = "Config files for yarn. file-path of resource to be added, the local filesystem is examined directly to find the resource.")
   public List<String> yarnConfig;
+  
+  @Parameter(names = { "--rate" }, description = "Messages per second")
+  public Integer rate = 1000;
+  
+  @Parameter(names = { "--stopOnFailure" }, description = "stop on failure percentage")
+  public Float stopOnFailure = 10f;
 
+  @Parameter(names = { "--stopOnCondition" }, description = "stop On Condition")
+  public String stopOnCondition="";
 }

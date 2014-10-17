@@ -13,4 +13,6 @@ public interface Client {
       ResponseHandler response);
 
   public DefaultFullHttpRequest createRequest(HttpMethod method, ByteBuf content);
+  public long getFailures();
+  public void initFailure();
 }

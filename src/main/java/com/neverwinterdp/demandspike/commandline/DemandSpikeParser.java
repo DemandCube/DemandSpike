@@ -8,7 +8,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.apache.avro.Schema;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -20,7 +19,6 @@ import org.slf4j.LoggerFactory;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
-import com.hazelcast.core.HazelcastInstance;
 import com.neverwinterdp.demandspike.job.JobConfig;
 import com.neverwinterdp.demandspike.result.Result;
 import com.neverwinterdp.demandspike.result.ResultAggregator;
@@ -31,93 +29,93 @@ import com.neverwinterdp.hadoop.yarn.app.ipc.ReportData;
 import com.neverwinterdp.util.JSONSerializer;
 
 public class DemandSpikeParser {
-  private static Logger logger;
 
-  public DemandSpikeParser() {
-    logger = LoggerFactory.getLogger("DemandSpike");
-  }
+	private static Logger logger;
 
-  public MainCommands mainCommands = new MainCommands();
-  public RunCommands runCommands = new RunCommands();
-  public StopCommands stopCommands = new StopCommands();
-  public PauseCommands pauseCommands = new PauseCommands();
-  public ListCommands listCommands = new ListCommands();
+	public DemandSpikeParser() {
+		logger = LoggerFactory.getLogger("DemandSpike");
+	}
 
-  public boolean parseCommandLine(String[] args) throws IOException,
-      InterruptedException, ExecutionException {
-    logger.info("Parsing command lines");
-    JCommander jcomm = null;
-    try {
-      jcomm = new JCommander(mainCommands);
-      jcomm.addCommand("run", runCommands);
-      jcomm.addCommand("stop", stopCommands);
-      jcomm.addCommand("pause", pauseCommands);
-      jcomm.addCommand("list", listCommands);
+	public MainCommands mainCommands = new MainCommands();
+	public RunCommands runCommands = new RunCommands();
+	public StopCommands stopCommands = new StopCommands();
+	public PauseCommands pauseCommands = new PauseCommands();
+	public ListCommands listCommands = new ListCommands();
 
-      if (args.length <= 0 || args == null) {
-        jcomm.usage();
-      }
+	public boolean parseCommandLine(String[] args) throws IOException,
+			InterruptedException, ExecutionException {
+		logger.info("Parsing command lines");
+		JCommander jcomm = null;
+		try {
+			jcomm = new JCommander(mainCommands);
+			jcomm.addCommand("run", runCommands);
+			jcomm.addCommand("stop", stopCommands);
+			jcomm.addCommand("pause", pauseCommands);
+			jcomm.addCommand("list", listCommands);
 
-      jcomm.parse(args);
+			if (args.length <= 0 || args == null) {
+				jcomm.usage();
+			}
 
-      if (mainCommands.help) {
-        jcomm.usage();
-        return true;
-      }
+			jcomm.parse(args);
 
-      if (jcomm.getParsedCommand().equals("run")) {
-        run(runCommands);
-      }
-    } catch (ParameterException e) {
+			if (mainCommands.help) {
+				jcomm.usage();
+				return true;
+			}
 
-      System.err.println(e.getMessage() + "\nUse the -h option to get usage");
-      return false;
-    }
+			if (jcomm.getParsedCommand().equals("run")) {
+				run(runCommands);
+			}
+		} catch (ParameterException e) {
 
-    if (args.length < 2) {
-      jcomm.usage();
-      return true;
-    }
-    return true;
-  }
+			System.err.println(e.getMessage()
+					+ "\nUse the -h option to get usage");
+			return false;
+		}
 
-  public boolean run(RunCommands commands) throws IOException,
-      InterruptedException, ExecutionException {
-    if (commands.mode.equals(SpikeEnums.MODE.standalone)) {
-      return launchStandAloneTest(commands);
-    } else {
-      if (commands.useYarn) {
-        System.out.println("yarn mode started...");
-        return launchYarnMode(commands);
-      } else {
-        return launchDistributedMode(commands);
-      }
-    }
-  }
+		if (args.length < 2) {
+			jcomm.usage();
+			return true;
+		}
+		return true;
+	}
 
-  
-  
-  private boolean launchDistributedMode(RunCommands commands)
-      throws InterruptedException {
-    //TODO Distributed mode
-    return true;
-  }
+	public boolean run(RunCommands commands) throws IOException,
+			InterruptedException, ExecutionException {
+		if (commands.mode.equals(SpikeEnums.MODE.standalone)) {
+			return launchStandAloneTest(commands);
+		} else {
+			if (commands.useYarn) {
+				System.out.println("yarn mode started...");
+                   return launchYarnMode(commands);
+			} else {
+				return launchDistributedMode(commands);
+			}
+		}
+	}
 
-  private boolean launchStandAloneTest(RunCommands commands)
-      throws IOException, InterruptedException, ExecutionException {
-    JobConfig config = new JobConfig(commands);
-    ReportData data = new ReportData();
+	private boolean launchDistributedMode(RunCommands commands)
+			throws InterruptedException {
+		//TODO Distributed mode
+		return true;
+	}
 
-    ExecutorService executor = Executors.newCachedThreadPool();
+	private boolean launchStandAloneTest(RunCommands commands)
+			throws IOException, InterruptedException, ExecutionException {
+		JobConfig config = new JobConfig(commands);
+	    ReportData data = new ReportData();
 
-    Future<Result> future = executor.submit(new SpikeWorker(config));
+	    ExecutorService executor = Executors.newCachedThreadPool();
 
-    data.setJsonData(JSONSerializer.INSTANCE.toString(future.get()));
-    System.out.println(JSONSerializer.INSTANCE.toString(future.get()));
-    return true;
-  }
+	    Future<Result> future = executor.submit(new SpikeWorker(config));
 
-	private boolean launchYarnMode(RunCommands commands)  {
+	    data.setJsonData(JSONSerializer.INSTANCE.toString(future.get()));
+        System.out.println(JSONSerializer.INSTANCE.toString(future.get()));
+		return true;
+	}
+
+	private boolean launchYarnMode(RunCommands commands) {
 		YarnConfiguration yarnConf = new YarnConfiguration();
 		yarnConf.setInt(YarnConfiguration.RM_SCHEDULER_MINIMUM_ALLOCATION_MB,64);
 		yarnConf.set("yarn.resourcemanager.scheduler.address", "0.0.0.0:8030");
@@ -134,19 +132,22 @@ public class DemandSpikeParser {
 				"NeverwinterDP_DemandSpike_App",
 				"--app-container-manager",
 				"com.neverwinterdp.demandspike.yarn.master.AsyncDemandSpikeAppMasterContainerManager",
+
+				"--conf:yarn.resourcemanager.scheduler.address=0.0.0.0:8030",				
+                "--app-rpc-port", "63200",
+                "--app-num-of-worker",""+commands.nWorkers,
 				"--conf:yarn.resourcemanager.scheduler.address=0.0.0.0:8030",
-				"--app-rpc-port", "63200", 
-				"--app-num-of-worker",""+commands.nWorkers,
-				"--conf:broker-connect="+commands.targets.get(0),
-				"--conf:max-duration="+commands.time,
-				"--conf:message-size="+commands.messageSize,
-				"--conf:maxNumOfRequests="+commands.maxRequests,
-				"--conf:cLevel="+commands.cLevel,
-				"--conf:nWorkers="+commands.nWorkers,};
+				"--conf:broker-connect=" + commands.targets.get(0),
+				"--conf:max-duration=" + commands.time,
+				"--conf:message-size=" + commands.messageSize,
+				"--conf:maxNumOfRequests=" + commands.maxRequests+
+                "--conf:cLevel="+commands.cLevel,
+				"--conf:nWorkers="+commands.nWorkers,
+ };
 
 		AppClient appClient = new AppClient();
 		try {
-			AppClientMonitor appMonitor = appClient.run(args,yarnConf);
+			AppClientMonitor appMonitor = appClient.run(args, yarnConf);
 			appMonitor.monitor();
 			appMonitor.report(System.out);
 			
@@ -184,7 +185,6 @@ public class DemandSpikeParser {
 			// TODO Handle exception
 			e.printStackTrace();
 		}
-		
 
 		return true;
 	}
