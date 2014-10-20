@@ -3,7 +3,7 @@ package com.neverwinterdp.demandspike.yarn.worker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.neverwinterdp.hadoop.yarn.app.AppInfo;
+import com.neverwinterdp.hadoop.yarn.app.AppConfig;
 import com.neverwinterdp.hadoop.yarn.app.worker.AppWorker;
 import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainer;
 import com.neverwinterdp.message.Message;
@@ -14,7 +14,7 @@ public class DemandSpikeAppWorker implements AppWorker {
   public void run(AppWorkerContainer appContainer) throws Exception {
     MessageSender sender = null ;
     try {
-      AppInfo config = appContainer.getConfig() ;
+      AppConfig config = appContainer.getConfig() ;
       DemandSpikeAppWorkerConfig demandSpikeWorkerConfig = new DemandSpikeAppWorkerConfig(config.yarnConf) ;
       sender = new MessageSender(demandSpikeWorkerConfig.getBrokerConnect(), 1000) ;
       long stopTime = System.currentTimeMillis() + demandSpikeWorkerConfig.getMaxDuration() ;

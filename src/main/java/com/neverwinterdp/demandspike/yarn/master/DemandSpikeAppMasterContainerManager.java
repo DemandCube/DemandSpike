@@ -11,6 +11,11 @@ import org.apache.hadoop.yarn.client.api.AMRMClient.ContainerRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.neverwinterdp.hadoop.yarn.app.AppContainerInfoHolder;
+import com.neverwinterdp.hadoop.yarn.app.AppInfo;
+import com.neverwinterdp.hadoop.yarn.app.protocol.AppContainerInfo;
+import com.neverwinterdp.hadoop.yarn.app.protocol.AppContainerStatus;
+import com.neverwinterdp.hadoop.yarn.app.protocol.ProcessStatus;
 import com.neverwinterdp.hadoop.yarn.app.master.AppMaster;
 import com.neverwinterdp.hadoop.yarn.app.master.AppMasterContainerManager;
 import com.neverwinterdp.hadoop.yarn.app.master.AppMasterMonitor;
@@ -60,18 +65,18 @@ public class DemandSpikeAppMasterContainerManager implements AppMasterContainerM
   public void onAllocatedContainer(AppMaster master, Container container) {
   }
 
-  public void onCompleteContainer(AppMaster master, ContainerStatus status, AppWorkerContainerInfo containerInfo) {
+  public void onCompleteContainer(AppMaster master, AppContainerInfoHolder containerInfo, ContainerStatus status) {
     LOGGER.info("on complete container " + status.getContainerId());
   }
 
-  public void onFailedContainer(AppMaster master, ContainerStatus status, AppWorkerContainerInfo containerInfo) {
+  public void onFailedContainer(AppMaster master, AppContainerInfoHolder containerInfo, ContainerStatus status) {
     LOGGER.info("on failed container " + status.getContainerId());
   }
 
   public void waitForComplete(AppMaster appMaster) {
     LOGGER.info("Start waitForComplete(AppMaster appMaster)");
-    AppMasterMonitor monitor = appMaster.getAppMonitor() ;
-    AppWorkerContainerInfo[] cinfos = monitor.getContainerInfos() ;
+    AppInfo monitor = appMaster.getAppInfo() ;
+    AppContainerInfo[] cinfos = monitor.getAppContainerInfos() ;
     
     try {
       boolean finished = false ;
@@ -80,8 +85,9 @@ public class DemandSpikeAppMasterContainerManager implements AppMasterContainerM
           this.wait(500);
         } 
         finished = true; 
-        for(AppWorkerContainerInfo sel : cinfos) {
-          if(!sel.getProgressStatus().getContainerState().equals(AppWorkerContainerState.FINISHED)) {
+        for(AppContainerInfo sel : cinfos) {
+          ProcessStatus pstatus = sel.getStatus().getProcessStatus() ;
+          if(!ProcessStatus.TERMINATED.equals(pstatus)) {
             finished = false ;
             break ;
           }
@@ -103,17 +109,18 @@ public class DemandSpikeAppMasterContainerManager implements AppMasterContainerM
 
   public void onExit(AppMaster appMaster) {
     LOGGER.info("Start onExit(AppMaster appMaster)");
-    AppMasterMonitor appMonitor = appMaster.getAppMonitor() ;
-    AppWorkerContainerInfo[] info = appMonitor.getContainerInfos() ;
+    AppInfo appInfo = appMaster.getAppInfo() ;
+    AppContainerInfo[] info = appInfo.getAppContainerInfos() ;
     int[] colWidth = {20, 20, 20, 20} ;
     TabularPrinter printer = new TabularPrinter(System.out, colWidth) ;
     printer.header("Id", "Progress", "Error", "State");
-    for(AppWorkerContainerInfo sel : info) {
+    for(AppContainerInfo sel : info) {
+      AppContainerStatus status = sel.getStatus() ;
       printer.row(
-        sel.getContainerId(), 
-        sel.getProgressStatus().getProgress(),
-        sel.getProgressStatus().getError() != null,
-        sel.getProgressStatus().getContainerState());
+        status.getContainerId(), 
+        status.getProgress(),
+        status.getErrorStacktrace() != null,
+        status.getProcessStatus());
     }
     LOGGER.info("Finish onExit(AppMaster appMaster)");
   }

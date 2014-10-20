@@ -7,12 +7,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.neverwinterdp.demandspike.yarn.worker.DemandSpikeAppWorker;
+import com.neverwinterdp.hadoop.yarn.app.AppConfig;
+import com.neverwinterdp.hadoop.yarn.app.AppContainerInfoHolder;
 import com.neverwinterdp.hadoop.yarn.app.AppInfo;
+import com.neverwinterdp.hadoop.yarn.app.protocol.AppContainerInfo;
+import com.neverwinterdp.hadoop.yarn.app.protocol.AppContainerStatus;
+import com.neverwinterdp.hadoop.yarn.app.protocol.ProcessStatus;
 import com.neverwinterdp.hadoop.yarn.app.master.AppMaster;
 import com.neverwinterdp.hadoop.yarn.app.master.AppMasterContainerManager;
-import com.neverwinterdp.hadoop.yarn.app.master.AppMasterMonitor;
-import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainerInfo;
-import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainerState;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.text.TabularPrinter;
 
@@ -24,7 +26,7 @@ public class AsyncDemandSpikeAppMasterContainerManager implements AppMasterConta
   
   public void onRequestContainer(AppMaster appMaster) {
     LOGGER.info("Start onRequestContainer(AppMaster appMaster)");
-    AppInfo appConfig = appMaster.getAppInfo() ;
+    AppConfig appConfig = appMaster.getAppConfig() ;
     appConfig.setWorkerByType(DemandSpikeAppWorker.class) ;
     System.out.println("AppInfo: " + JSONSerializer.INSTANCE.toString(appConfig));
     for (int i = 0; i < appConfig.appNumOfWorkers; i++) {
@@ -44,11 +46,11 @@ public class AsyncDemandSpikeAppMasterContainerManager implements AppMasterConta
     }
   }
 
-  public void onCompleteContainer(AppMaster master, ContainerStatus status, AppWorkerContainerInfo containerInfo) {
+  public void onCompleteContainer(AppMaster master, AppContainerInfoHolder containerInfo, ContainerStatus status) {
     try {
-      AppInfo appConfig = master.getAppInfo() ;
-      AppMasterMonitor monitor = master.getAppMonitor() ;
-      int complete = monitor.getCompletedContainerCount().intValue() ;
+      AppConfig appConfig = master.getAppConfig() ;
+      AppInfo appInfo = master.getAppInfo() ;
+      int complete = appInfo.getCompletedContainerCount().intValue() ;
       master.getAMRMClient().allocate(complete/(float)appConfig.appNumOfWorkers) ;
     } catch (Exception e) {
       LOGGER.error("onCompleteContainer() report error", e);
@@ -56,7 +58,7 @@ public class AsyncDemandSpikeAppMasterContainerManager implements AppMasterConta
     LOGGER.info("on complete container " + status.getContainerId());
   }
 
-  public void onFailedContainer(AppMaster master, ContainerStatus status, AppWorkerContainerInfo containerInfo) {
+  public void onFailedContainer(AppMaster master, AppContainerInfoHolder containerInfo, ContainerStatus status) {
     LOGGER.info("on failed container " + status.getContainerId());
   }
 
@@ -70,36 +72,38 @@ public class AsyncDemandSpikeAppMasterContainerManager implements AppMasterConta
 
   public void onExit(AppMaster appMaster) {
     LOGGER.info("Start onExit(AppMaster appMaster)");
-    AppMasterMonitor appMonitor = appMaster.getAppMonitor() ;
-    AppWorkerContainerInfo[] info = appMonitor.getContainerInfos() ;
+    AppInfo appMonitor = appMaster.getAppInfo() ;
+    AppContainerInfo[] info = appMonitor.getAppContainerInfos() ;
     int[] colWidth = {20, 20, 20, 20} ;
     TabularPrinter printer = new TabularPrinter(System.out, colWidth) ;
     printer.header("Id", "Progress", "Error", "State");
-    for(AppWorkerContainerInfo sel : info) {
+    for(AppContainerInfo sel : info) {
+      AppContainerStatus status = sel.getStatus() ;
       printer.row(
-        sel.getContainerId(), 
-        sel.getProgressStatus().getProgress(),
-        sel.getProgressStatus().getError() != null,
-        sel.getProgressStatus().getContainerState());
+        status.getContainerId(), 
+        status.getProgress(),
+        status.getErrorStacktrace() != null,
+        status.getProcessStatus());
     }
     LOGGER.info("Finish onExit(AppMaster appMaster)");
   }
 
   public void waitForComplete(AppMaster appMaster) {
     LOGGER.info("Start waitForComplete(AppMaster appMaster)");
-    AppInfo appConfig = appMaster.getAppInfo() ;
+    AppConfig appConfig = appMaster.getAppConfig() ;
     try {
       boolean finished = false ;
       while(!finished) {
         synchronized(this) {
           this.wait(500);
         } 
-        AppMasterMonitor monitor = appMaster.getAppMonitor() ;
-        AppWorkerContainerInfo[] cinfos = monitor.getContainerInfos() ;
+        AppInfo monitor = appMaster.getAppInfo() ;
+        AppContainerInfo[] cinfos = monitor.getAppContainerInfos() ;
         if(cinfos.length < appConfig.appNumOfWorkers)  continue ;
         finished = true; 
-        for(AppWorkerContainerInfo sel : cinfos) {
-          if(!sel.getProgressStatus().getContainerState().equals(AppWorkerContainerState.FINISHED)) {
+        for(AppContainerInfo sel : cinfos) {
+          ProcessStatus pstatus = sel.getStatus().getProcessStatus() ;
+          if(!ProcessStatus.TERMINATED.equals(pstatus)) {
             finished = false ;
             break ;
           }
