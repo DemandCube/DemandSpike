@@ -1,7 +1,6 @@
 package com.neverwinterdp.demandspike.worker;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Serializable;
@@ -10,7 +9,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import com.codahale.metrics.ConsoleReporter;
-import com.codahale.metrics.CsvReporter;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
@@ -19,7 +17,6 @@ import com.codahale.metrics.Timer;
 import com.neverwinterdp.demandspike.DemandSpike;
 import com.neverwinterdp.demandspike.job.JobConfig;
 import com.neverwinterdp.demandspike.result.Result;
-import com.neverwinterdp.util.JSONSerializer;
 
 public class SpikeWorker implements Callable<Result>, Serializable {
 
@@ -31,19 +28,19 @@ public class SpikeWorker implements Callable<Result>, Serializable {
   private static MetricRegistry metricRegistry = new MetricRegistry();
 
   public static synchronized MetricRegistry getMetricRegistry(){
-    return SpikeWorker.metricRegistry;
+    return metricRegistry;
   }
   
   public static synchronized Timer.Context getTimerContext(String... name) {
-    return SpikeWorker.metricRegistry.timer(getName(name)).time();
+    return metricRegistry.timer(getName(name)).time();
   }
 
   public static synchronized Meter getMeter(String name) {
-    return SpikeWorker.metricRegistry.meter(getName(name));
+    return metricRegistry.meter(getName(name));
   }
 
   public static synchronized Histogram getHistogram(String... name) {
-    return SpikeWorker.metricRegistry.histogram(getName(name));
+    return metricRegistry.histogram(getName(name));
   }
 
   public SpikeWorker(JobConfig config) {
@@ -66,20 +63,20 @@ public class SpikeWorker implements Callable<Result>, Serializable {
     latch.await();
 
      ConsoleReporter reporter = ConsoleReporter
-     .forRegistry(SpikeWorker.getMetricRegistry())
+     .forRegistry(metricRegistry)
      .convertRatesTo(TimeUnit.SECONDS)
      .convertDurationsTo(TimeUnit.MILLISECONDS).build();
      reporter.report();
    
-    Timer timer = SpikeWorker.getMetricRegistry().getTimers().get(getName("responses"));
+    Timer timer = metricRegistry.getTimers().get(getName("responses"));
     Snapshot snapshot = timer.getSnapshot();
     Result result = new Result();
     
-    result.setResponse2xx(SpikeWorker.getMetricRegistry().counter("2xx").getCount());
-    result.setResponse3xx(SpikeWorker.getMetricRegistry().counter("3xx").getCount());
-    result.setResponse4xx(SpikeWorker.getMetricRegistry().counter("4xx").getCount());
-    result.setResponse5xx(SpikeWorker.getMetricRegistry().counter("5xx").getCount());
-    result.setResponseOthers(SpikeWorker.getMetricRegistry().counter("others").getCount());
+    result.setResponse2xx(metricRegistry.counter("2xx").getCount());
+    result.setResponse3xx(metricRegistry.counter("3xx").getCount());
+    result.setResponse4xx(metricRegistry.counter("4xx").getCount());
+    result.setResponse5xx(metricRegistry.counter("5xx").getCount());
+    result.setResponseOthers(metricRegistry.counter("others").getCount());
 
     result.setMin(snapshot.getMin());
     result.setMax(snapshot.getMax());
@@ -101,7 +98,7 @@ public class SpikeWorker implements Callable<Result>, Serializable {
     result.setM5_rate(timer.getFiveMinuteRate());
     result.setMean_rate(timer.getMeanRate());
     result.setDuration_units(TimeUnit.NANOSECONDS.name());
-    result.setRate_units("");
+    result.setRate_units("messages/second");
 
     return result;
   }

@@ -65,7 +65,7 @@ public class JobConfig implements Serializable {
 
 	public JobConfig(Map<String, String> yarnConf) {
 		String brokerConnect = getString(yarnConf, "broker-connect",
-				"127.0.0.1:7080");
+				"http://127.0.0.1:7080");
 		this.messageSize = getString(yarnConf, "message-size", "1024");
 		;
 		this.numOfThreads = getInt(yarnConf, "cLevel", 1);

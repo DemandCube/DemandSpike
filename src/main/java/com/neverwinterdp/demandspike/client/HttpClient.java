@@ -6,8 +6,6 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelException;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.ConnectTimeoutException;
@@ -22,16 +20,10 @@ import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpVersion;
-import io.netty.handler.timeout.ReadTimeoutException;
-import io.netty.handler.timeout.ReadTimeoutHandler;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.channels.ClosedChannelException;
-import java.util.concurrent.TimeUnit;
-
-import org.hamcrest.core.Is;
-
 import com.neverwinterdp.demandspike.job.JobConfig;
 
 public class HttpClient implements Client {
@@ -39,8 +31,7 @@ public class HttpClient implements Client {
   private URL url;
   private Channel channel;
   private EventLoopGroup group;
-  private long counter;
-  private long failures;
+  public  static long failures;
   JobConfig config;
 
   public HttpClient(String url, JobConfig config) throws MalformedURLException {
@@ -48,12 +39,12 @@ public class HttpClient implements Client {
     this.config = config;
   }
   @Override
-  public long getFailures() {
+  public  long getFailures() {
 		return failures;
 	}
   @Override
-  public void initFailure() {
-  	failures=0;
+  public  void initFailure() {
+  	failures = 0;
   	
   }
   @Override
@@ -85,19 +76,13 @@ public class HttpClient implements Client {
   @Override
   public void sendRequest(DefaultFullHttpRequest request, ResponseHandler response)
   {
-	  counter++;
-    if (this.channel.isActive()) {
-    	
-    	
-    	
-    	
+    if (this.channel.isActive()) {	
       if (this.channel.pipeline().get("handler") == null) {
         this.channel.pipeline().addLast("handler", new HttpClientHandler(response));
       }
       
-
       ChannelFuture future = this.channel.writeAndFlush(request);
-      final long start = System.currentTimeMillis();
+      
       if(config.stopOnConditionName.equals("All")){
     	  future.addListener(new ChannelFutureListener() {
 
@@ -110,7 +95,7 @@ public class HttpClient implements Client {
        });
       }
       if(config.stopOnConditionName.equals("Latency")){
-   
+    	  final long start = System.currentTimeMillis();
     	  final long maxLatency = Integer.parseInt(config.stopOnConditionValue);
     	  future.addListener(new ChannelFutureListener() {
 
@@ -151,19 +136,14 @@ public class HttpClient implements Client {
   public DefaultFullHttpRequest createRequest(HttpMethod method, ByteBuf content) {
     DefaultFullHttpRequest request = null;
     if (content == null) {
-      request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method,
-          url.toString());
+      request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, url.toString());
     } else {
-      request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1,
-          HttpMethod.POST, url.toString(), content);
-      request.headers().set(HttpHeaders.Names.CONTENT_LENGTH,
-          content.readableBytes());
+      request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, url.toString(), content);
+      request.headers().set(HttpHeaders.Names.CONTENT_LENGTH,content.readableBytes());
     }
     request.headers().set(HttpHeaders.Names.HOST, url.getHost());
-    request.headers().set(HttpHeaders.Names.CONNECTION,
-        HttpHeaders.Values.KEEP_ALIVE);
-    request.headers().set(HttpHeaders.Names.ACCEPT_ENCODING,
-        HttpHeaders.Values.GZIP);
+    request.headers().set(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
+    request.headers().set(HttpHeaders.Names.ACCEPT_ENCODING, HttpHeaders.Values.GZIP);
     return request;
   }
 

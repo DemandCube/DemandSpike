@@ -7,13 +7,16 @@ import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.protobuf.ByteString;
+import com.neverwinterdp.demandspike.client.HttpClient;
 import com.neverwinterdp.demandspike.job.JobConfig;
 import com.neverwinterdp.demandspike.result.Result;
 import com.neverwinterdp.demandspike.worker.SpikeWorker;
-import com.neverwinterdp.hadoop.yarn.app.ipc.ReportData;
+import com.neverwinterdp.hadoop.yarn.app.protocol.AppContainerReport;
+import com.neverwinterdp.hadoop.yarn.app.protocol.IPCService.BlockingInterface;
 import com.neverwinterdp.hadoop.yarn.app.worker.AppWorker;
 import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainer;
-import com.neverwinterdp.util.JSONSerializer;
+import com.neverwinterdp.netty.rpc.client.DefaultClientRPCController;
 
 public class DemandSpikeAppWorker implements AppWorker {
   protected static final Logger LOGGER = LoggerFactory
@@ -23,10 +26,11 @@ public class DemandSpikeAppWorker implements AppWorker {
     JobConfig config = new JobConfig(appContainer.getConfig().yarnConf);
     
     ExecutorService executor = Executors.newCachedThreadPool();
-    Future<Result> future = executor.submit(new SpikeWorker(config));
+    SpikeWorker spikeWorker = new SpikeWorker(config);
+    Future<Result> future = executor.submit(spikeWorker);
+    FailureSubmitter failureSubmitter = new FailureSubmitter();
+    failureSubmitter.start();
     
-    ReportData data = new ReportData(appContainer.getConfig().getAppWorkerContainerId()+"",future.get());
-    appContainer.getAppMasterRPC().report("demandspike",
-        appContainer.getConfig().getAppWorkerContainerId(), data);
+
   }
 }

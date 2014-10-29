@@ -10,16 +10,10 @@ import com.neverwinterdp.demandspike.commandline.DemandSpikeParser;
 
 public class DemandSpike {
 
-  private static Logger logger;
-  private boolean help;
-  // public boolean run;
+
   public boolean stop;
   public boolean pause;
   public boolean list;
-
-  public DemandSpike() {
-    logger = LoggerFactory.getLogger("DemandSpike");
-  }
 
   public static void main(String[] args) throws InterruptedException,
       IOException, ExecutionException {

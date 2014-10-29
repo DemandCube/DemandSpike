@@ -112,7 +112,7 @@ def doRelease(String releaseDir) {
    // "commons.utils", "commons.api", "commons.cluster","commons.netty", "commons.zookeeper", "commons.hadoop-framework", "queuengin", "sparkngin",
    // "commons.utils","commons.cluster","commons.netty","commons.hadoop-framework",
    //"commons.utils",
-    "commons.utils", "commons.hadoop-framework", "jackson-core-2.2.2", "jackson-databind", "jackson-annotations", "jcommander", "reflections", "guava", "javassist",
+    "commons.netty", "commons.utils", "commons.hadoop-framework", "jackson-core-2.2.2", "jackson-databind", "jackson-annotations", "jcommander", "reflections", "guava", "javassist",
     'guice', 'javax.inject', 'hazelcast', 'aopalliance',
     "kafka", "scala-library",
     'zookeeper', 'zkclient',
@@ -151,7 +151,7 @@ def doRelease(String releaseDir) {
   }
 
   def jarsForHadoop = [ 
-    "commons.hadoop-framework", "commons.netty", "commons.utils", "jackson-core-2.2.2", "jackson-databind",
+    "commons.hadoop-framework", "commons.netty", "commons.utils", "jackson-core-2.3.0", "jackson-databind",
     "jackson-annotations", "jcommander","metrics-core", "netty-all",
   ] 
     
