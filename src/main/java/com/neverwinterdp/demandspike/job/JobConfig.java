@@ -5,12 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.beust.jcommander.Parameter;
 import com.neverwinterdp.demandspike.commandline.RunCommands;
 import com.neverwinterdp.demandspike.commandline.SpikeEnums;
 
 public class JobConfig implements Serializable {
-
 	/**
    * 
    */

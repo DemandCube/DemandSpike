@@ -1,5 +1,8 @@
 package com.neverwinterdp.demandspike.yarn;
 
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.HttpRequest;
+
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.server.MiniYARNCluster;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.ResourceScheduler;
@@ -12,12 +15,12 @@ import com.neverwinterdp.hadoop.AbstractMiniClusterUnitTest;
 import com.neverwinterdp.hadoop.yarn.app.AppClient;
 import com.neverwinterdp.hadoop.yarn.app.AppClientMonitor;
 import com.neverwinterdp.netty.http.HttpServer;
-import com.neverwinterdp.netty.http.HttpConnectionUnitTest.LongTaskRouteHandler;
+import com.neverwinterdp.netty.http.RouteHandlerGeneric;
 
 public class YarnWorkersTest extends AbstractMiniClusterUnitTest{
 
-	private static MiniYARNCluster miniYarnCluster ;
-	private static HttpServer server ;
+  private static MiniYARNCluster miniYarnCluster ;
+  private static HttpServer server ;
 	  @BeforeClass
 	  public static void setup() throws Exception {
 	    miniYarnCluster = createMiniYARNCluster(1);
@@ -40,10 +43,8 @@ public class YarnWorkersTest extends AbstractMiniClusterUnitTest{
   @Test
   public void testYarnContainers() throws Exception {
 		YarnConfiguration yarnConf = new YarnConfiguration(miniYarnCluster.getConfig());
-		yarnConf.setInt(YarnConfiguration.RM_SCHEDULER_MINIMUM_ALLOCATION_MB,
-				64);
-		yarnConf.setClass(YarnConfiguration.RM_SCHEDULER, FifoScheduler.class,
-				ResourceScheduler.class);
+		yarnConf.setInt(YarnConfiguration.RM_SCHEDULER_MINIMUM_ALLOCATION_MB, 64);
+		yarnConf.setClass(YarnConfiguration.RM_SCHEDULER, FifoScheduler.class, ResourceScheduler.class);
 		yarnConf.set("yarn.resourcemanager.scheduler.address", "0.0.0.0:8030");
 
 		String[] args = {
@@ -65,5 +66,19 @@ public class YarnWorkersTest extends AbstractMiniClusterUnitTest{
 		appMonitor.monitor();
 		appMonitor.report(System.out);
 		
+  }
+  
+  static public class LongTaskRouteHandler extends RouteHandlerGeneric {
+    @Override
+    protected void doGet(ChannelHandlerContext ctx, HttpRequest httpReq) {
+      System.out.println("start doGet()");
+      try {
+        Thread.sleep(2000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+      writeContent(ctx, httpReq, "long task", "text/plain");
+      System.out.println("finish doGet()");
+    }
   }
 }
