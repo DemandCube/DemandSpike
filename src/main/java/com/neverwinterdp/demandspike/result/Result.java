@@ -10,51 +10,51 @@ public class Result implements Serializable {
    */
   private static final long serialVersionUID = 1L;
 
-  @Header(name="2XX_Response")
+  @Header(name = "2XX_Response")
   private long response2xx = 0;
-  @Header(name="3XX_Response")
+  @Header(name = "3XX_Response")
   private long response3xx = 0;
-  @Header(name="4XX_Response")
+  @Header(name = "4XX_Response")
   private long response4xx = 0;
-  @Header(name="5XX_Response")
+  @Header(name = "5XX_Response")
   private long response5xx = 0;
-  @Header(name="Other_Response")
+  @Header(name = "Other_Response")
   private long responseOthers = 0;
-  @Header(name="count")
+  @Header(name = "count")
   private long count;
-  @Header(name="max")
+  @Header(name = "max")
   private long max;
-  @Header(name="mean")
+  @Header(name = "mean")
   private double mean;
-  @Header(name="min")
+  @Header(name = "min")
   private long min;
-  @Header(name="p50")
+  @Header(name = "p50")
   private double p50;
-  @Header(name="p75")
+  @Header(name = "p75")
   private double p75;
-  @Header(name="p95")
+  @Header(name = "p95")
   private double p95;
-  @Header(name="p98")
+  @Header(name = "p98")
   private double p98;
-  @Header(name="p99")
+  @Header(name = "p99")
   private double p99;
-  @Header(name="p999")
+  @Header(name = "p999")
   private double p999;
-  @Header(name="stddev")
+  @Header(name = "stddev")
   private double stddev;
-  @Header(name="m15_rate")
+  @Header(name = "m15_rate")
   private double m15_rate;
-  @Header(name="m1_rate")
+  @Header(name = "m1_rate")
   private double m1_rate;
-  @Header(name="m5_rate")
+  @Header(name = "m5_rate")
   private double m5_rate;
-  @Header(name="mean_rate")
+  @Header(name = "mean_rate")
   private double mean_rate;
-  @Header(name="duration_units")
+  @Header(name = "duration_units")
   private String duration_units;
-  @Header(name="rate_units",enable=false)
+  @Header(name = "rate_units", enable = false)
   private String rate_units;
-  @Header(name="values",enable=false)
+  @Header(name = "values", enable = false)
   private long[] values;
 
   public long getResponse2xx() {

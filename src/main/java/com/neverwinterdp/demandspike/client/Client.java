@@ -9,10 +9,11 @@ public interface Client {
 
   public void stop();
 
-  public void sendRequest(DefaultFullHttpRequest request,
-      ResponseHandler response);
+  public void sendRequest(DefaultFullHttpRequest request, ResponseHandler response);
 
   public DefaultFullHttpRequest createRequest(HttpMethod method, ByteBuf content);
+
   public long getFailures();
+
   public void initFailure();
 }

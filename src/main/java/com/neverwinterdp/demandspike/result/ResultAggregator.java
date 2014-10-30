@@ -4,18 +4,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.neverwinterdp.demandspike.util.Header;
 import com.neverwinterdp.util.text.TabularPrinter;
 
 public class ResultAggregator {
   Result result;
 
   long[] values = new long[0];
-  
+
   public ResultAggregator() {
     this.result = new Result();
   }
-  
+
   public ResultAggregator(Result result) {
     this.result = result;
   }
@@ -107,25 +106,18 @@ public class ResultAggregator {
     result.setMin(Collections.min(minList));
     result.setMax(Collections.max(maxList));
 
-
     return this.result;
   }
 
   public void printResult() {
-    int[] resultColWidth = { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
-        10, 10, 10, 10, 10, 10, 10, 10 };
-    TabularPrinter resultPrinter = new TabularPrinter(System.out,
-        resultColWidth);
-    resultPrinter.header("count", "max", "mean", "min", "p50", "p75", "p95",
-        "p98", "p99", "p999", "stddev", "m15_rate", "m1_rate", "m5_rate",
-        "mean_rate", "response2xx", "response3xx", "response4xx",
-        "response5xx", "responseOthers");
-    resultPrinter.row(result.getCount(), result.getMax(), result.getMean(),
-        result.getMin(), result.getP50(), result.getP75(), result.getP95(),
-        result.getP98(), result.getP99(), result.getP999(), result.getStddev(),
-        result.getM15_rate(), result.getM1_rate(), result.getM5_rate(),
-        result.getMean_rate(), result.getResponse2xx(),
-        result.getResponse3xx(), result.getResponse4xx(),
-        result.getResponse5xx(), result.getResponseOthers());
+    int[] resultColWidth = { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };
+    TabularPrinter resultPrinter = new TabularPrinter(System.out, resultColWidth);
+    resultPrinter.header("count", "max", "mean", "min", "p50", "p75", "p95", "p98", "p99", "p999", "stddev",
+        "m15_rate", "m1_rate", "m5_rate", "mean_rate", "response2xx", "response3xx", "response4xx", "response5xx",
+        "responseOthers");
+    resultPrinter.row(result.getCount(), result.getMax(), result.getMean(), result.getMin(), result.getP50(),
+        result.getP75(), result.getP95(), result.getP98(), result.getP99(), result.getP999(), result.getStddev(),
+        result.getM15_rate(), result.getM1_rate(), result.getM5_rate(), result.getMean_rate(), result.getResponse2xx(),
+        result.getResponse3xx(), result.getResponse4xx(), result.getResponse5xx(), result.getResponseOthers());
   }
 }

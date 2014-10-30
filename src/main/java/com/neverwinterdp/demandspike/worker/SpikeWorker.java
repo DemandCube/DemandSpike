@@ -27,10 +27,10 @@ public class SpikeWorker implements Callable<Result>, Serializable {
   private final JobConfig config;
   private static MetricRegistry metricRegistry = new MetricRegistry();
 
-  public static synchronized MetricRegistry getMetricRegistry(){
+  public static synchronized MetricRegistry getMetricRegistry() {
     return metricRegistry;
   }
-  
+
   public static synchronized Timer.Context getTimerContext(String... name) {
     return metricRegistry.timer(getName(name)).time();
   }
@@ -62,16 +62,14 @@ public class SpikeWorker implements Callable<Result>, Serializable {
     }
     latch.await();
 
-     ConsoleReporter reporter = ConsoleReporter
-     .forRegistry(metricRegistry)
-     .convertRatesTo(TimeUnit.SECONDS)
-     .convertDurationsTo(TimeUnit.MILLISECONDS).build();
-     reporter.report();
-   
+    ConsoleReporter reporter = ConsoleReporter.forRegistry(metricRegistry).convertRatesTo(TimeUnit.SECONDS)
+        .convertDurationsTo(TimeUnit.MILLISECONDS).build();
+    reporter.report();
+
     Timer timer = metricRegistry.getTimers().get(getName("responses"));
     Snapshot snapshot = timer.getSnapshot();
     Result result = new Result();
-    
+
     result.setResponse2xx(metricRegistry.counter("2xx").getCount());
     result.setResponse3xx(metricRegistry.counter("3xx").getCount());
     result.setResponse4xx(metricRegistry.counter("4xx").getCount());

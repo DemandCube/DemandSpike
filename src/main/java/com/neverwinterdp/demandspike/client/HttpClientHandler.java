@@ -13,8 +13,7 @@ public class HttpClientHandler extends SimpleChannelInboundHandler<HttpObject> {
   }
 
   @Override
-  public void channelRead0(ChannelHandlerContext ctx, HttpObject msg)
-      throws Exception {
+  public void channelRead0(ChannelHandlerContext ctx, HttpObject msg) throws Exception {
     if (!(msg instanceof HttpResponse))
       return;
     responseHandler.onResponse((HttpResponse) msg);

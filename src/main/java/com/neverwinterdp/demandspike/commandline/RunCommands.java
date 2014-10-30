@@ -46,19 +46,19 @@ public class RunCommands {
 
   @Parameter(names = { "--output-file" }, description = "CSV export file path.")
   public String outputFile;
-  
+
   @Parameter(names = { "--nWorkers" }, description = "Number of workers to handle the job")
   public Integer nWorkers = 1;
 
   @Parameter(names = "--yarn-config", description = "Config files for yarn. file-path of resource to be added, the local filesystem is examined directly to find the resource.")
   public List<String> yarnConfig;
-  
+
   @Parameter(names = { "--rate" }, description = "Messages per second")
   public Integer rate = 1000;
-  
+
   @Parameter(names = { "--stopOnFailure" }, description = "stop on failure percentage")
   public Float stopOnFailure = 10f;
 
   @Parameter(names = { "--stopOnCondition" }, description = "stop On Condition")
-  public String stopOnCondition="";
+  public String stopOnCondition = "";
 }
