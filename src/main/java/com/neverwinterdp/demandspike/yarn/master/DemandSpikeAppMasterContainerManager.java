@@ -11,6 +11,7 @@ import org.apache.hadoop.yarn.client.api.AMRMClient.ContainerRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.neverwinterdp.hadoop.yarn.app.AppContainerInfoHolder;
 import com.neverwinterdp.hadoop.yarn.app.master.AppMaster;
 import com.neverwinterdp.hadoop.yarn.app.master.AppMasterContainerManager;
 import com.neverwinterdp.hadoop.yarn.app.master.AppMasterMonitor;
@@ -70,7 +71,8 @@ public class DemandSpikeAppMasterContainerManager implements AppMasterContainerM
 
   public void waitForComplete(AppMaster appMaster) {
     LOGGER.info("Start waitForComplete(AppMaster appMaster)");
-    AppMasterMonitor monitor = appMaster.getAppMonitor() ;
+   // AppMasterMonitor monitor = appMaster.getAppMonitor();
+    AppMasterMonitor monitor = null;
     AppWorkerContainerInfo[] cinfos = monitor.getContainerInfos() ;
     
     try {
@@ -103,7 +105,8 @@ public class DemandSpikeAppMasterContainerManager implements AppMasterContainerM
 
   public void onExit(AppMaster appMaster) {
     LOGGER.info("Start onExit(AppMaster appMaster)");
-    AppMasterMonitor appMonitor = appMaster.getAppMonitor() ;
+    //AppMasterMonitor appMonitor = appMaster.getAppMonitor() ;
+    AppMasterMonitor appMonitor = null;
     AppWorkerContainerInfo[] info = appMonitor.getContainerInfos() ;
     int[] colWidth = {20, 20, 20, 20} ;
     TabularPrinter printer = new TabularPrinter(System.out, colWidth) ;
@@ -117,4 +120,18 @@ public class DemandSpikeAppMasterContainerManager implements AppMasterContainerM
     }
     LOGGER.info("Finish onExit(AppMaster appMaster)");
   }
+
+@Override
+public void onCompleteContainer(AppMaster arg0, AppContainerInfoHolder arg1,
+		ContainerStatus arg2) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void onFailedContainer(AppMaster arg0, AppContainerInfoHolder arg1,
+		ContainerStatus arg2) {
+	// TODO Auto-generated method stub
+	
+}
 }

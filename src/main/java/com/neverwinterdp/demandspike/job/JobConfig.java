@@ -5,12 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.beust.jcommander.Parameter;
 import com.neverwinterdp.demandspike.commandline.RunCommands;
 import com.neverwinterdp.demandspike.commandline.SpikeEnums;
 
 public class JobConfig implements Serializable {
-
 	/**
    * 
    */
@@ -65,7 +63,7 @@ public class JobConfig implements Serializable {
 
 	public JobConfig(Map<String, String> yarnConf) {
 		String brokerConnect = getString(yarnConf, "broker-connect",
-				"127.0.0.1:7080");
+				"http://127.0.0.1:7080");
 		this.messageSize = getString(yarnConf, "message-size", "1024");
 		;
 		this.numOfThreads = getInt(yarnConf, "cLevel", 1);

@@ -1,5 +1,14 @@
 package com.neverwinterdp.demandspike.yarn.worker;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.server.MiniYARNCluster;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.ResourceScheduler;
@@ -8,11 +17,14 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.neverwinterdp.demandspike.result.Result;
+import com.neverwinterdp.demandspike.result.ResultAggregator;
 import com.neverwinterdp.hadoop.AbstractMiniClusterUnitTest;
 import com.neverwinterdp.hadoop.yarn.app.AppClient;
 import com.neverwinterdp.hadoop.yarn.app.AppClientMonitor;
 import com.neverwinterdp.netty.http.HttpServer;
 import com.neverwinterdp.netty.http.HttpConnectionUnitTest.LongTaskRouteHandler;
+import com.neverwinterdp.util.JSONSerializer;
 
 public class YarnWorkersTest extends AbstractMiniClusterUnitTest {
 
@@ -21,13 +33,14 @@ public class YarnWorkersTest extends AbstractMiniClusterUnitTest {
 
 	@BeforeClass
 	public static void setup() throws Exception {
-		miniYarnCluster = createMiniYARNCluster(1);
-		Thread.sleep(1000);
 		server = new HttpServer();
 		server.add("/message", new LongTaskRouteHandler());
 		server.setPort(7080);
 		server.startAsDeamon();
 		Thread.sleep(1000);
+		miniYarnCluster = createMiniYARNCluster(1);
+		Thread.sleep(1000);
+		
 	}
 
 	@AfterClass
@@ -56,16 +69,42 @@ public class YarnWorkersTest extends AbstractMiniClusterUnitTest {
 				"NeverwinterDP_DemandSpike_App",
 				"--app-container-manager",
 				"com.neverwinterdp.demandspike.yarn.master.AsyncDemandSpikeAppMasterContainerManager",
-				"--app-rpc-port", "63200", "--app-num-of-worker", "2",
+				"--app-rpc-port", "63200", "--app-num-of-worker", "1",
 				"--conf:yarn.resourcemanager.scheduler.address=0.0.0.0:8030",
 				"--conf:broker-connect=http://127.0.0.1:7080/message",
-				"--conf:max-duration=30000", "--conf:message-size=1024",
+				"--conf:max-duration=3000000", "--conf:message-size=1024",
 				"--conf:maxNumOfRequests=10000" };
 
 		AppClient appClient = new AppClient();
-		AppClientMonitor appMonitor = appClient.run(args, yarnConf);
+		try {
+			AppClientMonitor appMonitor = appClient.run(args, yarnConf);
 		appMonitor.monitor();
-		appMonitor.report(System.out);
+			appMonitor.report(System.out);
+
+			System.out.println("finished yarn application");
+			/*
+			 * Configuration conf1 = new Configuration(yarnConf); Path tmpDir1 =
+			 * new Path("temp"); Path outFile1 = new Path(tmpDir1,
+			 * "reduce-out"); FileSystem fileSys = null;
+			 * 
+			 * Text key = new Text(); Text value = new Text();
+			 * SequenceFile.Reader reader = null; try { fileSys =
+			 * FileSystem.get(conf1); reader = new SequenceFile.Reader(fileSys,
+			 * outFile1, conf1); List<Result> results = new ArrayList<Result>();
+			 * while (reader.next(key, value)) {
+			 * System.out.println(key.toString() + "," + value.toString());
+			 * results.add(JSONSerializer.INSTANCE.fromString( value.toString(),
+			 * Result.class)); } ResultAggregator resultAggregator = new
+			 * ResultAggregator(); resultAggregator.merge(results);
+			 * System.out.println(JSONSerializer.INSTANCE
+			 * .toString(resultAggregator.getResult())); } catch (IOException
+			 * e1) { e1.printStackTrace(); } try { reader.close(); } catch
+			 * (IOException e) { e.printStackTrace(); }
+			 */
+		} catch (Exception e) {
+			// TODO Handle exception
+			e.printStackTrace();
+		}
 
 	}
 }

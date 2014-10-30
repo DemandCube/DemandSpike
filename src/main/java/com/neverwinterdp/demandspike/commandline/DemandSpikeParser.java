@@ -25,7 +25,6 @@ import com.neverwinterdp.demandspike.result.ResultAggregator;
 import com.neverwinterdp.demandspike.worker.SpikeWorker;
 import com.neverwinterdp.hadoop.yarn.app.AppClient;
 import com.neverwinterdp.hadoop.yarn.app.AppClientMonitor;
-import com.neverwinterdp.hadoop.yarn.app.ipc.ReportData;
 import com.neverwinterdp.util.JSONSerializer;
 
 public class DemandSpikeParser {
@@ -52,8 +51,9 @@ public class DemandSpikeParser {
 			jcomm.addCommand("pause", pauseCommands);
 			jcomm.addCommand("list", listCommands);
 
-			if (args.length <= 0 || args == null) {
+			if (args == null || args.length < 2  ) {
 				jcomm.usage();
+				return true;
 			}
 
 			jcomm.parse(args);
@@ -73,10 +73,6 @@ public class DemandSpikeParser {
 			return false;
 		}
 
-		if (args.length < 2) {
-			jcomm.usage();
-			return true;
-		}
 		return true;
 	}
 
@@ -103,13 +99,8 @@ public class DemandSpikeParser {
 	private boolean launchStandAloneTest(RunCommands commands)
 			throws IOException, InterruptedException, ExecutionException {
 		JobConfig config = new JobConfig(commands);
-	    ReportData data = new ReportData();
-
 	    ExecutorService executor = Executors.newCachedThreadPool();
-
 	    Future<Result> future = executor.submit(new SpikeWorker(config));
-
-	    data.setJsonData(JSONSerializer.INSTANCE.toString(future.get()));
         System.out.println(JSONSerializer.INSTANCE.toString(future.get()));
 		return true;
 	}
@@ -138,7 +129,7 @@ public class DemandSpikeParser {
 				"--conf:broker-connect=" + commands.targets.get(0),
 				"--conf:max-duration=" + commands.time,
 				"--conf:message-size=" + commands.messageSize,
-				"--conf:maxNumOfRequests=" + commands.maxRequests+
+				"--conf:maxNumOfRequests=" + commands.maxRequests,
                 "--conf:cLevel="+commands.cLevel,
 				"--conf:nWorkers="+commands.nWorkers,
  };

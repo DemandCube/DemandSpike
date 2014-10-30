@@ -12,10 +12,20 @@ import com.neverwinterdp.netty.http.HttpServer;
 import com.neverwinterdp.netty.http.RouteHandlerGeneric;
 
 public class SparknginTest {
-	String data = "{\"header\" : {\"version\" : 0.0,\"topic\" : \"metrics.consumer\",\"key\" : \"message-sender-task-0-%myid%\",\"traceEnable\" : false,\"instructionEnable\" : false},\"data\" : {\"type\" : null,\"data\" : \"IkFBQUFBQU=\",\"serializeType\" : null},\"traces\" : null,\"instructions\" : null}";
+	String data = "{\"header\" : {\"version\" : 0.0,\"topic\" : \"metrics.consumer\",\"key\" : \"message-sender-task-0\",\"traceEnable\" : false,\"instructionEnable\" : false},\"data\" : {\"type\" : null,\"data\" : \"IkFBQUFBQU=\",\"serializeType\" : null},\"traces\" : null,\"instructions\" : null}";
 	private static HttpServer server;
-	private static String failureCondition;
+	private static String failureCondition="";
 
+	
+	
+	
+	public static void main(String[] args)  {
+		server = new HttpServer();
+		server.add("/message", new MessageHandler());
+		server.setPort(7080);
+		server.startAsDeamon();
+	}
+	
 	@BeforeClass
 	public static void setup()  {
 		server = new HttpServer();
@@ -67,7 +77,7 @@ public class SparknginTest {
 	}
 
 	@Test
-	public void testSendingMillionmessages() {
+	public void testSendingMillionMessages() {
 		try {
 			server.startAsDeamon();
 			System.out.println("Sending million messages");
@@ -75,7 +85,7 @@ public class SparknginTest {
 			String[] args = { "run", "--target",
 					"http://127.0.0.1:7080/message", "--protocol", "HTTP",
 					"--method", "POST", "--input-data", this.data,
-					"--maxRequests","1000000"};
+					"--maxRequests","10000"};
 			long startTime = System.currentTimeMillis();
 			DemandSpike.main(args);
 			long stopTime = System.currentTimeMillis();
@@ -209,6 +219,7 @@ public class SparknginTest {
 
 		@Override
 		protected void doPost(ChannelHandlerContext ctx, HttpRequest httpReq) {
+			System.out.println("receiving message");
 			if (counter > 10000) {
 
 				if (failureCondition.equals("All")) {
