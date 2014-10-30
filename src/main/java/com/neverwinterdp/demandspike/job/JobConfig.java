@@ -10,9 +10,7 @@ import com.neverwinterdp.demandspike.commandline.SpikeEnums;
 
 public class JobConfig implements Serializable {
 
-  /**
-   * 
-   */
+  
   private static final long serialVersionUID = 1L;
 
   public List<String> targets;
