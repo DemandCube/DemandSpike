@@ -24,6 +24,7 @@ import io.netty.handler.codec.http.HttpVersion;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.channels.ClosedChannelException;
+
 import com.neverwinterdp.demandspike.job.JobConfig;
 
 public class HttpClient implements Client {
@@ -31,22 +32,25 @@ public class HttpClient implements Client {
   private URL url;
   private Channel channel;
   private EventLoopGroup group;
-  public  static long failures;
+  public static long failures;
   JobConfig config;
 
   public HttpClient(String url, JobConfig config) throws MalformedURLException {
     this.url = new URL(url);
     this.config = config;
   }
+
   @Override
-  public  long getFailures() {
-		return failures;
-	}
-  @Override
-  public  void initFailure() {
-  	failures = 0;
-  	
+  public long getFailures() {
+    return failures;
   }
+
+  @Override
+  public void initFailure() {
+    failures = 0;
+
+  }
+
   @Override
   public boolean start() throws InterruptedException {
     ChannelInitializer<SocketChannel> initializer = new ChannelInitializer<SocketChannel>() {
@@ -74,62 +78,61 @@ public class HttpClient implements Client {
   }
 
   @Override
-  public void sendRequest(DefaultFullHttpRequest request, ResponseHandler response)
-  {
-    if (this.channel.isActive()) {	
+  public void sendRequest(DefaultFullHttpRequest request, ResponseHandler response) {
+    if (this.channel.isActive()) {
       if (this.channel.pipeline().get("handler") == null) {
         this.channel.pipeline().addLast("handler", new HttpClientHandler(response));
       }
-      
+
       ChannelFuture future = this.channel.writeAndFlush(request);
-      
-      if(config.stopOnConditionName.equals("All")){
-    	  future.addListener(new ChannelFutureListener() {
 
-              @Override
-              public void operationComplete(ChannelFuture future) throws Exception {
-                  if ( !future.isSuccess() || (future.isSuccess() && future.cause()!=null )) {
-                	  failures++;
-                  }
-              }
-       });
-      }
-      if(config.stopOnConditionName.equals("Latency")){
-    	  final long start = System.currentTimeMillis();
-    	  final long maxLatency = Integer.parseInt(config.stopOnConditionValue);
-    	  future.addListener(new ChannelFutureListener() {
+      if (config.stopOnConditionName.equals("All")) {
+        future.addListener(new ChannelFutureListener() {
 
-              @Override
-              public void operationComplete(ChannelFuture future) throws Exception {      	  
-            	  if (System.currentTimeMillis()- start > maxLatency )
-            		  failures++;
-              }
-       });
+          @Override
+          public void operationComplete(ChannelFuture future) throws Exception {
+            if (!future.isSuccess() || (future.isSuccess() && future.cause() != null)) {
+              failures++;
+            }
+          }
+        });
       }
-      
-      
-      if(config.stopOnConditionName.equals("FailedConnexion")){
-    	  future.addListener(new ChannelFutureListener() {
-              @Override
-              public void operationComplete(ChannelFuture future) throws Exception {      	  
-            	  if ( future.cause() != null && (future.cause() instanceof ClosedChannelException  || future.cause() instanceof ConnectTimeoutException) ) {
-                	  failures++;
-                  }
-              }
-       });    
+      if (config.stopOnConditionName.equals("Latency")) {
+        final long start = System.currentTimeMillis();
+        final long maxLatency = Integer.parseInt(config.stopOnConditionValue);
+        future.addListener(new ChannelFutureListener() {
+
+          @Override
+          public void operationComplete(ChannelFuture future) throws Exception {
+            if (System.currentTimeMillis() - start > maxLatency)
+              failures++;
+          }
+        });
       }
-      
-      if(config.stopOnConditionName.equals("FailedIO")){
-    	  future.addListener(new ChannelFutureListener() {
-              @Override
-              public void operationComplete(ChannelFuture future) throws Exception {      	  
-            	  if ( future.cause() != null && (future.cause() instanceof ChannelException ) ) {
-                	  failures++;
-                  }
-              }
-       });    
+
+      if (config.stopOnConditionName.equals("FailedConnexion")) {
+        future.addListener(new ChannelFutureListener() {
+          @Override
+          public void operationComplete(ChannelFuture future) throws Exception {
+            if (future.cause() != null
+                && (future.cause() instanceof ClosedChannelException || future.cause() instanceof ConnectTimeoutException)) {
+              failures++;
+            }
+          }
+        });
       }
-      
+
+      if (config.stopOnConditionName.equals("FailedIO")) {
+        future.addListener(new ChannelFutureListener() {
+          @Override
+          public void operationComplete(ChannelFuture future) throws Exception {
+            if (future.cause() != null && (future.cause() instanceof ChannelException)) {
+              failures++;
+            }
+          }
+        });
+      }
+
     }
   }
 
@@ -139,16 +142,12 @@ public class HttpClient implements Client {
       request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, url.toString());
     } else {
       request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, url.toString(), content);
-      request.headers().set(HttpHeaders.Names.CONTENT_LENGTH,content.readableBytes());
+      request.headers().set(HttpHeaders.Names.CONTENT_LENGTH, content.readableBytes());
     }
     request.headers().set(HttpHeaders.Names.HOST, url.getHost());
     request.headers().set(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
     request.headers().set(HttpHeaders.Names.ACCEPT_ENCODING, HttpHeaders.Values.GZIP);
     return request;
   }
-
-
-
-
 
 }

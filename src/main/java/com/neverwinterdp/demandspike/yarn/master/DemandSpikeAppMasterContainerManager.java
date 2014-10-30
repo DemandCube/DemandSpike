@@ -1,4 +1,4 @@
-package com.neverwinterdp.demandspike.yarn.master ;
+package com.neverwinterdp.demandspike.yarn.master;
 
 import java.util.List;
 
@@ -21,35 +21,34 @@ import com.neverwinterdp.util.text.TabularPrinter;
 
 public class DemandSpikeAppMasterContainerManager implements AppMasterContainerManager {
   protected static final Logger LOGGER = LoggerFactory.getLogger(DemandSpikeAppMasterContainerManager.class);
-  
+
   public void onInit(AppMaster appMaster) {
   }
-  
+
   public void onRequestContainer(AppMaster appMaster) {
     LOGGER.info("Start onInit(AppMaster appMaster)");
-    Configuration conf = appMaster.getConfiguration() ;
-    int instanceMemory  = conf.getInt("demandspike.instance.memory", 128) ;
-    int instanceCores   = conf.getInt("demandspike.instance.core", 1) ;
-    int numOfTasks = 3 ;
+    Configuration conf = appMaster.getConfiguration();
+    int instanceMemory = conf.getInt("demandspike.instance.memory", 128);
+    int instanceCores = conf.getInt("demandspike.instance.core", 1);
+    int numOfTasks = 3;
     for (int i = 0; i < numOfTasks; i++) {
-      ContainerRequest containerReq = 
-          appMaster.createContainerRequest(0/*priority*/, instanceCores, instanceMemory);
-      appMaster.add(containerReq) ;
+      ContainerRequest containerReq = appMaster.createContainerRequest(0/* priority */, instanceCores, instanceMemory);
+      appMaster.add(containerReq);
     }
     try {
-      int allocatedContainer = 0 ;
-      while(allocatedContainer < numOfTasks) {
+      int allocatedContainer = 0;
+      while (allocatedContainer < numOfTasks) {
         Thread.sleep(1000);
-        AllocateResponse response = appMaster.getAMRMClient().allocate((float)allocatedContainer/numOfTasks);
-        Resource resource = response.getAvailableResources() ;
+        AllocateResponse response = appMaster.getAMRMClient().allocate((float) allocatedContainer / numOfTasks);
+        Resource resource = response.getAvailableResources();
         LOGGER.info("getAllocatedContainers() Avaiable Cores: " + resource.getVirtualCores());
         LOGGER.info("getAllocatedContainers() Avaiable Memory: " + resource.getMemory());
-        
-        List<Container> containers = response.getAllocatedContainers() ;
+
+        List<Container> containers = response.getAllocatedContainers();
         LOGGER.info("Allocated " + containers.size() + " containers");
-        for(Container container : containers) {
-          appMaster.startContainer(container) ;
-          allocatedContainer++ ;
+        for (Container container : containers) {
+          appMaster.startContainer(container);
+          allocatedContainer++;
         }
       }
     } catch (Exception e) {
@@ -71,21 +70,21 @@ public class DemandSpikeAppMasterContainerManager implements AppMasterContainerM
 
   public void waitForComplete(AppMaster appMaster) {
     LOGGER.info("Start waitForComplete(AppMaster appMaster)");
-   // AppMasterMonitor monitor = appMaster.getAppMonitor();
+    // AppMasterMonitor monitor = appMaster.getAppMonitor();
     AppMasterMonitor monitor = null;
-    AppWorkerContainerInfo[] cinfos = monitor.getContainerInfos() ;
-    
+    AppWorkerContainerInfo[] cinfos = monitor.getContainerInfos();
+
     try {
-      boolean finished = false ;
-      while(!finished) {
-        synchronized(this) {
+      boolean finished = false;
+      while (!finished) {
+        synchronized (this) {
           this.wait(500);
-        } 
-        finished = true; 
-        for(AppWorkerContainerInfo sel : cinfos) {
-          if(!sel.getProgressStatus().getContainerState().equals(AppWorkerContainerState.FINISHED)) {
-            finished = false ;
-            break ;
+        }
+        finished = true;
+        for (AppWorkerContainerInfo sel : cinfos) {
+          if (!sel.getProgressStatus().getContainerState().equals(AppWorkerContainerState.FINISHED)) {
+            finished = false;
+            break;
           }
         }
       }
@@ -95,9 +94,9 @@ public class DemandSpikeAppMasterContainerManager implements AppMasterContainerM
     LOGGER.info("Finish waitForComplete(AppMaster appMaster)");
   }
 
-  public void onShutdownRequest(AppMaster appMaster)  {
+  public void onShutdownRequest(AppMaster appMaster) {
     LOGGER.info("Start onShutdownRequest(AppMaster appMaster)");
-    synchronized(this) {
+    synchronized (this) {
       this.notify();
     }
     LOGGER.info("Finish onShutdownRequest(AppMaster appMaster)");
@@ -105,33 +104,28 @@ public class DemandSpikeAppMasterContainerManager implements AppMasterContainerM
 
   public void onExit(AppMaster appMaster) {
     LOGGER.info("Start onExit(AppMaster appMaster)");
-    //AppMasterMonitor appMonitor = appMaster.getAppMonitor() ;
+    // AppMasterMonitor appMonitor = appMaster.getAppMonitor() ;
     AppMasterMonitor appMonitor = null;
-    AppWorkerContainerInfo[] info = appMonitor.getContainerInfos() ;
-    int[] colWidth = {20, 20, 20, 20} ;
-    TabularPrinter printer = new TabularPrinter(System.out, colWidth) ;
+    AppWorkerContainerInfo[] info = appMonitor.getContainerInfos();
+    int[] colWidth = { 20, 20, 20, 20 };
+    TabularPrinter printer = new TabularPrinter(System.out, colWidth);
     printer.header("Id", "Progress", "Error", "State");
-    for(AppWorkerContainerInfo sel : info) {
-      printer.row(
-        sel.getContainerId(), 
-        sel.getProgressStatus().getProgress(),
-        sel.getProgressStatus().getError() != null,
-        sel.getProgressStatus().getContainerState());
+    for (AppWorkerContainerInfo sel : info) {
+      printer.row(sel.getContainerId(), sel.getProgressStatus().getProgress(),
+          sel.getProgressStatus().getError() != null, sel.getProgressStatus().getContainerState());
     }
     LOGGER.info("Finish onExit(AppMaster appMaster)");
   }
 
-@Override
-public void onCompleteContainer(AppMaster arg0, AppContainerInfoHolder arg1,
-		ContainerStatus arg2) {
-	// TODO Auto-generated method stub
-	
-}
+  @Override
+  public void onCompleteContainer(AppMaster arg0, AppContainerInfoHolder arg1, ContainerStatus arg2) {
+    // TODO Auto-generated method stub
 
-@Override
-public void onFailedContainer(AppMaster arg0, AppContainerInfoHolder arg1,
-		ContainerStatus arg2) {
-	// TODO Auto-generated method stub
-	
-}
+  }
+
+  @Override
+  public void onFailedContainer(AppMaster arg0, AppContainerInfoHolder arg1, ContainerStatus arg2) {
+    // TODO Auto-generated method stub
+
+  }
 }

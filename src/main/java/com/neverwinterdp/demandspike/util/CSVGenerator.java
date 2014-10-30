@@ -16,9 +16,8 @@ public class CSVGenerator<T> {
     this.clazz = clazz;
   }
 
-  public boolean generateCSVFile(List<T> list, String fileName)
-      throws NoSuchFieldException, SecurityException, IllegalArgumentException,
-      IllegalAccessException, IOException {
+  public boolean generateCSVFile(List<T> list, String fileName) throws NoSuchFieldException, SecurityException,
+      IllegalArgumentException, IllegalAccessException, IOException {
     Field[] fields = clazz.getDeclaredFields();
     List<String> headers = new ArrayList<String>();
     List<String> values = new ArrayList<String>();
