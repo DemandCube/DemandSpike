@@ -14,13 +14,6 @@ public class SparknginUnitTest {
   String data = "{\"header\" : {\"version\" : 0.0,\"topic\" : \"metrics.consumer\",\"key\" : \"message-sender-task-0\",\"traceEnable\" : false,\"instructionEnable\" : false},\"data\" : {\"type\" : null,\"data\" : \"IkFBQUFBQU=\",\"serializeType\" : null},\"traces\" : null,\"instructions\" : null}";
   private static HttpServer server;
 
-  public static void main(String[] args) {
-    server = new HttpServer();
-    server.add("/message", new MessageHandler());
-    server.setPort(7080);
-    server.startAsDeamon();
-  }
-
   @BeforeClass
   public static void setup() {
     server = new HttpServer();

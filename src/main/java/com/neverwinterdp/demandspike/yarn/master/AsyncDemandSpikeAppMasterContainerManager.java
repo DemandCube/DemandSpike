@@ -20,6 +20,8 @@ import com.neverwinterdp.hadoop.yarn.app.AppContainerInfoHolder;
 import com.neverwinterdp.hadoop.yarn.app.AppInfo;
 import com.neverwinterdp.hadoop.yarn.app.protocol.AppContainerInfo;
 import com.neverwinterdp.hadoop.yarn.app.protocol.AppContainerInfoList;
+import com.neverwinterdp.hadoop.yarn.app.protocol.AppContainerStatus;
+import com.neverwinterdp.hadoop.yarn.app.protocol.ProcessStatus;
 import com.neverwinterdp.hadoop.yarn.app.master.AppMaster;
 import com.neverwinterdp.hadoop.yarn.app.master.AppMasterContainerManager;
 import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainerInfo;
@@ -30,24 +32,90 @@ import com.neverwinterdp.util.text.TabularPrinter;
 public class AsyncDemandSpikeAppMasterContainerManager implements AppMasterContainerManager {
   protected static final Logger LOGGER = LoggerFactory.getLogger(AsyncDemandSpikeAppMasterContainerManager.class);
   static protected RPCServer server;
-
+  //List<ReportHandler> reportDatas = new ArrayList<ReportHandler>();
   public void onInit(AppMaster appMaster) {
-
+      /*appMaster.getIPCServiceServer().register("demandspike",
+				new ReportHandler() {
+					@Override
+					public void onReport(AppMaster appMaster,
+							AppWorkerContainerInfo containerInfo,
+							ReportData data) {
+						synchronized (reportDatas) {
+							reportDatas.add(data);
+						}
+					}
+				});*/
   }
-
+  
   public void onRequestContainer(AppMaster appMaster) {
     LOGGER.info("Start onRequestContainer(AppMaster appMaster)");
-    AppConfig appConfig = appMaster.getAppConfig();
-    appConfig.setWorkerByType(DemandSpikeAppWorker.class);
+    AppConfig appConfig = appMaster.getAppConfig() ;
+    appConfig.setWorkerByType(DemandSpikeAppWorker.class) ;
     System.out.println("AppInfo: " + JSONSerializer.INSTANCE.toString(appConfig));
     for (int i = 0; i < appConfig.appNumOfWorkers; i++) {
-      ContainerRequest containerReq = appMaster.createContainerRequest(0/* priority */, appConfig.workerNumOfCore,
-          appConfig.workerMaxMemory);
-      appMaster.add(containerReq);
+      ContainerRequest containerReq = 
+          appMaster.createContainerRequest(0/*priority*/, appConfig.workerNumOfCore, appConfig.workerMaxMemory);
+      appMaster.add(containerReq) ;
     }
     LOGGER.info("Finish onRequestContainer(AppMaster appMaster)");
   }
 
+  
+
+  public void onCompleteContainer(AppMaster master, AppContainerInfoHolder containerInfo, ContainerStatus status) {
+    try {
+      AppConfig appConfig = master.getAppConfig() ;
+      AppInfo appInfo = master.getAppInfo() ;
+      int complete = appInfo.getCompletedContainerCount().intValue() ;
+      master.getAMRMClient().allocate(complete/(float)appConfig.appNumOfWorkers) ;
+    } catch (Exception e) {
+      LOGGER.error("onCompleteContainer() report error", e);
+    }
+    LOGGER.info("on complete container " + status.getContainerId());
+  }
+
+  public void onFailedContainer(AppMaster master, AppContainerInfoHolder containerInfo, ContainerStatus status) {
+    LOGGER.info("on failed container " + status.getContainerId());
+  }
+
+  public void onShutdownRequest(AppMaster appMaster)  {
+    LOGGER.info("Start onShutdownRequest(AppMaster appMaster)");
+    synchronized(this) {
+      this.notify();
+    }
+    LOGGER.info("Finish onShutdownRequest(AppMaster appMaster)");
+  }
+
+
+
+  public void waitForComplete(AppMaster appMaster) {
+    LOGGER.info("Start waitForComplete(AppMaster appMaster)");
+    AppConfig appConfig = appMaster.getAppConfig() ;
+    try {
+      boolean finished = false ;
+      while(!finished) {
+        synchronized(this) {
+          this.wait(500);
+        } 
+        AppInfo monitor = appMaster.getAppInfo() ;
+        AppContainerInfo[] cinfos = monitor.getAppContainerInfos() ;
+        if(cinfos.length < appConfig.appNumOfWorkers)  continue ;
+        finished = true; 
+        for(AppContainerInfo sel : cinfos) {
+          ProcessStatus pstatus = sel.getStatus().getProcessStatus() ;
+          if(!ProcessStatus.TERMINATED.equals(pstatus)) {
+            finished = false ;
+            break ;
+          }
+        }
+      }
+    } catch (InterruptedException ex) {
+      LOGGER.error("wait interruption: ", ex);
+    }
+    LOGGER.info("Finish waitForComplete(AppMaster appMaster)");
+  }
+  
+  
   public void onAllocatedContainer(AppMaster appMaster, Container container) {
     try {
       LOGGER.info("onAllocateContainer(...), container id = " + container.getId());
@@ -60,45 +128,22 @@ public class AsyncDemandSpikeAppMasterContainerManager implements AppMasterConta
       LOGGER.error("Start container error", ex);
     }
   }
-
-  public void onCompleteContainer(AppMaster master, ContainerStatus status, AppWorkerContainerInfo containerInfo) {
-    try {
-      AppConfig appConfig = master.getAppConfig();
-      AppInfo monitor = master.getAppInfo();
-      int complete = monitor.getCompletedContainerCount().intValue();
-      master.getAMRMClient().allocate(complete / (float) appConfig.appNumOfWorkers);
-    } catch (Exception e) {
-      LOGGER.error("onCompleteContainer() report error", e);
-    }
-    LOGGER.info("on complete container " + status.getContainerId());
-  }
-
-  public void onFailedContainer(AppMaster master, ContainerStatus status, AppWorkerContainerInfo containerInfo) {
-    LOGGER.info("on failed container " + status.getContainerId());
-  }
-
-  public void onShutdownRequest(AppMaster appMaster) {
-    LOGGER.info("Start onShutdownRequest(AppMaster appMaster)");
-    synchronized (this) {
-      this.notify();
-    }
-    LOGGER.info("Finish onShutdownRequest(AppMaster appMaster)");
-  }
-
+  
   public void onExit(AppMaster appMaster) {
     LOGGER.info("Start onExit(AppMaster appMaster)");
-    int[] colWidth = { 20, 20, 20, 20 };
-    TabularPrinter printer = new TabularPrinter(System.out, colWidth);
+    AppInfo appMonitor = appMaster.getAppInfo() ;
+    AppContainerInfo[] info = appMonitor.getAppContainerInfos() ;
+    int[] colWidth = {20, 20, 20, 20} ;
+    TabularPrinter printer = new TabularPrinter(System.out, colWidth) ;
     printer.header("Id", "Progress", "Error", "State");
-    AppInfo appInfo = appMaster.getAppInfo();
-    AppContainerInfoList cinfos = appInfo.getAppContainerInfoList();
-    for (AppContainerInfo sel : cinfos.getContainerInfoList()) {
-      if (sel.getStatus().getProcessStatus().getNumber() != 1) {
-        break;
-      }
-      printer.row(sel, sel.getStatus().getProcessStatus());
+    for(AppContainerInfo sel : info) {
+      AppContainerStatus status = sel.getStatus() ;
+      printer.row(
+        status.getContainerId(), 
+        status.getProgress(),
+        status.getErrorStacktrace() != null,
+        status.getProcessStatus());
     }
-
     LOGGER.info("Finish onExit(AppMaster appMaster)");
 
     Configuration conf = appMaster.getConfiguration();
@@ -126,43 +171,4 @@ public class AsyncDemandSpikeAppMasterContainerManager implements AppMasterConta
 
   }
 
-  public void waitForComplete(AppMaster appMaster) {
-    LOGGER.info("Start waitForComplete(AppMaster appMaster)");
-    AppConfig appConfig = appMaster.getAppConfig();
-    try {
-      boolean finished = false;
-      while (!finished) {
-        synchronized (this) {
-          this.wait(500);
-        }
-        AppInfo appInfo = appMaster.getAppInfo();
-        AppContainerInfoList cinfos = appInfo.getAppContainerInfoList();
-        if (cinfos.getContainerInfoCount() < appConfig.appNumOfWorkers)
-          continue;
-        finished = true;
-
-        for (AppContainerInfo sel : cinfos.getContainerInfoList()) {
-          if (sel.getStatus().getProcessStatus().getNumber() != 1) {
-            finished = false;
-            break;
-          }
-        }
-      }
-    } catch (InterruptedException ex) {
-      LOGGER.error("wait interruption: ", ex);
-    }
-    LOGGER.info("Finish waitForComplete(AppMaster appMaster)");
-  }
-
-  @Override
-  public void onCompleteContainer(AppMaster arg0, AppContainerInfoHolder arg1, ContainerStatus arg2) {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void onFailedContainer(AppMaster arg0, AppContainerInfoHolder arg1, ContainerStatus arg2) {
-    // TODO Auto-generated method stub
-
-  }
 }
