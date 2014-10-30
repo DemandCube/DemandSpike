@@ -14,18 +14,11 @@ public class SparknginUnitTest {
   String data = "{\"header\" : {\"version\" : 0.0,\"topic\" : \"metrics.consumer\",\"key\" : \"message-sender-task-0\",\"traceEnable\" : false,\"instructionEnable\" : false},\"data\" : {\"type\" : null,\"data\" : \"IkFBQUFBQU=\",\"serializeType\" : null},\"traces\" : null,\"instructions\" : null}";
   private static HttpServer server;
 
-  public static void main(String[] args) {
-    server = new HttpServer();
-    server.add("/message", new MessageHandler());
-    server.setPort(7080);
-    server.startAsDeamon();
-  }
-
   @BeforeClass
   public static void setup() {
-    server = new HttpServer();
+   /* server = new HttpServer();
     server.add("/message", new MessageHandler());
-    server.setPort(7080);
+    server.setPort(7080);*/
   }
 
   @AfterClass
@@ -36,7 +29,7 @@ public class SparknginUnitTest {
   @Test
   public void testSendingMillionMessages() {
     try {
-      server.startAsDeamon();
+      //server.startAsDeamon();
       System.out.println("Sending million messages");
 
       String[] args = { "run", "--target", "http://127.0.0.1:7080/message", "--protocol", "HTTP", "--method", "POST",
@@ -46,7 +39,7 @@ public class SparknginUnitTest {
       long stopTime = System.currentTimeMillis();
       long elapsedTime = stopTime - startTime;
       System.out.println("Execution time " + elapsedTime + " ms");
-      server.shutdown();
+      //server.shutdown();
 
     } catch (Exception e) {
       assert (false);

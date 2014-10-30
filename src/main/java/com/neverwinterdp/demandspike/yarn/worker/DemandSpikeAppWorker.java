@@ -24,6 +24,10 @@ public class DemandSpikeAppWorker implements AppWorker {
     Future<Result> future = executor.submit(spikeWorker);
     FailureSubmitter failureSubmitter = new FailureSubmitter();
     failureSubmitter.start();
+    /*ReportData data = new ReportData(appContainer.getConfig().getAppWorkerContainerId()+"",future.get());
+    appContainer.getAppMasterRPC().report("demandspike",
+        appContainer.getConfig().getAppWorkerContainerId(), data);*/
+    
 
   }
 }
