@@ -18,9 +18,6 @@ import com.neverwinterdp.hadoop.yarn.app.protocol.AppContainerStatus;
 import com.neverwinterdp.hadoop.yarn.app.protocol.ProcessStatus;
 import com.neverwinterdp.hadoop.yarn.app.master.AppMaster;
 import com.neverwinterdp.hadoop.yarn.app.master.AppMasterContainerManager;
-import com.neverwinterdp.hadoop.yarn.app.master.AppMasterMonitor;
-import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainerInfo;
-import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainerState;
 import com.neverwinterdp.util.text.TabularPrinter;
 
 public class DemandSpikeAppMasterContainerManager implements AppMasterContainerManager {
