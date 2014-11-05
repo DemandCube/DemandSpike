@@ -56,4 +56,10 @@ public class Monitor {
       monitors.put(sel.getMethod(), sel);
     }
   }
+  
+  static Monitor merge(Monitor ... monitor) {
+    Monitor newMonitor = new Monitor() ;
+    //TODO: do the merge
+    return newMonitor ;
+  }
 }

@@ -70,4 +70,10 @@ public class MethodMonitor {
   public void addSumAvgExecutionTime(long execTime) {
     this.sumAvgExecutionTime = execTime;
   }
+  
+  static MethodMonitor merge(MethodMonitor methodMonitor) {
+    MethodMonitor mMonitor = new MethodMonitor() ;
+    //TODO: merge the method monitor data
+    return mMonitor; 
+  }
 }
