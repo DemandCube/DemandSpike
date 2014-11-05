@@ -7,7 +7,7 @@ public class MethodMonitor {
   private int    clientLimitTimeoutCount         = 0;
   private int    closeChannelExceptionCount      = 0;
   private int    connectionTimeoutExceptionCount = 0;
-  private int    timeoutExceptionCount                = 0;
+  private int    timeoutExceptionCount           = 0;
   private int    unknownErrorCount               = 0;
   private long   sumAvgExecutionTime             = 0;
   

@@ -144,6 +144,7 @@ public class DemandSpikeClient {
           } else if(cause instanceof ConnectTimeoutException) {
             mMonitor.incConnectionTimeoutExceptionCount(); 
           }
+          waitingRequests.remove(request.getKey()) ;
         }
       }
     });
@@ -168,6 +169,7 @@ public class DemandSpikeClient {
         byteBuf.readBytes(data) ;
         Request request = handleResponse(response, data) ;
         if(request == null) {
+          //TODO: to fix this
           Iterator<Map.Entry<String, Request>> iterator = waitingRequests.entrySet().iterator() ;
           iterator.next();
           iterator.remove(); 
