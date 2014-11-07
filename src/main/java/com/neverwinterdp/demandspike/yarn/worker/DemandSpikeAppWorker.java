@@ -19,11 +19,16 @@ public class DemandSpikeAppWorker implements AppWorker {
   public void run(AppWorkerContainer appContainer) throws Exception {
     JobConfig config = new JobConfig(appContainer.getConfig().yarnConf);
 
-    ExecutorService executor = Executors.newCachedThreadPool();
-    SpikeWorker spikeWorker = new SpikeWorker(config);
-    Future<Result> future = executor.submit(spikeWorker);
+   
+    System.out.println("worker config "+config);
     FailureSubmitter failureSubmitter = new FailureSubmitter();
     failureSubmitter.start();
+    SpikeWorker spikeWorker = new SpikeWorker(config);
+    spikeWorker.call();
+    //ExecutorService executor = Executors.newCachedThreadPool();
+    //Future<Result> future = executor.submit(spikeWorker);
+    
+    
     /*ReportData data = new ReportData(appContainer.getConfig().getAppWorkerContainerId()+"",future.get());
     appContainer.getAppMasterRPC().report("demandspike",
         appContainer.getConfig().getAppWorkerContainerId(), data);*/

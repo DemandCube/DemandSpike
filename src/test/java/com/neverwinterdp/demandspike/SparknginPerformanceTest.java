@@ -17,16 +17,16 @@ public class SparknginPerformanceTest {
 
   public static void main(String[] args) {
     server = new HttpServer();
-    server.add("/message", new MessageHandler());
+    server.add("/", new MessageHandler());
     server.setPort(7080);
     server.startAsDeamon();
   }
 
   @BeforeClass
   public static void setup() {
-    server = new HttpServer();
+    /*server = new HttpServer();
     server.add("/message", new MessageHandler());
-    server.setPort(7080);
+    server.setPort(7080);*/
   }
 
   @AfterClass
@@ -69,7 +69,7 @@ public class SparknginPerformanceTest {
   @Test
   public void testSendingMillionMessages() {
     try {
-      server.startAsDeamon();
+      //server.startAsDeamon();
       System.out.println("Sending million messages");
 
       String[] args = { "run", "--target", "http://127.0.0.1:7080/message", "--protocol", "HTTP", "--method", "POST",
@@ -79,7 +79,7 @@ public class SparknginPerformanceTest {
       long stopTime = System.currentTimeMillis();
       long elapsedTime = stopTime - startTime;
       System.out.println("Execution time " + elapsedTime + " ms");
-      server.shutdown();
+      //server.shutdown();
       printSeparator();
 
     } catch (Exception e) {
@@ -193,10 +193,11 @@ public class SparknginPerformanceTest {
 
     @Override
     protected void doPost(ChannelHandlerContext ctx, HttpRequest httpReq) {
-      if (counter > 10000) {
+      if (counter > 100000) {
 
         if (failureCondition.equals("All")) {
-          ctx.close();
+          System.err.println("generating failure");
+          server.shutdown();
         } else {
           if (failureCondition.equals("Latency")) {
             try {
@@ -216,6 +217,7 @@ public class SparknginPerformanceTest {
         }
       }
       counter++;
+      System.out.println("counter "+ counter);
 
     }
   }

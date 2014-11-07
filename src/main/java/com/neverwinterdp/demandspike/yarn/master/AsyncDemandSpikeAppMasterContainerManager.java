@@ -32,6 +32,8 @@ import com.neverwinterdp.util.text.TabularPrinter;
 public class AsyncDemandSpikeAppMasterContainerManager implements AppMasterContainerManager {
   protected static final Logger LOGGER = LoggerFactory.getLogger(AsyncDemandSpikeAppMasterContainerManager.class);
   static protected RPCServer server;
+  FailureCollector failureCollector;
+  Boolean failurecase =false;
   //List<ReportHandler> reportDatas = new ArrayList<ReportHandler>();
   public void onInit(AppMaster appMaster) {
       /*appMaster.getIPCServiceServer().register("demandspike",
@@ -63,6 +65,7 @@ public class AsyncDemandSpikeAppMasterContainerManager implements AppMasterConta
   
 
   public void onCompleteContainer(AppMaster master, AppContainerInfoHolder containerInfo, ContainerStatus status) {
+    System.out.println("onCompleteContainer");
     try {
       AppConfig appConfig = master.getAppConfig() ;
       AppInfo appInfo = master.getAppInfo() ;
@@ -93,7 +96,7 @@ public class AsyncDemandSpikeAppMasterContainerManager implements AppMasterConta
     AppConfig appConfig = appMaster.getAppConfig() ;
     try {
       boolean finished = false ;
-      while(!finished) {
+      while(!finished && ! failurecase) {
         synchronized(this) {
           this.wait(500);
         } 
@@ -122,7 +125,7 @@ public class AsyncDemandSpikeAppMasterContainerManager implements AppMasterConta
       appMaster.startContainer(container);
       server = new RPCServer();
       server.startAsDeamon();
-      FailureCollector failureCollector = new FailureCollector(server);
+      failureCollector = new FailureCollector(server,failurecase);
       failureCollector.start();
     } catch (Exception ex) {
       LOGGER.error("Start container error", ex);
@@ -144,6 +147,7 @@ public class AsyncDemandSpikeAppMasterContainerManager implements AppMasterConta
         status.getErrorStacktrace() != null,
         status.getProcessStatus());
     }
+    failureCollector.stop();
     LOGGER.info("Finish onExit(AppMaster appMaster)");
 
     Configuration conf = appMaster.getConfiguration();

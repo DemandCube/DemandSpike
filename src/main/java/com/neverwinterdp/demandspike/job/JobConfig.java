@@ -72,6 +72,7 @@ public class JobConfig implements Serializable {
     this.targets.add(brokerConnect);
     this.requestsPerThread = maxNumOfRequests / nWorkers / numOfThreads;
     this.method = SpikeEnums.METHOD.POST;
+    this.rate = getInt(yarnConf, "rate", 1000);
 
   }
 
@@ -95,4 +96,15 @@ public class JobConfig implements Serializable {
       return defaultValue;
     return Long.parseLong(val);
   }
+
+  @Override
+  public String toString() {
+    return "JobConfig [targets=" + targets + ", numOfThreads=" + numOfThreads + ", messageSize=" + messageSize
+        + ", maxDuration=" + maxDuration + ", maxNumOfRequests=" + maxNumOfRequests + ", sendPeriod=" + sendPeriod
+        + ", data=" + data + ", inputFile=" + inputFile + ", inputTemplate=" + inputTemplate + ", requestsPerThread="
+        + requestsPerThread + ", nWorkers=" + nWorkers + ", rate=" + rate + ", stopOnFailure=" + stopOnFailure
+        + ", stopOnConditionName=" + stopOnConditionName + ", stopOnConditionValue=" + stopOnConditionValue
+        + ", method=" + method + ", outputFile=" + outputFile + "]";
+  }
+  
 }

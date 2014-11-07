@@ -96,9 +96,11 @@ public class SpikeRunner implements Runnable, Serializable {
     HttpResponseHandler responseHandler = new HttpResponseHandler();
     long time;
     responseHandler.setMeters(cxt, meter, histogram);
-    for (long i = 0; i < config.requestsPerThread / config.rate; i++) {
 
-      for (j = 0; i < config.rate; j++) {
+long i;
+    for (i = 0; i < config.requestsPerThread / config.rate; i++) {
+
+      for (j = 0; j < config.rate; j++) {
         if (config.data != null) {
           if (generateData) {
             dataGenerator.setIdPrefix(taskId);
@@ -116,19 +118,20 @@ public class SpikeRunner implements Runnable, Serializable {
           break;
         }
       }
+      /*long diff = roundStoptime -System.currentTimeMillis();
+      if ( diff  > 0) {
+        Thread.sleep(diff);
 
-      if (roundStoptime - System.currentTimeMillis() > 0) {
-        Thread.sleep(roundStoptime - System.currentTimeMillis());
-      }
+      }*/
       failures = c.getFailures();
       c.initFailure();
       if (failures > maxFailedMessages) {
-        System.err.println("Failure Case, failures : " + failures);
         break;
       }
       System.out.println(j + " Messages/second, failures : " + failures);
       roundStoptime = System.currentTimeMillis() + 1000;
     }
+
   }
 
   // private helper
