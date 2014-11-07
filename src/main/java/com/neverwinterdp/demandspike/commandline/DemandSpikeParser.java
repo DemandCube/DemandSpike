@@ -112,13 +112,15 @@ public class DemandSpikeParser {
       }
     }
 
-    String[] args = { "--app-name", "NeverwinterDP_DemandSpike_App", "--app-container-manager",
+    String[] args = { "--app-name", "NeverwinterDP_DemandSpike_App","--worker-max-memory","256",
+        "--app-container-manager",
+        
         "com.neverwinterdp.demandspike.yarn.master.AsyncDemandSpikeAppMasterContainerManager",
         "--conf:yarn.resourcemanager.scheduler.address=0.0.0.0:8030", "--app-rpc-port", "63200", "--app-num-of-worker",
         "" + commands.nWorkers, "--conf:yarn.resourcemanager.scheduler.address=0.0.0.0:8030",
         "--conf:broker-connect=" + commands.targets.get(0), "--conf:max-duration=" + commands.time,
         "--conf:message-size=" + commands.messageSize, "--conf:maxNumOfRequests=" + commands.maxRequests,
-        "--conf:cLevel=" + commands.cLevel, "--conf:nWorkers=" + commands.nWorkers, };
+        "--conf:cLevel=" + commands.cLevel, "--conf:nWorkers=" + commands.nWorkers,"--conf:rate=" + commands.rate, };
 
     AppClient appClient = new AppClient();
     try {

@@ -11,9 +11,11 @@ public class FailureCollector extends Thread {
 
   RPCServer server;
   long totalFailure;
+  Boolean failurecase;
 
-  public FailureCollector(RPCServer server) {
+  public FailureCollector(RPCServer server, Boolean failurecase) {
     this.server = server;
+    this.failurecase=failurecase;
 
   }
 
@@ -23,6 +25,10 @@ public class FailureCollector extends Thread {
 
     while (true) {
       System.out.println("totalFailure " + totalFailure);
+      if(totalFailure > 100){
+        failurecase=true;
+        System.out.println("Failure case");
+      }
       try {
         Thread.sleep(1000);
       } catch (InterruptedException e) {
