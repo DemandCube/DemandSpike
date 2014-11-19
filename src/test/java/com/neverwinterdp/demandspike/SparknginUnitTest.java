@@ -42,7 +42,7 @@ public class SparknginUnitTest {
       
       System.out.println("Sending million messages");
       String[] args = { "run", "--target", "http://" + target + ":7080/message", "--protocol", "HTTP", "--method",
-          "POST", "--input-data", this.data, "--maxRequests", maxRequests+"", "--time", "300000", "--rate", "5000",};
+          "POST", "--input-data", this.data, "--maxRequests", maxRequests+"", "--time", "300000", "--rate", "5000", };
       DemandSpike.main(args);
       
 
