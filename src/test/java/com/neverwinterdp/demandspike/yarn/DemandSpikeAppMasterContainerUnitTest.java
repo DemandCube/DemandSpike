@@ -8,12 +8,12 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.neverwinterdp.demandspike.DemandSpikeClusterBuilder;
-import com.neverwinterdp.hadoop.AbstractMiniClusterUnitTest;
+import com.neverwinterdp.hadoop.MiniClusterUtil;
 import com.neverwinterdp.hadoop.yarn.app.AppClient;
 import com.neverwinterdp.hadoop.yarn.app.AppClientMonitor;
 import com.neverwinterdp.server.shell.Shell;
 
-public class DemandSpikeAppMasterContainerUnitTest extends AbstractMiniClusterUnitTest {
+public class DemandSpikeAppMasterContainerUnitTest {
   static MiniYARNCluster miniYarnCluster ;
   static DemandSpikeClusterBuilder clusterBuilder ;
   static protected Shell shell ;
@@ -25,7 +25,7 @@ public class DemandSpikeAppMasterContainerUnitTest extends AbstractMiniClusterUn
     clusterBuilder.install() ;
     shell = clusterBuilder.shell ;
     
-    miniYarnCluster = createMiniYARNCluster(1);
+    miniYarnCluster = MiniClusterUtil.createMiniYARNCluster(1);
     Thread.sleep(1000);
     Configuration conf = miniYarnCluster.getConfig() ;
   }

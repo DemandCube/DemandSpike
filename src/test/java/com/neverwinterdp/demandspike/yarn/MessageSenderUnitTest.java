@@ -6,11 +6,10 @@ import org.junit.Test;
 
 import com.neverwinterdp.demandspike.DemandSpikeClusterBuilder;
 import com.neverwinterdp.demandspike.yarn.worker.MessageSender;
-import com.neverwinterdp.hadoop.AbstractMiniClusterUnitTest;
 import com.neverwinterdp.message.Message;
 import com.neverwinterdp.server.shell.Shell;
 
-public class MessageSenderUnitTest extends AbstractMiniClusterUnitTest {
+public class MessageSenderUnitTest {
   static DemandSpikeClusterBuilder clusterBuilder ;
   static protected Shell shell ;
   
